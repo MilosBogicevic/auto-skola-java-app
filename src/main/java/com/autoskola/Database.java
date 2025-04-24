@@ -1,6 +1,7 @@
 package com.autoskola;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,10 +10,10 @@ public class Database {
 
     public static void initialize() {
         try (Connection conn = connect()) {
-            conn.createStatement().execute("DROP TABLE IF EXISTS kandidati");
+            Statement st = conn.createStatement();
 
-            String sql = """
-                CREATE TABLE kandidati (
+            st.execute("""
+                CREATE TABLE IF NOT EXISTS kandidati (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     ime TEXT,
                     prezime TEXT,
@@ -22,13 +23,43 @@ public class Database {
                     kategorija TEXT,
                     polozio_teoriju INTEGER,
                     polozio_voznju INTEGER,
-                    cena REAL,
+                    datum_upisa TEXT,
+                    cena_teorija REAL,
+                    cena_praksa REAL,
                     broj_rata INTEGER,
                     iznos_po_rati REAL,
                     placeno REAL
                 );
-                """;
-            conn.createStatement().execute(sql);
+            """);
+
+            st.execute("""
+                CREATE TABLE IF NOT EXISTS instruktori (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    ime TEXT,
+                    lekarski TEXT,
+                    vozacka TEXT,
+                    licenca TEXT
+                );
+            """);
+
+            st.execute("""
+                CREATE TABLE IF NOT EXISTS vozila (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    tablice TEXT,
+                    registracija TEXT,
+                    tehnicki TEXT
+                );
+            """);
+
+            st.execute("""
+                CREATE TABLE IF NOT EXISTS uplate (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    kandidat_id INTEGER,
+                    datum TEXT,
+                    iznos REAL
+                );
+            """);
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -38,14 +69,16 @@ public class Database {
         return DriverManager.getConnection(URL);
     }
 
+    // === KANDIDATI ===
+
     public static void sacuvajKandidata(Kandidat k) {
         String sql = """
             INSERT INTO kandidati (
                 ime, prezime, jmbg, telefon, email, kategorija,
-                polozio_teoriju, polozio_voznju,
-                cena, broj_rata, iznos_po_rati, placeno
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """;
+                polozio_teoriju, polozio_voznju, datum_upisa,
+                cena_teorija, cena_praksa, broj_rata, iznos_po_rati, placeno
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """;
 
         try (Connection conn = connect(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, k.getIme());
@@ -56,10 +89,43 @@ public class Database {
             stmt.setString(6, k.getKategorija());
             stmt.setBoolean(7, k.isPolozioTeoriju());
             stmt.setBoolean(8, k.isPolozioVoznju());
-            stmt.setDouble(9, k.getCena());
-            stmt.setInt(10, k.getBrojRata());
-            stmt.setDouble(11, k.getIznosPoRati());
-            stmt.setDouble(12, k.getPlaceno());
+            stmt.setString(9, k.getDatumUpisa().toString());
+            stmt.setDouble(10, k.getCenaTeorija());
+            stmt.setDouble(11, k.getCenaPraksa());
+            stmt.setInt(12, k.getBrojRata());
+            stmt.setDouble(13, k.getIznosPoRati());
+            stmt.setDouble(14, k.getPlaceno());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void izmeniKandidata(Kandidat k) {
+        String sql = """
+            UPDATE kandidati SET
+                ime = ?, prezime = ?, jmbg = ?, telefon = ?, email = ?, kategorija = ?,
+                polozio_teoriju = ?, polozio_voznju = ?, datum_upisa = ?,
+                cena_teorija = ?, cena_praksa = ?, broj_rata = ?, iznos_po_rati = ?, placeno = ?
+            WHERE id = ?
+        """;
+
+        try (Connection conn = connect(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, k.getIme());
+            stmt.setString(2, k.getPrezime());
+            stmt.setString(3, k.getJmbg());
+            stmt.setString(4, k.getTelefon());
+            stmt.setString(5, k.getEmail());
+            stmt.setString(6, k.getKategorija());
+            stmt.setBoolean(7, k.isPolozioTeoriju());
+            stmt.setBoolean(8, k.isPolozioVoznju());
+            stmt.setString(9, k.getDatumUpisa().toString());
+            stmt.setDouble(10, k.getCenaTeorija());
+            stmt.setDouble(11, k.getCenaPraksa());
+            stmt.setInt(12, k.getBrojRata());
+            stmt.setDouble(13, k.getIznosPoRati());
+            stmt.setDouble(14, k.getPlaceno());
+            stmt.setInt(15, k.getId());
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -82,7 +148,9 @@ public class Database {
                         rs.getString("kategorija"),
                         rs.getBoolean("polozio_teoriju"),
                         rs.getBoolean("polozio_voznju"),
-                        rs.getDouble("cena"),
+                        LocalDate.parse(rs.getString("datum_upisa")),
+                        rs.getDouble("cena_teorija"),
+                        rs.getDouble("cena_praksa"),
                         rs.getInt("broj_rata"),
                         rs.getDouble("iznos_po_rati"),
                         rs.getDouble("placeno")
@@ -97,8 +165,7 @@ public class Database {
     }
 
     public static void obrisiKandidata(int id) {
-        String sql = "DELETE FROM kandidati WHERE id = ?";
-        try (Connection conn = connect(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = connect(); PreparedStatement stmt = conn.prepareStatement("DELETE FROM kandidati WHERE id = ?")) {
             stmt.setInt(1, id);
             stmt.executeUpdate();
         } catch (SQLException e) {
@@ -106,32 +173,104 @@ public class Database {
         }
     }
 
-    public static void izmeniKandidata(Kandidat k) {
-        String sql = """
-            UPDATE kandidati SET
-                ime = ?, prezime = ?, jmbg = ?, telefon = ?, email = ?, kategorija = ?,
-                polozio_teoriju = ?, polozio_voznju = ?,
-                cena = ?, broj_rata = ?, iznos_po_rati = ?, placeno = ?
-            WHERE id = ?
-            """;
+    // === INSTRUKTORI ===
 
+    public static void sacuvajInstruktora(Instruktor i) {
+        String sql = "INSERT INTO instruktori (ime, lekarski, vozacka, licenca) VALUES (?, ?, ?, ?)";
         try (Connection conn = connect(); PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, k.getIme());
-            stmt.setString(2, k.getPrezime());
-            stmt.setString(3, k.getJmbg());
-            stmt.setString(4, k.getTelefon());
-            stmt.setString(5, k.getEmail());
-            stmt.setString(6, k.getKategorija());
-            stmt.setBoolean(7, k.isPolozioTeoriju());
-            stmt.setBoolean(8, k.isPolozioVoznju());
-            stmt.setDouble(9, k.getCena());
-            stmt.setInt(10, k.getBrojRata());
-            stmt.setDouble(11, k.getIznosPoRati());
-            stmt.setDouble(12, k.getPlaceno());
-            stmt.setInt(13, k.getId());
+            stmt.setString(1, i.getIme());
+            stmt.setString(2, i.getLekarskiIstice().toString());
+            stmt.setString(3, i.getVozackaIstice().toString());
+            stmt.setString(4, i.getLicencaIstice().toString());
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public static List<Instruktor> vratiInstruktore() {
+        List<Instruktor> lista = new ArrayList<>();
+        try (Connection conn = connect(); ResultSet rs = conn.createStatement().executeQuery("SELECT * FROM instruktori")) {
+            while (rs.next()) {
+                lista.add(new Instruktor(
+                        rs.getInt("id"),
+                        rs.getString("ime"),
+                        LocalDate.parse(rs.getString("lekarski")),
+                        LocalDate.parse(rs.getString("vozacka")),
+                        LocalDate.parse(rs.getString("licenca"))
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return lista;
+    }
+
+    // === VOZILA ===
+
+    public static void sacuvajVozilo(Vozilo v) {
+        String sql = "INSERT INTO vozila (tablice, registracija, tehnicki) VALUES (?, ?, ?)";
+        try (Connection conn = connect(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, v.getTablice());
+            stmt.setString(2, v.getRegistracijaIstice().toString());
+            stmt.setString(3, v.getTehnickiIstice().toString());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static List<Vozilo> vratiVozila() {
+        List<Vozilo> lista = new ArrayList<>();
+        try (Connection conn = connect(); ResultSet rs = conn.createStatement().executeQuery("SELECT * FROM vozila")) {
+            while (rs.next()) {
+                lista.add(new Vozilo(
+                        rs.getInt("id"),
+                        rs.getString("tablice"),
+                        LocalDate.parse(rs.getString("registracija")),
+                        LocalDate.parse(rs.getString("tehnicki"))
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return lista;
+    }
+
+    // === UPLATE ===
+
+    public static void sacuvajUplatu(Uplata u) {
+        String sql = "INSERT INTO uplate (kandidat_id, datum, iznos) VALUES (?, ?, ?)";
+        try (Connection conn = connect(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, u.getKandidatId());
+            stmt.setString(2, u.getDatum().toString());
+            stmt.setDouble(3, u.getIznos());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static List<Uplata> vratiUplateZaKandidata(int kandidatId) {
+        List<Uplata> lista = new ArrayList<>();
+        String sql = "SELECT * FROM uplate WHERE kandidat_id = ? ORDER BY datum ASC";
+
+        try (Connection conn = connect(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, kandidatId);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                lista.add(new Uplata(
+                        rs.getInt("id"),
+                        rs.getInt("kandidat_id"),
+                        LocalDate.parse(rs.getString("datum")),
+                        rs.getDouble("iznos")
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return lista;
     }
 }

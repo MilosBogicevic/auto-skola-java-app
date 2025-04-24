@@ -1,5 +1,7 @@
 package com.autoskola;
 
+import java.time.LocalDate;
+
 public class Kandidat {
     private int id;
     private String ime;
@@ -10,14 +12,19 @@ public class Kandidat {
     private String kategorija;
     private boolean polozioTeoriju;
     private boolean polozioVoznju;
-    private double cena;
+
+    private LocalDate datumUpisa;
+    private double cenaTeorija;
+    private double cenaPraksa;
     private int brojRata;
     private double iznosPoRati;
     private double placeno;
 
     public Kandidat(int id, String ime, String prezime, String jmbg, String telefon, String email,
                     String kategorija, boolean polozioTeoriju, boolean polozioVoznju,
-                    double cena, int brojRata, double iznosPoRati, double placeno) {
+                    LocalDate datumUpisa, double cenaTeorija, double cenaPraksa,
+                    int brojRata, double iznosPoRati, double placeno) {
+
         this.id = id;
         this.ime = ime;
         this.prezime = prezime;
@@ -27,7 +34,9 @@ public class Kandidat {
         this.kategorija = kategorija;
         this.polozioTeoriju = polozioTeoriju;
         this.polozioVoznju = polozioVoznju;
-        this.cena = cena;
+        this.datumUpisa = datumUpisa;
+        this.cenaTeorija = cenaTeorija;
+        this.cenaPraksa = cenaPraksa;
         this.brojRata = brojRata;
         this.iznosPoRati = iznosPoRati;
         this.placeno = placeno;
@@ -42,12 +51,19 @@ public class Kandidat {
     public String getKategorija() { return kategorija; }
     public boolean isPolozioTeoriju() { return polozioTeoriju; }
     public boolean isPolozioVoznju() { return polozioVoznju; }
-    public double getCena() { return cena; }
+
+    public LocalDate getDatumUpisa() { return datumUpisa; }
+    public double getCenaTeorija() { return cenaTeorija; }
+    public double getCenaPraksa() { return cenaPraksa; }
     public int getBrojRata() { return brojRata; }
     public double getIznosPoRati() { return iznosPoRati; }
     public double getPlaceno() { return placeno; }
 
+    public double getUkupnaCena() {
+        return cenaTeorija + cenaPraksa;
+    }
+
     public double getPreostalo() {
-        return Math.max(0, cena - placeno);
+        return Math.max(0, getUkupnaCena() - placeno);
     }
 }
