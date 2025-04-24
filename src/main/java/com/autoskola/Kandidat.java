@@ -16,14 +16,12 @@ public class Kandidat {
     private LocalDate datumUpisa;
     private double cenaTeorija;
     private double cenaPraksa;
-    private int brojRata;
-    private double iznosPoRati;
     private double placeno;
 
     public Kandidat(int id, String ime, String prezime, String jmbg, String telefon, String email,
                     String kategorija, boolean polozioTeoriju, boolean polozioVoznju,
                     LocalDate datumUpisa, double cenaTeorija, double cenaPraksa,
-                    int brojRata, double iznosPoRati, double placeno) {
+                    double placeno) {
 
         this.id = id;
         this.ime = ime;
@@ -37,8 +35,6 @@ public class Kandidat {
         this.datumUpisa = datumUpisa;
         this.cenaTeorija = cenaTeorija;
         this.cenaPraksa = cenaPraksa;
-        this.brojRata = brojRata;
-        this.iznosPoRati = iznosPoRati;
         this.placeno = placeno;
     }
 
@@ -55,8 +51,6 @@ public class Kandidat {
     public LocalDate getDatumUpisa() { return datumUpisa; }
     public double getCenaTeorija() { return cenaTeorija; }
     public double getCenaPraksa() { return cenaPraksa; }
-    public int getBrojRata() { return brojRata; }
-    public double getIznosPoRati() { return iznosPoRati; }
     public double getPlaceno() { return placeno; }
 
     public double getUkupnaCena() {

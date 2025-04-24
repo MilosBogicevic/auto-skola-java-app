@@ -26,8 +26,6 @@ public class Database {
                     datum_upisa TEXT,
                     cena_teorija REAL,
                     cena_praksa REAL,
-                    broj_rata INTEGER,
-                    iznos_po_rati REAL,
                     placeno REAL
                 );
             """);
@@ -45,6 +43,7 @@ public class Database {
             st.execute("""
                 CREATE TABLE IF NOT EXISTS vozila (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    naziv TEXT,
                     tablice TEXT,
                     registracija TEXT,
                     tehnicki TEXT
@@ -76,8 +75,8 @@ public class Database {
             INSERT INTO kandidati (
                 ime, prezime, jmbg, telefon, email, kategorija,
                 polozio_teoriju, polozio_voznju, datum_upisa,
-                cena_teorija, cena_praksa, broj_rata, iznos_po_rati, placeno
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                cena_teorija, cena_praksa, placeno
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """;
 
         try (Connection conn = connect(); PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -92,9 +91,7 @@ public class Database {
             stmt.setString(9, k.getDatumUpisa().toString());
             stmt.setDouble(10, k.getCenaTeorija());
             stmt.setDouble(11, k.getCenaPraksa());
-            stmt.setInt(12, k.getBrojRata());
-            stmt.setDouble(13, k.getIznosPoRati());
-            stmt.setDouble(14, k.getPlaceno());
+            stmt.setDouble(12, k.getPlaceno());
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -106,7 +103,7 @@ public class Database {
             UPDATE kandidati SET
                 ime = ?, prezime = ?, jmbg = ?, telefon = ?, email = ?, kategorija = ?,
                 polozio_teoriju = ?, polozio_voznju = ?, datum_upisa = ?,
-                cena_teorija = ?, cena_praksa = ?, broj_rata = ?, iznos_po_rati = ?, placeno = ?
+                cena_teorija = ?, cena_praksa = ?, placeno = ?
             WHERE id = ?
         """;
 
@@ -122,10 +119,8 @@ public class Database {
             stmt.setString(9, k.getDatumUpisa().toString());
             stmt.setDouble(10, k.getCenaTeorija());
             stmt.setDouble(11, k.getCenaPraksa());
-            stmt.setInt(12, k.getBrojRata());
-            stmt.setDouble(13, k.getIznosPoRati());
-            stmt.setDouble(14, k.getPlaceno());
-            stmt.setInt(15, k.getId());
+            stmt.setDouble(12, k.getPlaceno());
+            stmt.setInt(13, k.getId());
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -151,8 +146,6 @@ public class Database {
                         LocalDate.parse(rs.getString("datum_upisa")),
                         rs.getDouble("cena_teorija"),
                         rs.getDouble("cena_praksa"),
-                        rs.getInt("broj_rata"),
-                        rs.getDouble("iznos_po_rati"),
                         rs.getDouble("placeno")
                 );
                 lista.add(k);
@@ -164,15 +157,6 @@ public class Database {
         return lista;
     }
 
-    public static void obrisiKandidata(int id) {
-        try (Connection conn = connect(); PreparedStatement stmt = conn.prepareStatement("DELETE FROM kandidati WHERE id = ?")) {
-            stmt.setInt(1, id);
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
     // === INSTRUKTORI ===
 
     public static void sacuvajInstruktora(Instruktor i) {
@@ -182,6 +166,20 @@ public class Database {
             stmt.setString(2, i.getLekarskiIstice().toString());
             stmt.setString(3, i.getVozackaIstice().toString());
             stmt.setString(4, i.getLicencaIstice().toString());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void izmeniInstruktora(Instruktor i) {
+        String sql = "UPDATE instruktori SET ime = ?, lekarski = ?, vozacka = ?, licenca = ? WHERE id = ?";
+        try (Connection conn = connect(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, i.getIme());
+            stmt.setString(2, i.getLekarskiIstice().toString());
+            stmt.setString(3, i.getVozackaIstice().toString());
+            stmt.setString(4, i.getLicencaIstice().toString());
+            stmt.setInt(5, i.getId());
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -209,11 +207,26 @@ public class Database {
     // === VOZILA ===
 
     public static void sacuvajVozilo(Vozilo v) {
-        String sql = "INSERT INTO vozila (tablice, registracija, tehnicki) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO vozila (naziv, tablice, registracija, tehnicki) VALUES (?, ?, ?, ?)";
         try (Connection conn = connect(); PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, v.getTablice());
-            stmt.setString(2, v.getRegistracijaIstice().toString());
-            stmt.setString(3, v.getTehnickiIstice().toString());
+            stmt.setString(1, v.getNaziv());
+            stmt.setString(2, v.getTablice());
+            stmt.setString(3, v.getRegistracijaIstice().toString());
+            stmt.setString(4, v.getTehnickiIstice().toString());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void izmeniVozilo(Vozilo v) {
+        String sql = "UPDATE vozila SET naziv = ?, tablice = ?, registracija = ?, tehnicki = ? WHERE id = ?";
+        try (Connection conn = connect(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, v.getNaziv());
+            stmt.setString(2, v.getTablice());
+            stmt.setString(3, v.getRegistracijaIstice().toString());
+            stmt.setString(4, v.getTehnickiIstice().toString());
+            stmt.setInt(5, v.getId());
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -226,6 +239,7 @@ public class Database {
             while (rs.next()) {
                 lista.add(new Vozilo(
                         rs.getInt("id"),
+                        rs.getString("naziv"),
                         rs.getString("tablice"),
                         LocalDate.parse(rs.getString("registracija")),
                         LocalDate.parse(rs.getString("tehnicki"))

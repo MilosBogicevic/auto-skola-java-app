@@ -15,43 +15,54 @@ public class InstruktorForm {
     public InstruktorForm(Instruktor postojeći, Consumer<Instruktor> onSacuvaj) {
         Stage stage = new Stage();
         stage.initModality(Modality.APPLICATION_MODAL);
-        stage.setTitle(postojeći == null ? "Novi instruktor" : "Izmeni instruktora");
+        stage.setTitle(postojeći == null ? "Novi instruktor" : "Izmena instruktora");
 
-        TextField imePolje = new TextField();
+        TextField imePolje = new TextField(postojeći != null ? postojeći.getIme() : "");
         imePolje.setPromptText("Ime i prezime");
-        if (postojeći != null) imePolje.setText(postojeći.getIme());
 
-        DatePicker lekarskiPicker = new DatePicker();
+        DatePicker lekarskiPicker = new DatePicker(postojeći != null ? postojeći.getLekarskiIstice() : null);
         lekarskiPicker.setPromptText("Lekarski ističe");
-        if (postojeći != null) lekarskiPicker.setValue(postojeći.getLekarskiIstice());
 
-        DatePicker vozackaPicker = new DatePicker();
+        DatePicker vozackaPicker = new DatePicker(postojeći != null ? postojeći.getVozackaIstice() : null);
         vozackaPicker.setPromptText("Vozačka ističe");
-        if (postojeći != null) vozackaPicker.setValue(postojeći.getVozackaIstice());
 
-        DatePicker licencaPicker = new DatePicker();
+        DatePicker licencaPicker = new DatePicker(postojeći != null ? postojeći.getLicencaIstice() : null);
         licencaPicker.setPromptText("Licenca ističe");
-        if (postojeći != null) licencaPicker.setValue(postojeći.getLicencaIstice());
 
         Button sacuvajBtn = new Button("Sačuvaj");
 
         sacuvajBtn.setOnAction(e -> {
+            // Disable button to prevent multiple clicks
+            sacuvajBtn.setDisable(true);
+
             try {
+                String ime = imePolje.getText().trim();
+                LocalDate lekarski = lekarskiPicker.getValue();
+                LocalDate vozacka = vozackaPicker.getValue();
+                LocalDate licenca = licencaPicker.getValue();
+
+                if (ime.isEmpty() || lekarski == null || vozacka == null || licenca == null) {
+                    throw new IllegalArgumentException("Sva polja moraju biti popunjena.");
+                }
+
                 Instruktor novi = new Instruktor(
                         postojeći != null ? postojeći.getId() : 0,
-                        imePolje.getText(),
-                        lekarskiPicker.getValue(),
-                        vozackaPicker.getValue(),
-                        licencaPicker.getValue()
+                        ime,
+                        lekarski,
+                        vozacka,
+                        licenca
                 );
+
                 onSacuvaj.accept(novi);
                 stage.close();
+
             } catch (Exception ex) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Greška");
-                alert.setHeaderText("Unos nije uspešan");
-                alert.setContentText("Proverite da su svi datumi uneti.");
+                alert.setHeaderText("Neispravan unos");
+                alert.setContentText(ex.getMessage());
                 alert.showAndWait();
+                sacuvajBtn.setDisable(false); // Re-enable button if failed
             }
         });
 

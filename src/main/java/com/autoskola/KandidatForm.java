@@ -3,7 +3,7 @@ package com.autoskola;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -17,25 +17,20 @@ public class KandidatForm {
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.setTitle(postojeći == null ? "Novi kandidat" : "Izmena kandidata");
 
-        TextField imePolje = new TextField();
+        TextField imePolje = new TextField(postojeći != null ? postojeći.getIme() : "");
         imePolje.setPromptText("Ime");
-        if (postojeći != null) imePolje.setText(postojeći.getIme());
 
-        TextField prezimePolje = new TextField();
+        TextField prezimePolje = new TextField(postojeći != null ? postojeći.getPrezime() : "");
         prezimePolje.setPromptText("Prezime");
-        if (postojeći != null) prezimePolje.setText(postojeći.getPrezime());
 
-        TextField jmbgPolje = new TextField();
+        TextField jmbgPolje = new TextField(postojeći != null ? postojeći.getJmbg() : "");
         jmbgPolje.setPromptText("JMBG");
-        if (postojeći != null) jmbgPolje.setText(postojeći.getJmbg());
 
-        TextField telefonPolje = new TextField();
+        TextField telefonPolje = new TextField(postojeći != null ? postojeći.getTelefon() : "");
         telefonPolje.setPromptText("Telefon");
-        if (postojeći != null) telefonPolje.setText(postojeći.getTelefon());
 
-        TextField emailPolje = new TextField();
+        TextField emailPolje = new TextField(postojeći != null ? postojeći.getEmail() : "");
         emailPolje.setPromptText("Email");
-        if (postojeći != null) emailPolje.setText(postojeći.getEmail());
 
         ComboBox<String> kategorijaBox = new ComboBox<>();
         kategorijaBox.getItems().addAll("A", "A1", "B", "C", "CE", "D");
@@ -47,30 +42,17 @@ public class KandidatForm {
         CheckBox polozioVoznju = new CheckBox("Položio vožnju");
         if (postojeći != null) polozioVoznju.setSelected(postojeći.isPolozioVoznju());
 
-        DatePicker datumUpisaPicker = new DatePicker();
+        DatePicker datumUpisaPicker = new DatePicker(postojeći != null ? postojeći.getDatumUpisa() : LocalDate.now());
         datumUpisaPicker.setPromptText("Datum upisa");
-        if (postojeći != null) datumUpisaPicker.setValue(postojeći.getDatumUpisa());
-        else datumUpisaPicker.setValue(LocalDate.now());
 
-        TextField cenaTeorijaPolje = new TextField();
-        cenaTeorijaPolje.setPromptText("Cena teorije (€)");
-        if (postojeći != null) cenaTeorijaPolje.setText(String.valueOf(postojeći.getCenaTeorija()));
+        TextField cenaTeorijaPolje = new TextField(postojeći != null ? String.valueOf(postojeći.getCenaTeorija()) : "");
+        cenaTeorijaPolje.setPromptText("Cena teorije (RSD)");
 
-        TextField cenaPraksaPolje = new TextField();
-        cenaPraksaPolje.setPromptText("Cena prakse (€)");
-        if (postojeći != null) cenaPraksaPolje.setText(String.valueOf(postojeći.getCenaPraksa()));
+        TextField cenaPraksaPolje = new TextField(postojeći != null ? String.valueOf(postojeći.getCenaPraksa()) : "");
+        cenaPraksaPolje.setPromptText("Cena prakse (RSD)");
 
-        TextField brojRataPolje = new TextField();
-        brojRataPolje.setPromptText("Broj rata");
-        if (postojeći != null) brojRataPolje.setText(String.valueOf(postojeći.getBrojRata()));
-
-        TextField iznosPoRatiPolje = new TextField();
-        iznosPoRatiPolje.setPromptText("Iznos po rati (€)");
-        if (postojeći != null) iznosPoRatiPolje.setText(String.valueOf(postojeći.getIznosPoRati()));
-
-        TextField placenoPolje = new TextField();
-        placenoPolje.setPromptText("Plaćeno do sada (€)");
-        if (postojeći != null) placenoPolje.setText(String.valueOf(postojeći.getPlaceno()));
+        TextField placenoPolje = new TextField(postojeći != null ? String.valueOf(postojeći.getPlaceno()) : "");
+        placenoPolje.setPromptText("Plaćeno do sada (RSD)");
 
         Button sacuvajBtn = new Button("Sačuvaj");
 
@@ -89,14 +71,16 @@ public class KandidatForm {
                         datumUpisaPicker.getValue(),
                         Double.parseDouble(cenaTeorijaPolje.getText()),
                         Double.parseDouble(cenaPraksaPolje.getText()),
-                        Integer.parseInt(brojRataPolje.getText()),
-                        Double.parseDouble(iznosPoRatiPolje.getText()),
                         Double.parseDouble(placenoPolje.getText())
                 );
                 onSacuvaj.accept(novi);
                 stage.close();
             } catch (Exception ex) {
-                prikaziGresku("Greška u unosu", "Proveri da su svi brojevi ispravni.");
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Greška u unosu");
+                alert.setHeaderText(null);
+                alert.setContentText("Proverite da su svi brojevi ispravno uneti.");
+                alert.showAndWait();
             }
         });
 
@@ -105,20 +89,11 @@ public class KandidatForm {
                 kategorijaBox, datumUpisaPicker,
                 polozioTeoriju, polozioVoznju,
                 cenaTeorijaPolje, cenaPraksaPolje,
-                brojRataPolje, iznosPoRatiPolje, placenoPolje,
-                sacuvajBtn
+                placenoPolje, sacuvajBtn
         );
         forma.setPadding(new Insets(20));
 
-        stage.setScene(new Scene(forma, 450, 650));
+        stage.setScene(new Scene(forma, 450, 600));
         stage.showAndWait();
-    }
-
-    private void prikaziGresku(String naslov, String poruka) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(naslov);
-        alert.setHeaderText(null);
-        alert.setContentText(poruka);
-        alert.showAndWait();
     }
 }

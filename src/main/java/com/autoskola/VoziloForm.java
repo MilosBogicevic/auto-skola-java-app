@@ -17,6 +17,10 @@ public class VoziloForm {
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.setTitle(postojece == null ? "Novo vozilo" : "Izmena vozila");
 
+        TextField nazivPolje = new TextField();
+        nazivPolje.setPromptText("Naziv vozila");
+        if (postojece != null) nazivPolje.setText(postojece.getNaziv());
+
         TextField tablicePolje = new TextField();
         tablicePolje.setPromptText("Registarske tablice");
         if (postojece != null) tablicePolje.setText(postojece.getTablice());
@@ -35,6 +39,7 @@ public class VoziloForm {
             try {
                 Vozilo novo = new Vozilo(
                         postojece != null ? postojece.getId() : 0,
+                        nazivPolje.getText(),
                         tablicePolje.getText(),
                         registracijaPicker.getValue(),
                         tehnickiPicker.getValue()
@@ -45,15 +50,15 @@ public class VoziloForm {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Greška");
                 alert.setHeaderText("Unos nije uspešan");
-                alert.setContentText("Proverite da su svi datumi uneti.");
+                alert.setContentText("Proverite da su svi podaci ispravno uneti.");
                 alert.showAndWait();
             }
         });
 
-        VBox layout = new VBox(10, tablicePolje, registracijaPicker, tehnickiPicker, sacuvajBtn);
+        VBox layout = new VBox(10, nazivPolje, tablicePolje, registracijaPicker, tehnickiPicker, sacuvajBtn);
         layout.setPadding(new Insets(20));
 
-        stage.setScene(new Scene(layout, 400, 250));
+        stage.setScene(new Scene(layout, 400, 280));
         stage.showAndWait();
     }
 }
