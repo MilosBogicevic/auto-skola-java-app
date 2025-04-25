@@ -33,9 +33,16 @@ public class ObavestenjaHelper {
     private static void dodajUpozorenje(VBox box, String tip, String ime, LocalDate datumIsteka, LocalDate danas) {
         long dana = ChronoUnit.DAYS.between(danas, datumIsteka);
 
+        String glagol = switch (tip) {
+            case "Registracija", "Vozačka", "Licenca" -> "istekla";
+            case "Tehnički", "Lekarski" -> "istekao";
+            default -> "istekao";
+        };
+
         if (dana < 0) {
-            Label l = new Label("❌ " + tip + " istekla za " + ime + " (" + datumIsteka + ")");
+            Label l = new Label("❌ " + tip + " " + glagol + " za " + ime + " (" + datumIsteka + ")");
             l.setStyle("-fx-text-fill: red;");
+
             box.getChildren().add(l);
         } else if (dana <= 7) {
             Label l = new Label("⚠ " + tip + " uskoro ističe za " + ime + " (" + datumIsteka + ")");

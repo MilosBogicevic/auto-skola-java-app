@@ -21,7 +21,7 @@ public class UplataForm {
         datumPicker.setPromptText("Datum uplate");
 
         TextField iznosField = new TextField();
-        iznosField.setPromptText("Iznos uplate (€)");
+        iznosField.setPromptText("Iznos uplate (RSD)");
 
         Button sacuvajBtn = new Button("Sačuvaj");
 

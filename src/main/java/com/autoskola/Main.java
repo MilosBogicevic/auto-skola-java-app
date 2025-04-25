@@ -12,6 +12,7 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
 public class Main extends Application {
@@ -28,6 +29,7 @@ public class Main extends Application {
     private HBox dugmiciKandidati;
     private HBox dugmiciInstruktori, dugmiciVozila;
     private TabPane tabPane;
+    private TextField pretragaField;
 
     @Override
     public void start(Stage stage) {
@@ -39,21 +41,22 @@ public class Main extends Application {
 
         kandidatiTable = new TableView<>(kandidatiLista);
         kandidatiTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        DateTimeFormatter srpskiFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy.");
         kandidatiTable.getColumns().addAll(
-                kol("ID baze", k -> String.valueOf(k.getId())),
-                kol("ID kandidata", Kandidat::getIdKandidata),
+                kol("R. br.", k -> String.valueOf(k.getId())),
+                kol("ID br.", Kandidat::getIdKandidata),
                 kol("Ime", Kandidat::getIme),
                 kol("Prezime", Kandidat::getPrezime),
                 kol("JMBG", Kandidat::getJmbg),
                 kol("Telefon", Kandidat::getTelefon),
                 kol("Email", Kandidat::getEmail),
                 kol("Kategorija", Kandidat::getKategorija),
-                kol("Datum upisa", k -> k.getDatumUpisa().toString()),
-                kol("Teorija", k -> k.isPolozioTeoriju() ? "✔️" : "❌"),
-                kol("Voznja", k -> k.isPolozioVoznju() ? "✔️" : "❌"),
+                kol("Datum upisa", k -> k.getDatumUpisa().format(srpskiFormat)),
+                kol("Položena teorija", k -> k.isPolozioTeoriju() ? "DA" : "NE"),
+                kol("Položena vožnja", k -> k.isPolozioVoznju() ? "DA" : "NE"),
                 kol("Cena (RSD)", k -> String.format("%.0f", k.getUkupnaCena())),
-                kol("Plaćeno (RSD)", k -> String.format("%.0f", k.getPlaceno())),
-                kolBoja("Preostalo (RSD)", Kandidat::getPreostalo)
+                kol("Plaćeno", k -> String.format("%.0f", k.getPlaceno())),
+                kolBoja("Preostalo", Kandidat::getPreostalo)
         );
 
         instruktoriTable = new TableView<>(instruktoriLista);
@@ -74,10 +77,10 @@ public class Main extends Application {
                 kol("Tehnički", v -> v.getTehnickiIstice().toString())
         );
 
-        Button dodajKandidata = new Button("➕ Novi kandidat");
-        Button izmeniKandidata = new Button("✏️ Izmeni kandidata");
-        Button dodajUplatu = new Button("💵 Dodaj uplatu");
-        Button detaljiBtn = new Button("📄 Detalji / Štampa");
+        Button dodajKandidata = new Button("Dodaj kandidata");
+        Button izmeniKandidata = new Button("Izmeni kandidata");
+        Button dodajUplatu = new Button("Dodaj uplatu");
+        Button detaljiBtn = new Button("Detalji / Štampa");
 
         dodajKandidata.setOnAction(e -> new KandidatForm(null, k -> {
             Database.sacuvajKandidata(k);
@@ -104,22 +107,11 @@ public class Main extends Application {
                 new UplataForm(selektovani.getId(), u -> {
                     Database.sacuvajUplatu(u);
 
-                    // Preračunaj ukupno
                     double ukupno = Database.vratiUplateZaKandidata(selektovani.getId())
-                            .stream()
-                            .mapToDouble(Uplata::getIznos)
-                            .sum();
+                            .stream().mapToDouble(Uplata::getIznos).sum();
 
-                    // Osveži kandidata iz baze
-                    Kandidat azuriran = Database.vratiSve().stream()
-                            .filter(k -> k.getId() == selektovani.getId())
-                            .findFirst()
-                            .orElse(null);
-
-                    if (azuriran != null) {
-                        azuriran.setPlaceno(ukupno);
-                        Database.izmeniKandidata(azuriran);
-                    }
+                    selektovani.setPlaceno(ukupno);
+                    Database.izmeniKandidata(selektovani);
 
                     kandidatiLista.setAll(Database.vratiSve());
                 });
@@ -127,7 +119,6 @@ public class Main extends Application {
                 prikaziPoruku("Niste selektovali kandidata.");
             }
         });
-
 
         detaljiBtn.setOnAction(e -> {
             Kandidat k = kandidatiTable.getSelectionModel().getSelectedItem();
@@ -140,8 +131,18 @@ public class Main extends Application {
 
         dugmiciKandidati = new HBox(10, dodajKandidata, izmeniKandidata, dodajUplatu, detaljiBtn);
 
-        Button dodajInstruktora = new Button("➕ Novi instruktor");
-        Button izmeniInstruktora = new Button("✏️ Izmeni instruktora");
+        pretragaField = new TextField();
+        pretragaField.setPromptText("🔍 Pretraga po ID broju kandidata");
+        HBox.setHgrow(pretragaField, Priority.ALWAYS);
+        pretragaField.setMaxWidth(Double.MAX_VALUE);
+        pretragaField.textProperty().addListener((obs, oldVal, newVal) -> {
+            kandidatiTable.setItems(kandidatiLista.filtered(k ->
+                    k.getIdKandidata() != null && k.getIdKandidata().toLowerCase().contains(newVal.toLowerCase())
+            ));
+        });
+
+        Button dodajInstruktora = new Button("Dodaj instruktora");
+        Button izmeniInstruktora = new Button("Izmeni instruktora");
 
         dodajInstruktora.setOnAction(e -> new InstruktorForm(null, i -> {
             Database.sacuvajInstruktora(i);
@@ -164,8 +165,8 @@ public class Main extends Application {
 
         dugmiciInstruktori = new HBox(10, dodajInstruktora, izmeniInstruktora);
 
-        Button dodajVozilo = new Button("➕ Novo vozilo");
-        Button izmeniVozilo = new Button("✏️ Izmeni vozilo");
+        Button dodajVozilo = new Button("Dodaj vozilo");
+        Button izmeniVozilo = new Button("Izmeni vozilo");
 
         dodajVozilo.setOnAction(e -> new VoziloForm(null, v -> {
             Database.sacuvajVozilo(v);
@@ -188,14 +189,6 @@ public class Main extends Application {
 
         dugmiciVozila = new HBox(10, dodajVozilo, izmeniVozilo);
 
-        TextField pretragaField = new TextField();
-        pretragaField.setPromptText("🔍 Pretraga po ID kandidata");
-        pretragaField.textProperty().addListener((obs, oldVal, newVal) -> {
-            kandidatiTable.setItems(kandidatiLista.filtered(k ->
-                    k.getIdKandidata() != null && k.getIdKandidata().toLowerCase().contains(newVal.toLowerCase())
-            ));
-        });
-
         tabPane = new TabPane(
                 new Tab("Kandidati", kandidatiTable),
                 new Tab("Instruktori", instruktoriTable),
@@ -203,25 +196,24 @@ public class Main extends Application {
         );
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
 
-        VBox dugmici = new VBox();
+        HBox dugmici = new HBox(10, dugmiciKandidati, pretragaField);
         tabPane.getSelectionModel().selectedIndexProperty().addListener((obs, oldVal, newVal) -> {
             switch (newVal.intValue()) {
-                case 0 -> dugmici.getChildren().setAll(dugmiciKandidati);
+                case 0 -> dugmici.getChildren().setAll(dugmiciKandidati, pretragaField);
                 case 1 -> dugmici.getChildren().setAll(dugmiciInstruktori);
                 case 2 -> dugmici.getChildren().setAll(dugmiciVozila);
             }
         });
-        dugmici.getChildren().setAll(dugmiciKandidati);
 
-        VBox levaStrana = new VBox(10, pretragaField, dugmici, tabPane);
+        VBox levaStrana = new VBox(10, dugmici, tabPane);
         VBox.setVgrow(tabPane, Priority.ALWAYS);
 
         obavestenjaBox = new VBox(10);
         obavestenjaBox.setPadding(new Insets(10));
         obavestenjaBox.setPrefWidth(420);
         obavestenjaBox.setStyle("-fx-background-color: #fdfdfd; -fx-border-color: #ccc;");
-        Label naslov = new Label("📢 Obaveštenja");
-        naslov.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+        Label naslov = new Label("Obaveštenja");
+        naslov.setStyle("-fx-font-weight: bold;");
         obavestenjaBox.getChildren().add(naslov);
         osveziObavestenja();
 
@@ -230,7 +222,9 @@ public class Main extends Application {
         HBox.setHgrow(levaStrana, Priority.ALWAYS);
 
         stage.setTitle("Auto škola – Upravljanje");
-        stage.setScene(new Scene(glavni, 1350, 700));
+        Scene scene = new Scene(glavni, 1350, 700);
+        glavni.setStyle("-fx-font-size: 16px;");
+        stage.setScene(scene);
         stage.show();
     }
 

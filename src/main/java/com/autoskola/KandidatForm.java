@@ -49,10 +49,10 @@ public class KandidatForm {
         datumUpisaPicker.setPromptText("Datum upisa");
 
         TextField cenaTeorijaPolje = new TextField(postojeći != null ? String.valueOf(postojeći.getCenaTeorija()) : "");
-        cenaTeorijaPolje.setPromptText("Cena teorije (RSD)");
+        cenaTeorijaPolje.setPromptText("Cena teorijske obuke (RSD)");
 
         TextField cenaPraksaPolje = new TextField(postojeći != null ? String.valueOf(postojeći.getCenaPraksa()) : "");
-        cenaPraksaPolje.setPromptText("Cena prakse (RSD)");
+        cenaPraksaPolje.setPromptText("Cena praktične obuke (RSD)");
 
         Button sacuvajBtn = new Button("Sačuvaj");
 
