@@ -63,9 +63,9 @@ public class Main extends Application {
         instruktoriTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         instruktoriTable.getColumns().addAll(
                 kol("Ime", Instruktor::getIme),
-                kol("Lekarski", i -> i.getLekarskiIstice().toString()),
-                kol("Vozačka", i -> i.getVozackaIstice().toString()),
-                kol("Licenca", i -> i.getLicencaIstice().toString())
+                kol("Lekarski", i -> i.getLekarskiIstice().format(srpskiFormat)),
+                kol("Vozačka", i -> i.getVozackaIstice().format(srpskiFormat)),
+                kol("Licenca", i -> i.getLicencaIstice().format(srpskiFormat))
         );
 
         vozilaTable = new TableView<>(vozilaLista);
@@ -73,8 +73,8 @@ public class Main extends Application {
         vozilaTable.getColumns().addAll(
                 kol("Naziv", Vozilo::getNaziv),
                 kol("Tablice", Vozilo::getTablice),
-                kol("Registracija", v -> v.getRegistracijaIstice().toString()),
-                kol("Tehnički", v -> v.getTehnickiIstice().toString())
+                kol("Registracija", v -> v.getRegistracijaIstice().format(srpskiFormat)),
+                kol("Tehnički", v -> v.getTehnickiIstice().format(srpskiFormat))
         );
 
         Button dodajKandidata = new Button("Dodaj kandidata");
@@ -112,6 +112,9 @@ public class Main extends Application {
 
                     selektovani.setPlaceno(ukupno);
                     Database.izmeniKandidata(selektovani);
+
+                    // Osvežavanje obaveštenja nakon uplate
+                    osveziObavestenja();
 
                     kandidatiLista.setAll(Database.vratiSve());
                 });
@@ -257,24 +260,37 @@ public class Main extends Application {
 
     private void osveziObavestenja() {
         obavestenjaBox.getChildren().removeIf(n -> n instanceof Label && n != obavestenjaBox.getChildren().get(0));
+
         LocalDate danas = LocalDate.now();
+
+        boolean imaKandidata = false;
         for (Kandidat k : kandidatiLista) {
             long dana = ChronoUnit.DAYS.between(k.getDatumUpisa(), danas);
-            if (dana >= 30 && k.getPlaceno() < k.getCenaTeorija()) {
-                Label l = new Label("❗ " + k.getIme() + " " + k.getPrezime() + " nije platio teoriju (" + dana + " dana)");
+            double razlika = k.getCenaTeorija() - k.getPlaceno();
+
+            // Ako kandidat nije platio dovoljno za teoriju, dodaj obaveštenje
+            if (dana >= 30 && razlika > 0) {
+                Label l = new Label("❗ " + k.getIme() + " " + k.getPrezime() +
+                        " duguje " + String.format("%,.0f RSD", razlika) +
+                        " za teoriju (" + dana + " dana od upisa)");
                 l.setStyle("-fx-text-fill: red;");
                 obavestenjaBox.getChildren().add(l);
+                imaKandidata = true;
             }
         }
+
+        // Instruktori i vozila
         ObavestenjaHelper.prikaziObavestenjaInstruktora(obavestenjaBox);
         ObavestenjaHelper.prikaziObavestenjaVozila(obavestenjaBox);
 
+        // Ako nema obaveštenja, prikaži poruku
         if (obavestenjaBox.getChildren().size() == 1) {
             Label nema = new Label("✓ Nema aktivnih obaveštenja.");
             nema.setStyle("-fx-text-fill: green;");
             obavestenjaBox.getChildren().add(nema);
         }
 
+        // Dodavanje klikabilnih obaveštenja
         for (var node : obavestenjaBox.getChildren()) {
             if (node instanceof Label l && !l.getText().startsWith("📢") && !l.getText().startsWith("✓")) {
                 l.setOnMouseClicked(this::obradiKlikNaObavestenje);
@@ -282,12 +298,20 @@ public class Main extends Application {
         }
     }
 
+
     private void obradiKlikNaObavestenje(MouseEvent event) {
         String text = ((Label) event.getSource()).getText();
-        if (text.contains("Lekarski") || text.contains("Vozačka") || text.contains("Licenca")) {
-            tabPane.getSelectionModel().select(1);
-        } else if (text.contains("Registracija") || text.contains("Tehnički")) {
-            tabPane.getSelectionModel().select(2);
+        // Ako je obaveštenje o kandidatu
+        if (text.contains("nije platio teoriju") || text.contains("duguje")) {
+            tabPane.getSelectionModel().select(0);  // Otvori Tab za Kandidate
+        }
+        // Ako je obaveštenje o instruktoru
+        else if (text.contains("Lekarski") || text.contains("Vozačka") || text.contains("Licenca")) {
+            tabPane.getSelectionModel().select(1);  // Otvori Tab za Instruktore
+        }
+        // Ako je obaveštenje o vozilu
+        else if (text.contains("Registracija") || text.contains("Tehnički")) {
+            tabPane.getSelectionModel().select(2);  // Otvori Tab za Vozila
         }
     }
 
