@@ -17,6 +17,9 @@ public class KandidatForm {
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.setTitle(postojeći == null ? "Novi kandidat" : "Izmena kandidata");
 
+        TextField idKandidatPolje = new TextField(postojeći != null ? postojeći.getIdKandidata() : "");
+        idKandidatPolje.setPromptText("ID kandidata (šifra iz evidencije)");
+
         TextField imePolje = new TextField(postojeći != null ? postojeći.getIme() : "");
         imePolje.setPromptText("Ime");
 
@@ -30,7 +33,7 @@ public class KandidatForm {
         telefonPolje.setPromptText("Telefon");
 
         TextField emailPolje = new TextField(postojeći != null ? postojeći.getEmail() : "");
-        emailPolje.setPromptText("Email");
+        emailPolje.setPromptText("Email (opciono)");
 
         ComboBox<String> kategorijaBox = new ComboBox<>();
         kategorijaBox.getItems().addAll("A", "A1", "B", "C", "CE", "D");
@@ -51,49 +54,71 @@ public class KandidatForm {
         TextField cenaPraksaPolje = new TextField(postojeći != null ? String.valueOf(postojeći.getCenaPraksa()) : "");
         cenaPraksaPolje.setPromptText("Cena prakse (RSD)");
 
-        TextField placenoPolje = new TextField(postojeći != null ? String.valueOf(postojeći.getPlaceno()) : "");
-        placenoPolje.setPromptText("Plaćeno do sada (RSD)");
-
         Button sacuvajBtn = new Button("Sačuvaj");
 
         sacuvajBtn.setOnAction(e -> {
             try {
+                if (idKandidatPolje.getText().isEmpty() || imePolje.getText().isEmpty()
+                        || prezimePolje.getText().isEmpty() || jmbgPolje.getText().isEmpty()
+                        || telefonPolje.getText().isEmpty() || kategorijaBox.getValue() == null
+                        || cenaTeorijaPolje.getText().isEmpty() || cenaPraksaPolje.getText().isEmpty()) {
+                    throw new IllegalArgumentException("Sva obavezna polja moraju biti popunjena.");
+                }
+
+                double cenaTeorija = Double.parseDouble(cenaTeorijaPolje.getText());
+                double cenaPraksa = Double.parseDouble(cenaPraksaPolje.getText());
+
+                double placeno = 0;
+                if (postojeći != null) {
+                    placeno = Database.vratiUplateZaKandidata(postojeći.getId())
+                            .stream()
+                            .mapToDouble(Uplata::getIznos)
+                            .sum();
+                }
+
                 Kandidat novi = new Kandidat(
                         postojeći != null ? postojeći.getId() : 0,
+                        idKandidatPolje.getText().trim(),
                         imePolje.getText(),
                         prezimePolje.getText(),
                         jmbgPolje.getText(),
                         telefonPolje.getText(),
-                        emailPolje.getText(),
+                        emailPolje.getText().trim(),
                         kategorijaBox.getValue(),
                         polozioTeoriju.isSelected(),
                         polozioVoznju.isSelected(),
                         datumUpisaPicker.getValue(),
-                        Double.parseDouble(cenaTeorijaPolje.getText()),
-                        Double.parseDouble(cenaPraksaPolje.getText()),
-                        Double.parseDouble(placenoPolje.getText())
+                        cenaTeorija,
+                        cenaPraksa,
+                        placeno
                 );
                 onSacuvaj.accept(novi);
                 stage.close();
+            } catch (NumberFormatException ex) {
+                prikaziGresku("Proverite da su cene ispravno unete.");
             } catch (Exception ex) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Greška u unosu");
-                alert.setHeaderText(null);
-                alert.setContentText("Proverite da su svi brojevi ispravno uneti.");
-                alert.showAndWait();
+                prikaziGresku(ex.getMessage());
             }
         });
 
         VBox forma = new VBox(10,
-                imePolje, prezimePolje, jmbgPolje, telefonPolje, emailPolje,
+                idKandidatPolje, imePolje, prezimePolje, jmbgPolje, telefonPolje, emailPolje,
                 kategorijaBox, datumUpisaPicker,
                 polozioTeoriju, polozioVoznju,
                 cenaTeorijaPolje, cenaPraksaPolje,
-                placenoPolje, sacuvajBtn
+                sacuvajBtn
         );
         forma.setPadding(new Insets(20));
 
         stage.setScene(new Scene(forma, 450, 600));
         stage.showAndWait();
+    }
+
+    private void prikaziGresku(String poruka) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Greška u unosu");
+        alert.setHeaderText(null);
+        alert.setContentText(poruka);
+        alert.showAndWait();
     }
 }

@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 public class Kandidat {
     private int id;
+    private String idKandidata;
     private String ime;
     private String prezime;
     private String jmbg;
@@ -18,12 +19,13 @@ public class Kandidat {
     private double cenaPraksa;
     private double placeno;
 
-    public Kandidat(int id, String ime, String prezime, String jmbg, String telefon, String email,
+    public Kandidat(int id, String idKandidata, String ime, String prezime, String jmbg, String telefon, String email,
                     String kategorija, boolean polozioTeoriju, boolean polozioVoznju,
                     LocalDate datumUpisa, double cenaTeorija, double cenaPraksa,
                     double placeno) {
 
         this.id = id;
+        this.idKandidata = idKandidata;
         this.ime = ime;
         this.prezime = prezime;
         this.jmbg = jmbg;
@@ -39,6 +41,7 @@ public class Kandidat {
     }
 
     public int getId() { return id; }
+    public String getIdKandidata() { return idKandidata; }
     public String getIme() { return ime; }
     public String getPrezime() { return prezime; }
     public String getJmbg() { return jmbg; }
@@ -52,6 +55,10 @@ public class Kandidat {
     public double getCenaTeorija() { return cenaTeorija; }
     public double getCenaPraksa() { return cenaPraksa; }
     public double getPlaceno() { return placeno; }
+
+    public void setPlaceno(double placeno) {
+        this.placeno = placeno;
+    }
 
     public double getUkupnaCena() {
         return cenaTeorija + cenaPraksa;

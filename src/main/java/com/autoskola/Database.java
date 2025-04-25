@@ -15,6 +15,7 @@ public class Database {
             st.execute("""
                 CREATE TABLE IF NOT EXISTS kandidati (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    id_kandidata TEXT,
                     ime TEXT,
                     prezime TEXT,
                     jmbg TEXT,
@@ -73,25 +74,26 @@ public class Database {
     public static void sacuvajKandidata(Kandidat k) {
         String sql = """
             INSERT INTO kandidati (
-                ime, prezime, jmbg, telefon, email, kategorija,
+                id_kandidata, ime, prezime, jmbg, telefon, email, kategorija,
                 polozio_teoriju, polozio_voznju, datum_upisa,
                 cena_teorija, cena_praksa, placeno
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """;
 
         try (Connection conn = connect(); PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, k.getIme());
-            stmt.setString(2, k.getPrezime());
-            stmt.setString(3, k.getJmbg());
-            stmt.setString(4, k.getTelefon());
-            stmt.setString(5, k.getEmail());
-            stmt.setString(6, k.getKategorija());
-            stmt.setBoolean(7, k.isPolozioTeoriju());
-            stmt.setBoolean(8, k.isPolozioVoznju());
-            stmt.setString(9, k.getDatumUpisa().toString());
-            stmt.setDouble(10, k.getCenaTeorija());
-            stmt.setDouble(11, k.getCenaPraksa());
-            stmt.setDouble(12, k.getPlaceno());
+            stmt.setString(1, k.getIdKandidata());
+            stmt.setString(2, k.getIme());
+            stmt.setString(3, k.getPrezime());
+            stmt.setString(4, k.getJmbg());
+            stmt.setString(5, k.getTelefon());
+            stmt.setString(6, k.getEmail());
+            stmt.setString(7, k.getKategorija());
+            stmt.setBoolean(8, k.isPolozioTeoriju());
+            stmt.setBoolean(9, k.isPolozioVoznju());
+            stmt.setString(10, k.getDatumUpisa().toString());
+            stmt.setDouble(11, k.getCenaTeorija());
+            stmt.setDouble(12, k.getCenaPraksa());
+            stmt.setDouble(13, k.getPlaceno());
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -101,26 +103,27 @@ public class Database {
     public static void izmeniKandidata(Kandidat k) {
         String sql = """
             UPDATE kandidati SET
-                ime = ?, prezime = ?, jmbg = ?, telefon = ?, email = ?, kategorija = ?,
+                id_kandidata = ?, ime = ?, prezime = ?, jmbg = ?, telefon = ?, email = ?, kategorija = ?,
                 polozio_teoriju = ?, polozio_voznju = ?, datum_upisa = ?,
                 cena_teorija = ?, cena_praksa = ?, placeno = ?
             WHERE id = ?
         """;
 
         try (Connection conn = connect(); PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, k.getIme());
-            stmt.setString(2, k.getPrezime());
-            stmt.setString(3, k.getJmbg());
-            stmt.setString(4, k.getTelefon());
-            stmt.setString(5, k.getEmail());
-            stmt.setString(6, k.getKategorija());
-            stmt.setBoolean(7, k.isPolozioTeoriju());
-            stmt.setBoolean(8, k.isPolozioVoznju());
-            stmt.setString(9, k.getDatumUpisa().toString());
-            stmt.setDouble(10, k.getCenaTeorija());
-            stmt.setDouble(11, k.getCenaPraksa());
-            stmt.setDouble(12, k.getPlaceno());
-            stmt.setInt(13, k.getId());
+            stmt.setString(1, k.getIdKandidata());
+            stmt.setString(2, k.getIme());
+            stmt.setString(3, k.getPrezime());
+            stmt.setString(4, k.getJmbg());
+            stmt.setString(5, k.getTelefon());
+            stmt.setString(6, k.getEmail());
+            stmt.setString(7, k.getKategorija());
+            stmt.setBoolean(8, k.isPolozioTeoriju());
+            stmt.setBoolean(9, k.isPolozioVoznju());
+            stmt.setString(10, k.getDatumUpisa().toString());
+            stmt.setDouble(11, k.getCenaTeorija());
+            stmt.setDouble(12, k.getCenaPraksa());
+            stmt.setDouble(13, k.getPlaceno());
+            stmt.setInt(14, k.getId());
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -135,6 +138,7 @@ public class Database {
             while (rs.next()) {
                 Kandidat k = new Kandidat(
                         rs.getInt("id"),
+                        rs.getString("id_kandidata"),
                         rs.getString("ime"),
                         rs.getString("prezime"),
                         rs.getString("jmbg"),

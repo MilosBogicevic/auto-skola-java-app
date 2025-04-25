@@ -1,4 +1,3 @@
-// Ažurirani Main.java
 package com.autoskola;
 
 import javafx.application.Application;
@@ -26,7 +25,8 @@ public class Main extends Application {
     private TableView<Vozilo> vozilaTable;
 
     private VBox obavestenjaBox;
-    private VBox dugmiciKandidati, dugmiciInstruktori, dugmiciVozila;
+    private HBox dugmiciKandidati;
+    private HBox dugmiciInstruktori, dugmiciVozila;
     private TabPane tabPane;
 
     @Override
@@ -40,7 +40,8 @@ public class Main extends Application {
         kandidatiTable = new TableView<>(kandidatiLista);
         kandidatiTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         kandidatiTable.getColumns().addAll(
-                kol("ID", k -> String.valueOf(k.getId())),
+                kol("ID baze", k -> String.valueOf(k.getId())),
+                kol("ID kandidata", Kandidat::getIdKandidata),
                 kol("Ime", Kandidat::getIme),
                 kol("Prezime", Kandidat::getPrezime),
                 kol("JMBG", Kandidat::getJmbg),
@@ -75,10 +76,8 @@ public class Main extends Application {
 
         Button dodajKandidata = new Button("➕ Novi kandidat");
         Button izmeniKandidata = new Button("✏️ Izmeni kandidata");
-        Button dodajInstruktora = new Button("➕ Novi instruktor");
-        Button izmeniInstruktora = new Button("✏️ Izmeni instruktor");
-        Button dodajVozilo = new Button("➕ Novo vozilo");
-        Button izmeniVozilo = new Button("✏️ Izmeni vozilo");
+        Button dodajUplatu = new Button("💵 Dodaj uplatu");
+        Button detaljiBtn = new Button("📄 Detalji / Štampa");
 
         dodajKandidata.setOnAction(e -> new KandidatForm(null, k -> {
             Database.sacuvajKandidata(k);
@@ -94,8 +93,55 @@ public class Main extends Application {
                     kandidatiLista.setAll(Database.vratiSve());
                     osveziObavestenja();
                 });
+            } else {
+                prikaziPoruku("Niste selektovali kandidata.");
             }
         });
+
+        dodajUplatu.setOnAction(e -> {
+            Kandidat selektovani = kandidatiTable.getSelectionModel().getSelectedItem();
+            if (selektovani != null) {
+                new UplataForm(selektovani.getId(), u -> {
+                    Database.sacuvajUplatu(u);
+
+                    // Preračunaj ukupno
+                    double ukupno = Database.vratiUplateZaKandidata(selektovani.getId())
+                            .stream()
+                            .mapToDouble(Uplata::getIznos)
+                            .sum();
+
+                    // Osveži kandidata iz baze
+                    Kandidat azuriran = Database.vratiSve().stream()
+                            .filter(k -> k.getId() == selektovani.getId())
+                            .findFirst()
+                            .orElse(null);
+
+                    if (azuriran != null) {
+                        azuriran.setPlaceno(ukupno);
+                        Database.izmeniKandidata(azuriran);
+                    }
+
+                    kandidatiLista.setAll(Database.vratiSve());
+                });
+            } else {
+                prikaziPoruku("Niste selektovali kandidata.");
+            }
+        });
+
+
+        detaljiBtn.setOnAction(e -> {
+            Kandidat k = kandidatiTable.getSelectionModel().getSelectedItem();
+            if (k != null) {
+                new KandidatDetaljiForm(k);
+            } else {
+                prikaziPoruku("Niste selektovali kandidata.");
+            }
+        });
+
+        dugmiciKandidati = new HBox(10, dodajKandidata, izmeniKandidata, dodajUplatu, detaljiBtn);
+
+        Button dodajInstruktora = new Button("➕ Novi instruktor");
+        Button izmeniInstruktora = new Button("✏️ Izmeni instruktora");
 
         dodajInstruktora.setOnAction(e -> new InstruktorForm(null, i -> {
             Database.sacuvajInstruktora(i);
@@ -111,8 +157,15 @@ public class Main extends Application {
                     instruktoriLista.setAll(Database.vratiInstruktore());
                     osveziObavestenja();
                 });
+            } else {
+                prikaziPoruku("Niste selektovali instruktora.");
             }
         });
+
+        dugmiciInstruktori = new HBox(10, dodajInstruktora, izmeniInstruktora);
+
+        Button dodajVozilo = new Button("➕ Novo vozilo");
+        Button izmeniVozilo = new Button("✏️ Izmeni vozilo");
 
         dodajVozilo.setOnAction(e -> new VoziloForm(null, v -> {
             Database.sacuvajVozilo(v);
@@ -128,12 +181,20 @@ public class Main extends Application {
                     vozilaLista.setAll(Database.vratiVozila());
                     osveziObavestenja();
                 });
+            } else {
+                prikaziPoruku("Niste selektovali vozilo.");
             }
         });
 
-        dugmiciKandidati = new VBox(10, dodajKandidata, izmeniKandidata);
-        dugmiciInstruktori = new VBox(10, dodajInstruktora, izmeniInstruktora);
-        dugmiciVozila = new VBox(10, dodajVozilo, izmeniVozilo);
+        dugmiciVozila = new HBox(10, dodajVozilo, izmeniVozilo);
+
+        TextField pretragaField = new TextField();
+        pretragaField.setPromptText("🔍 Pretraga po ID kandidata");
+        pretragaField.textProperty().addListener((obs, oldVal, newVal) -> {
+            kandidatiTable.setItems(kandidatiLista.filtered(k ->
+                    k.getIdKandidata() != null && k.getIdKandidata().toLowerCase().contains(newVal.toLowerCase())
+            ));
+        });
 
         tabPane = new TabPane(
                 new Tab("Kandidati", kandidatiTable),
@@ -152,7 +213,7 @@ public class Main extends Application {
         });
         dugmici.getChildren().setAll(dugmiciKandidati);
 
-        VBox levaStrana = new VBox(10, dugmici, tabPane);
+        VBox levaStrana = new VBox(10, pretragaField, dugmici, tabPane);
         VBox.setVgrow(tabPane, Priority.ALWAYS);
 
         obavestenjaBox = new VBox(10);
@@ -162,7 +223,6 @@ public class Main extends Application {
         Label naslov = new Label("📢 Obaveštenja");
         naslov.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
         obavestenjaBox.getChildren().add(naslov);
-
         osveziObavestenja();
 
         HBox glavni = new HBox(20, levaStrana, obavestenjaBox);
@@ -183,7 +243,6 @@ public class Main extends Application {
     private TableColumn<Kandidat, String> kolBoja(String naslov, java.util.function.Function<Kandidat, Double> getter) {
         TableColumn<Kandidat, String> col = new TableColumn<>(naslov);
         col.setCellValueFactory(data -> new SimpleStringProperty(String.format("%.0f", getter.apply(data.getValue()))));
-
         col.setCellFactory(column -> new TableCell<>() {
             @Override
             protected void updateItem(String item, boolean empty) {
@@ -194,11 +253,8 @@ public class Main extends Application {
                 } else {
                     setText(item);
                     double iznos = Double.parseDouble(item);
-                    if (iznos > 0) {
-                        setStyle("-fx-background-color: #ffcccc; -fx-alignment: CENTER;");
-                    } else {
-                        setStyle("-fx-background-color: #ccffcc; -fx-alignment: CENTER;");
-                    }
+                    setStyle("-fx-alignment: CENTER; -fx-background-color: " +
+                            (iznos > 0 ? "#ffcccc" : "#ccffcc") + ";");
                 }
             }
         });
@@ -210,8 +266,7 @@ public class Main extends Application {
         LocalDate danas = LocalDate.now();
         for (Kandidat k : kandidatiLista) {
             long dana = ChronoUnit.DAYS.between(k.getDatumUpisa(), danas);
-            boolean nijePlatioTeoriju = k.getPlaceno() < k.getCenaTeorija();
-            if (dana >= 30 && nijePlatioTeoriju) {
+            if (dana >= 30 && k.getPlaceno() < k.getCenaTeorija()) {
                 Label l = new Label("❗ " + k.getIme() + " " + k.getPrezime() + " nije platio teoriju (" + dana + " dana)");
                 l.setStyle("-fx-text-fill: red;");
                 obavestenjaBox.getChildren().add(l);
@@ -226,7 +281,6 @@ public class Main extends Application {
             obavestenjaBox.getChildren().add(nema);
         }
 
-        // Klik obavestenja: TODO - selektuj instruktora/vozilo
         for (var node : obavestenjaBox.getChildren()) {
             if (node instanceof Label l && !l.getText().startsWith("📢") && !l.getText().startsWith("✓")) {
                 l.setOnMouseClicked(this::obradiKlikNaObavestenje);
@@ -238,19 +292,17 @@ public class Main extends Application {
         String text = ((Label) event.getSource()).getText();
         if (text.contains("Lekarski") || text.contains("Vozačka") || text.contains("Licenca")) {
             tabPane.getSelectionModel().select(1);
-            String ime = text.substring(text.indexOf("za") + 3, text.indexOf("(")).trim();
-            instruktoriTable.getItems().stream()
-                    .filter(i -> i.getIme().equalsIgnoreCase(ime))
-                    .findFirst()
-                    .ifPresent(i -> instruktoriTable.getSelectionModel().select(i));
         } else if (text.contains("Registracija") || text.contains("Tehnički")) {
             tabPane.getSelectionModel().select(2);
-            String tablice = text.substring(text.indexOf("za") + 3, text.indexOf("(")).trim();
-            vozilaTable.getItems().stream()
-                    .filter(v -> v.getTablice().equalsIgnoreCase(tablice))
-                    .findFirst()
-                    .ifPresent(v -> vozilaTable.getSelectionModel().select(v));
         }
+    }
+
+    private void prikaziPoruku(String tekst) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Obaveštenje");
+        alert.setHeaderText(null);
+        alert.setContentText(tekst);
+        alert.showAndWait();
     }
 
     public static void main(String[] args) {

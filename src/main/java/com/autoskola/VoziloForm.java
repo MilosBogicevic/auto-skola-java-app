@@ -37,6 +37,11 @@ public class VoziloForm {
 
         sacuvajBtn.setOnAction(e -> {
             try {
+                if (nazivPolje.getText().isEmpty() || tablicePolje.getText().isEmpty()
+                        || registracijaPicker.getValue() == null || tehnickiPicker.getValue() == null) {
+                    throw new IllegalArgumentException("Sva polja moraju biti popunjena.");
+                }
+
                 Vozilo novo = new Vozilo(
                         postojece != null ? postojece.getId() : 0,
                         nazivPolje.getText(),
@@ -50,7 +55,7 @@ public class VoziloForm {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Greška");
                 alert.setHeaderText("Unos nije uspešan");
-                alert.setContentText("Proverite da su svi podaci ispravno uneti.");
+                alert.setContentText(ex.getMessage());
                 alert.showAndWait();
             }
         });

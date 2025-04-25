@@ -60,7 +60,7 @@ public class InstruktorForm {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Greška");
                 alert.setHeaderText("Neispravan unos");
-                alert.setContentText(ex.getMessage());
+                alert.setContentText("Sva polja moraju biti ispravno popunjena. " + ex.getMessage());
                 alert.showAndWait();
                 sacuvajBtn.setDisable(false); // Re-enable button if failed
             }
