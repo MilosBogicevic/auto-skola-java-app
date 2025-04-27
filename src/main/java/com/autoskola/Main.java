@@ -146,7 +146,9 @@ public class Main extends Application {
         pretragaField.setMaxWidth(Double.MAX_VALUE);
         pretragaField.textProperty().addListener((obs, oldVal, newVal) -> {
             kandidatiTable.setItems(kandidatiLista.filtered(k ->
-                    k.getIdKandidata() != null && k.getIdKandidata().toLowerCase().contains(newVal.toLowerCase())
+                    (k.getIdKandidata() != null && k.getIdKandidata().toLowerCase().contains(newVal.toLowerCase())) ||
+                            k.getIme().toLowerCase().contains(newVal.toLowerCase()) ||
+                            k.getPrezime().toLowerCase().contains(newVal.toLowerCase())
             ));
         });
 
@@ -229,6 +231,8 @@ public class Main extends Application {
         HBox glavni = new HBox(20, levaStrana, obavestenjaBox);
         glavni.setPadding(new Insets(15));
         HBox.setHgrow(levaStrana, Priority.ALWAYS);
+
+        stage.setMaximized(true);
 
         stage.setTitle("Auto škola – Upravljanje");
         Scene scene = new Scene(glavni, 1350, 700);

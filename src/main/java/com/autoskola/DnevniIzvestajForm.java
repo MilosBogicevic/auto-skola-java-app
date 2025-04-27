@@ -33,6 +33,7 @@ public class DnevniIzvestajForm {
 
         // Korišćenje ScrollPane-a za automatski skrol
         ScrollPane scrollPane = new ScrollPane(prikazIzvestajaBox);
+        scrollPane.setPadding(new Insets(10));
         scrollPane.setFitToWidth(true);
         scrollPane.setPrefSize(500, 500);
 
