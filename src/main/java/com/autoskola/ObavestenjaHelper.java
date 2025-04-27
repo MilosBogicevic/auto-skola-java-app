@@ -4,10 +4,13 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 public class ObavestenjaHelper {
+
+    private static final DateTimeFormatter srpskiFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy.");
 
     public static void prikaziObavestenjaInstruktora(VBox box) {
         List<Instruktor> svi = Database.vratiInstruktore();
@@ -32,21 +35,15 @@ public class ObavestenjaHelper {
 
     private static void dodajUpozorenje(VBox box, String tip, String ime, LocalDate datumIsteka, LocalDate danas) {
         long dana = ChronoUnit.DAYS.between(danas, datumIsteka);
+        String tekst = (dana < 0)
+                ? "❌ " + tip + " istekao za " + ime + " (" + datumIsteka.format(srpskiFormat) + ")"
+                : (dana <= 7)
+                ? "⚠ " + tip + " uskoro ističe za " + ime + " (" + datumIsteka.format(srpskiFormat) + ")"
+                : null;
 
-        String glagol = switch (tip) {
-            case "Registracija", "Vozačka", "Licenca" -> "istekla";
-            case "Tehnički", "Lekarski" -> "istekao";
-            default -> "istekao";
-        };
-
-        if (dana < 0) {
-            Label l = new Label("❌ " + tip + " " + glagol + " za " + ime + " (" + datumIsteka + ")");
-            l.setStyle("-fx-text-fill: red;");
-
-            box.getChildren().add(l);
-        } else if (dana <= 7) {
-            Label l = new Label("⚠ " + tip + " uskoro ističe za " + ime + " (" + datumIsteka + ")");
-            l.setStyle("-fx-text-fill: orange;");
+        if (tekst != null) {
+            Label l = new Label(tekst);
+            l.setStyle("-fx-text-fill: " + (dana < 0 ? "red" : "orange") + ";");
             box.getChildren().add(l);
         }
     }

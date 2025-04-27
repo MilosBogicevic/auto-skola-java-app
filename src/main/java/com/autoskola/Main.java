@@ -58,6 +58,17 @@ public class Main extends Application {
                 kolBoja("Preostalo", Kandidat::getPreostalo)
         );
 
+        kandidatiTable.setRowFactory(tv -> {
+            TableRow<Kandidat> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (row.isEmpty()) {
+                    kandidatiTable.getSelectionModel().clearSelection();
+                }
+            });
+            return row;
+        });
+
+
         instruktoriTable = new TableView<>(instruktoriLista);
         instruktoriTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         instruktoriTable.getColumns().addAll(
@@ -67,6 +78,16 @@ public class Main extends Application {
                 kol("Licenca", i -> i.getLicencaIstice().format(srpskiFormat))
         );
 
+        instruktoriTable.setRowFactory(tv -> {
+            TableRow<Instruktor> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (row.isEmpty()) {
+                    instruktoriTable.getSelectionModel().clearSelection();
+                }
+            });
+            return row;
+        });
+
         vozilaTable = new TableView<>(vozilaLista);
         vozilaTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         vozilaTable.getColumns().addAll(
@@ -75,6 +96,16 @@ public class Main extends Application {
                 kol("Registracija", v -> v.getRegistracijaIstice().format(srpskiFormat)),
                 kol("Tehnički", v -> v.getTehnickiIstice().format(srpskiFormat))
         );
+
+        vozilaTable.setRowFactory(tv -> {
+            TableRow<Vozilo> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (row.isEmpty()) {
+                    vozilaTable.getSelectionModel().clearSelection();
+                }
+            });
+            return row;
+        });
 
         Button dodajKandidata = new Button("Dodaj kandidata");
         Button izmeniKandidata = new Button("Izmeni kandidata");
@@ -141,7 +172,7 @@ public class Main extends Application {
         dugmiciKandidati = new HBox(10, dodajKandidata, izmeniKandidata, dodajUplatu, detaljiBtn, dnevniIzvestajBtn);
 
         pretragaField = new TextField();
-        pretragaField.setPromptText("🔍 Pretraga po ID broju kandidata");
+        pretragaField.setPromptText("🔍 Pretraga po ID broju, imenu ili prezimenu");
         HBox.setHgrow(pretragaField, Priority.ALWAYS);
         pretragaField.setMaxWidth(Double.MAX_VALUE);
         pretragaField.textProperty().addListener((obs, oldVal, newVal) -> {
@@ -261,7 +292,7 @@ public class Main extends Application {
                     setText(item);
                     double iznos = Double.parseDouble(item);
                     setStyle("-fx-alignment: CENTER; -fx-background-color: " +
-                            (iznos > 0 ? "#ffcccc" : "#ccffcc") + ";");
+                            (iznos > 0 ? "#ffcccc" : "#ccffcc") + ";" + "-fx-text-fill: black;");
                 }
             }
         });
@@ -311,19 +342,50 @@ public class Main extends Application {
 
     private void obradiKlikNaObavestenje(MouseEvent event) {
         String text = ((Label) event.getSource()).getText();
-        // Ako je obaveštenje o kandidatu
+
         if (text.contains("nije platio teoriju") || text.contains("duguje")) {
-            tabPane.getSelectionModel().select(0);  // Otvori Tab za Kandidate
-        }
-        // Ako je obaveštenje o instruktoru
-        else if (text.contains("Lekarski") || text.contains("Vozačka") || text.contains("Licenca")) {
-            tabPane.getSelectionModel().select(1);  // Otvori Tab za Instruktore
-        }
-        // Ako je obaveštenje o vozilu
-        else if (text.contains("Registracija") || text.contains("Tehnički")) {
-            tabPane.getSelectionModel().select(2);  // Otvori Tab za Vozila
+            tabPane.getSelectionModel().select(0);  // Kandidati
+            String[] delovi = text.split(" ");
+            if (delovi.length >= 3) {
+                String ime = delovi[1];
+                String prezime = delovi[2];
+                kandidatiTable.getSelectionModel().clearSelection();
+                for (Kandidat k : kandidatiTable.getItems()) {
+                    if (k.getIme().equals(ime) && k.getPrezime().equals(prezime)) {
+                        kandidatiTable.getSelectionModel().select(k);
+                        kandidatiTable.scrollTo(k);
+                        kandidatiTable.requestFocus();
+                        break;
+                    }
+                }
+            }
+        } else if (text.contains("Lekarski") || text.contains("Vozačka") || text.contains("Licenca")) {
+            tabPane.getSelectionModel().select(1);  // Instruktori
+            String ime = text.substring(text.indexOf("za") + 3, text.indexOf("(")).trim();
+            instruktoriTable.getSelectionModel().clearSelection();
+            for (Instruktor i : instruktoriTable.getItems()) {
+                if (i.getIme().equals(ime)) {
+                    instruktoriTable.getSelectionModel().select(i);
+                    instruktoriTable.scrollTo(i);
+                    instruktoriTable.requestFocus();
+                    break;
+                }
+            }
+        } else if (text.contains("Registracija") || text.contains("Tehnički")) {
+            tabPane.getSelectionModel().select(2);  // Vozila
+            String tablice = text.substring(text.indexOf("za") + 3, text.indexOf("(")).trim();
+            vozilaTable.getSelectionModel().clearSelection();
+            for (Vozilo v : vozilaTable.getItems()) {
+                if (v.getTablice().equals(tablice)) {
+                    vozilaTable.getSelectionModel().select(v);
+                    vozilaTable.scrollTo(v);
+                    vozilaTable.requestFocus();
+                    break;
+                }
+            }
         }
     }
+
 
     private void prikaziPoruku(String tekst) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
