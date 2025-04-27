@@ -291,4 +291,60 @@ public class Database {
 
         return lista;
     }
+
+    public static List<Uplata> vratiUplateZaDatum(LocalDate datum) {
+        List<Uplata> lista = new ArrayList<>();
+        String sql = "SELECT * FROM uplate WHERE datum = ?";
+
+        try (Connection conn = connect(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, datum.toString());
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                lista.add(new Uplata(
+                        rs.getInt("id"),
+                        rs.getInt("kandidat_id"),
+                        LocalDate.parse(rs.getString("datum")),
+                        rs.getDouble("iznos")
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return lista;
+    }
+
+    public static Kandidat vratiKandidataPoId(int kandidatId) {
+        Kandidat kandidat = null;
+        String sql = "SELECT * FROM kandidati WHERE id = ?";
+
+        try (Connection conn = connect(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, kandidatId);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                kandidat = new Kandidat(
+                        rs.getInt("id"),
+                        rs.getString("id_kandidata"),
+                        rs.getString("ime"),
+                        rs.getString("prezime"),
+                        rs.getString("jmbg"),
+                        rs.getString("telefon"),
+                        rs.getString("email"),
+                        rs.getString("kategorija"),
+                        rs.getBoolean("polozio_teoriju"),
+                        rs.getBoolean("polozio_voznju"),
+                        LocalDate.parse(rs.getString("datum_upisa")),
+                        rs.getDouble("cena_teorija"),
+                        rs.getDouble("cena_praksa"),
+                        rs.getDouble("placeno")
+                );
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return kandidat;
+    }
 }

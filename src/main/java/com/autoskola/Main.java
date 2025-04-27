@@ -81,6 +81,9 @@ public class Main extends Application {
         Button izmeniKandidata = new Button("Izmeni kandidata");
         Button dodajUplatu = new Button("Dodaj uplatu");
         Button detaljiBtn = new Button("Detalji / Štampa");
+        Button dnevniIzvestajBtn = new Button("Dnevni izveštaj");
+
+        dugmiciKandidati = new HBox(10, dnevniIzvestajBtn);
 
         dodajKandidata.setOnAction(e -> new KandidatForm(null, k -> {
             Database.sacuvajKandidata(k);
@@ -132,7 +135,11 @@ public class Main extends Application {
             }
         });
 
-        dugmiciKandidati = new HBox(10, dodajKandidata, izmeniKandidata, dodajUplatu, detaljiBtn);
+        dnevniIzvestajBtn.setOnAction(e -> {
+            new DnevniIzvestajForm();
+        });
+
+        dugmiciKandidati = new HBox(10, dodajKandidata, izmeniKandidata, dodajUplatu, detaljiBtn, dnevniIzvestajBtn);
 
         pretragaField = new TextField();
         pretragaField.setPromptText("🔍 Pretraga po ID broju kandidata");
