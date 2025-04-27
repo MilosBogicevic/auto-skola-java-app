@@ -37,11 +37,6 @@ public class DnevniIzvestajForm {
         scrollPane.setFitToWidth(true);
         scrollPane.setPrefSize(500, 500);
 
-        // Dodavanje naslova izveštaja sa današnjim datumom u srpskom formatu
-        Label naslovLabel = new Label("Uplate na dan: " + LocalDate.now().format(srpskiFormat));
-        naslovLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 16px;");
-        prikazIzvestajaBox.getChildren().add(naslovLabel);
-
         // Automatski prikaz uplata kada se izabere datum
         datumPicker.setOnAction(e -> {
             LocalDate datum = datumPicker.getValue();
