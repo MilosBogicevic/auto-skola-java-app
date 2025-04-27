@@ -26,9 +26,6 @@ public class KandidatForm {
         TextField prezimePolje = new TextField(postojeći != null ? postojeći.getPrezime() : "");
         prezimePolje.setPromptText("Prezime");
 
-        TextField jmbgPolje = new TextField(postojeći != null ? postojeći.getJmbg() : "");
-        jmbgPolje.setPromptText("JMBG");
-
         TextField telefonPolje = new TextField(postojeći != null ? postojeći.getTelefon() : "");
         telefonPolje.setPromptText("Telefon");
 
@@ -59,9 +56,9 @@ public class KandidatForm {
         sacuvajBtn.setOnAction(e -> {
             try {
                 if (idKandidatPolje.getText().isEmpty() || imePolje.getText().isEmpty()
-                        || prezimePolje.getText().isEmpty() || jmbgPolje.getText().isEmpty()
-                        || telefonPolje.getText().isEmpty() || kategorijaBox.getValue() == null
-                        || cenaTeorijaPolje.getText().isEmpty() || cenaPraksaPolje.getText().isEmpty()) {
+                        || prezimePolje.getText().isEmpty() || telefonPolje.getText().isEmpty()
+                        || kategorijaBox.getValue() == null || cenaTeorijaPolje.getText().isEmpty()
+                        || cenaPraksaPolje.getText().isEmpty()) {
                     throw new IllegalArgumentException("Sva obavezna polja moraju biti popunjena.");
                 }
 
@@ -81,7 +78,6 @@ public class KandidatForm {
                         idKandidatPolje.getText().trim(),
                         imePolje.getText(),
                         prezimePolje.getText(),
-                        jmbgPolje.getText(),
                         telefonPolje.getText(),
                         emailPolje.getText().trim(),
                         kategorijaBox.getValue(),
@@ -102,7 +98,7 @@ public class KandidatForm {
         });
 
         VBox forma = new VBox(10,
-                idKandidatPolje, imePolje, prezimePolje, jmbgPolje, telefonPolje, emailPolje,
+                idKandidatPolje, imePolje, prezimePolje, telefonPolje, emailPolje,
                 kategorijaBox, datumUpisaPicker,
                 polozioTeoriju, polozioVoznju,
                 cenaTeorijaPolje, cenaPraksaPolje,

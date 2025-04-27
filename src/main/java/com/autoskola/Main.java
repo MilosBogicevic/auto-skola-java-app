@@ -47,7 +47,6 @@ public class Main extends Application {
                 kol("ID br.", Kandidat::getIdKandidata),
                 kol("Ime", Kandidat::getIme),
                 kol("Prezime", Kandidat::getPrezime),
-                kol("JMBG", Kandidat::getJmbg),
                 kol("Telefon", Kandidat::getTelefon),
                 kol("Email", Kandidat::getEmail),
                 kol("Kategorija", Kandidat::getKategorija),

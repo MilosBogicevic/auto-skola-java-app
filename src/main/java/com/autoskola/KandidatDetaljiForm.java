@@ -30,7 +30,6 @@ public class KandidatDetaljiForm {
         layout.getChildren().addAll(
                 new Label("ID broj kandidata: " + kandidat.getIdKandidata()),
                 new Label("Ime i prezime: " + kandidat.getIme() + " " + kandidat.getPrezime()),
-                new Label("JMBG: " + kandidat.getJmbg()),
                 new Label("Telefon: " + kandidat.getTelefon()),
                 new Label("Email: " + (kandidat.getEmail().isEmpty() ? "nema" : kandidat.getEmail())),
                 new Label("Kategorija: " + kandidat.getKategorija()),

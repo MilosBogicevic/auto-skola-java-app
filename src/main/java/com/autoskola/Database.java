@@ -18,7 +18,6 @@ public class Database {
                     id_kandidata TEXT,
                     ime TEXT,
                     prezime TEXT,
-                    jmbg TEXT,
                     telefon TEXT,
                     email TEXT,
                     kategorija TEXT,
@@ -74,7 +73,7 @@ public class Database {
     public static void sacuvajKandidata(Kandidat k) {
         String sql = """
             INSERT INTO kandidati (
-                id_kandidata, ime, prezime, jmbg, telefon, email, kategorija,
+                id_kandidata, ime, prezime, telefon, email, kategorija,
                 polozio_teoriju, polozio_voznju, datum_upisa,
                 cena_teorija, cena_praksa, placeno
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -84,7 +83,6 @@ public class Database {
             stmt.setString(1, k.getIdKandidata());
             stmt.setString(2, k.getIme());
             stmt.setString(3, k.getPrezime());
-            stmt.setString(4, k.getJmbg());
             stmt.setString(5, k.getTelefon());
             stmt.setString(6, k.getEmail());
             stmt.setString(7, k.getKategorija());
@@ -103,7 +101,7 @@ public class Database {
     public static void izmeniKandidata(Kandidat k) {
         String sql = """
             UPDATE kandidati SET
-                id_kandidata = ?, ime = ?, prezime = ?, jmbg = ?, telefon = ?, email = ?, kategorija = ?,
+                id_kandidata = ?, ime = ?, prezime = ?, telefon = ?, email = ?, kategorija = ?,
                 polozio_teoriju = ?, polozio_voznju = ?, datum_upisa = ?,
                 cena_teorija = ?, cena_praksa = ?, placeno = ?
             WHERE id = ?
@@ -113,7 +111,6 @@ public class Database {
             stmt.setString(1, k.getIdKandidata());
             stmt.setString(2, k.getIme());
             stmt.setString(3, k.getPrezime());
-            stmt.setString(4, k.getJmbg());
             stmt.setString(5, k.getTelefon());
             stmt.setString(6, k.getEmail());
             stmt.setString(7, k.getKategorija());
@@ -141,7 +138,6 @@ public class Database {
                         rs.getString("id_kandidata"),
                         rs.getString("ime"),
                         rs.getString("prezime"),
-                        rs.getString("jmbg"),
                         rs.getString("telefon"),
                         rs.getString("email"),
                         rs.getString("kategorija"),
@@ -329,7 +325,6 @@ public class Database {
                         rs.getString("id_kandidata"),
                         rs.getString("ime"),
                         rs.getString("prezime"),
-                        rs.getString("jmbg"),
                         rs.getString("telefon"),
                         rs.getString("email"),
                         rs.getString("kategorija"),
