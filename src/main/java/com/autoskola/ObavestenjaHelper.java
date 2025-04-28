@@ -35,16 +35,22 @@ public class ObavestenjaHelper {
 
     private static void dodajUpozorenje(VBox box, String tip, String ime, LocalDate datumIsteka, LocalDate danas) {
         long dana = ChronoUnit.DAYS.between(danas, datumIsteka);
-        String tekst = (dana < 0)
-                ? "❌ " + tip + " istekao za " + ime + " (" + datumIsteka.format(srpskiFormat) + ")"
-                : (dana <= 7)
-                ? "⚠ " + tip + " uskoro ističe za " + ime + " (" + datumIsteka.format(srpskiFormat) + ")"
-                : null;
+        String glagol = switch (tip) {
+            case "Registracija", "Vozačka", "Licenca" -> "istekla";  // Za ove tipove koristimo "istekla"
+            case "Tehnički", "Lekarski" -> "istekao";  // Za ove tipove koristimo "istekao"
+            default -> "istekao";  // Podrazumevani glagol za sve ostale
+        };
 
-        if (tekst != null) {
-            Label l = new Label(tekst);
-            l.setStyle("-fx-text-fill: " + (dana < 0 ? "red" : "orange") + ";");
-            box.getChildren().add(l);
+        if (dana < 0) {
+            // Ako je datum isteka prošao
+            Label l = new Label("❌ " + tip + " " + glagol + " za " + ime + " (" + datumIsteka.format(srpskiFormat) + ")");
+            l.setStyle("-fx-text-fill: red;");
+            box.getChildren().add(l);  // Dodajemo obaveštenje u box
+        } else if (dana <= 7) {
+            // Ako je datum isteka uskoro (do 7 dana)
+            Label l = new Label("⚠ " + tip + " uskoro ističe za " + ime + " (" + datumIsteka.format(srpskiFormat) + ")");
+            l.setStyle("-fx-text-fill: orange;");
+            box.getChildren().add(l);  // Dodajemo obaveštenje u box
         }
     }
 }
