@@ -361,7 +361,10 @@ public class Main extends Application {
             }
         } else if (text.contains("Lekarski") || text.contains("Vozačka") || text.contains("Licenca")) {
             tabPane.getSelectionModel().select(1);  // Instruktori
-            String ime = text.substring(text.indexOf("za") + 3, text.indexOf("(")).trim();
+            int indeksZa = text.lastIndexOf("za ");
+            int indeksOtvorenaZagrada = text.indexOf("(", indeksZa);
+            String ime = text.substring(indeksZa + 3, indeksOtvorenaZagrada).trim();
+
             instruktoriTable.getSelectionModel().clearSelection();
             for (Instruktor i : instruktoriTable.getItems()) {
                 if (i.getIme().equals(ime)) {
