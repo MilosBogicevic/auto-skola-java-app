@@ -26,11 +26,11 @@ public class VoziloForm {
         if (postojece != null) tablicePolje.setText(postojece.getTablice());
 
         DatePicker registracijaPicker = new DatePicker();
-        registracijaPicker.setPromptText("Registracija ističe");
+        registracijaPicker.setPromptText("Registracija rađena");
         if (postojece != null) registracijaPicker.setValue(postojece.getRegistracijaIstice());
 
         DatePicker tehnickiPicker = new DatePicker();
-        tehnickiPicker.setPromptText("Tehnički pregled ističe");
+        tehnickiPicker.setPromptText("Tehnički pregled urađen");
         if (postojece != null) tehnickiPicker.setValue(postojece.getTehnickiIstice());
 
         Button sacuvajBtn = new Button("Sačuvaj");
@@ -62,6 +62,7 @@ public class VoziloForm {
 
         VBox layout = new VBox(10, nazivPolje, tablicePolje, registracijaPicker, tehnickiPicker, sacuvajBtn);
         layout.setPadding(new Insets(20));
+        layout.setStyle("-fx-font-size: 16px;");
 
         stage.setScene(new Scene(layout, 400, 280));
         stage.showAndWait();

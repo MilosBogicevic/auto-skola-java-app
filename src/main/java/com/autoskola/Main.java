@@ -73,9 +73,9 @@ public class Main extends Application {
         instruktoriTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         instruktoriTable.getColumns().addAll(
                 kol("Ime", Instruktor::getIme),
-                kol("Lekarski", i -> i.getLekarskiIstice().format(srpskiFormat)),
-                kol("Vozačka", i -> i.getVozackaIstice().format(srpskiFormat)),
-                kol("Licenca", i -> i.getLicencaIstice().format(srpskiFormat))
+                kol("Lekarski ističe", i -> i.getLekarskiIstice().format(srpskiFormat)),
+                kol("Vozačka ističe", i -> i.getVozackaIstice().format(srpskiFormat)),
+                kol("Licenca ističe", i -> i.getLicencaIstice().format(srpskiFormat))
         );
 
         instruktoriTable.setRowFactory(tv -> {
@@ -93,8 +93,8 @@ public class Main extends Application {
         vozilaTable.getColumns().addAll(
                 kol("Naziv", Vozilo::getNaziv),
                 kol("Tablice", Vozilo::getTablice),
-                kol("Registracija", v -> v.getRegistracijaIstice().format(srpskiFormat)),
-                kol("Tehnički", v -> v.getTehnickiIstice().format(srpskiFormat))
+                kol("Registracija rađena", v -> v.getRegistracijaIstice().format(srpskiFormat)),
+                kol("Tehnički pregled urađen", v -> v.getTehnickiIstice().format(srpskiFormat))
         );
 
         vozilaTable.setRowFactory(tv -> {
@@ -313,7 +313,7 @@ public class Main extends Application {
             if (dana >= 30 && razlika > 0) {
                 Label l = new Label("❗ " + k.getIme() + " " + k.getPrezime() +
                         " duguje " + String.format("%,.0f RSD", razlika) +
-                        " za teoriju (" + dana + " dana od upisa)");
+                        " za teoriju");
                 l.setStyle("-fx-text-fill: red;");
                 obavestenjaBox.getChildren().add(l);
                 imaKandidata = true;
@@ -343,7 +343,7 @@ public class Main extends Application {
     private void obradiKlikNaObavestenje(MouseEvent event) {
         String text = ((Label) event.getSource()).getText();
 
-        if (text.contains("nije platio teoriju") || text.contains("duguje")) {
+        if (text.contains("duguje")) {
             tabPane.getSelectionModel().select(0);  // Kandidati
             String[] delovi = text.split(" ");
             if (delovi.length >= 3) {
@@ -395,6 +395,7 @@ public class Main extends Application {
         alert.setTitle("Obaveštenje");
         alert.setHeaderText(null);
         alert.setContentText(tekst);
+        alert.getDialogPane().setStyle("-fx-font-size: 16px;");
         alert.showAndWait();
     }
 

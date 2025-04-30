@@ -68,6 +68,7 @@ public class InstruktorForm {
 
         VBox layout = new VBox(10, imePolje, lekarskiPicker, vozackaPicker, licencaPicker, sacuvajBtn);
         layout.setPadding(new Insets(20));
+        layout.setStyle("-fx-font-size: 16px;");
 
         stage.setScene(new Scene(layout, 400, 300));
         stage.showAndWait();

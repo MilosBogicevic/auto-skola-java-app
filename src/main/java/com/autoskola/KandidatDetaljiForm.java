@@ -24,6 +24,7 @@ public class KandidatDetaljiForm {
 
         VBox layout = new VBox(10);
         layout.setPadding(new Insets(20));
+        layout.setStyle("-fx-font-size: 16px;");
 
         DateTimeFormatter format = DateTimeFormatter.ofPattern("dd.MM.yyyy.");
 
@@ -72,6 +73,7 @@ public class KandidatDetaljiForm {
 
         VBox koren = new VBox(10, scroll, stampajBtn);
         koren.setPadding(new Insets(10));
+        koren.setStyle("-fx-font-size: 16px;");
 
         stage.setScene(new Scene(koren));
         stage.showAndWait();

@@ -44,6 +44,7 @@ public class UplataForm {
 
         VBox layout = new VBox(10, datumPicker, iznosField, sacuvajBtn);
         layout.setPadding(new Insets(20));
+        layout.setStyle("-fx-font-size: 16px;");
 
         stage.setScene(new Scene(layout, 300, 180));
         stage.showAndWait();

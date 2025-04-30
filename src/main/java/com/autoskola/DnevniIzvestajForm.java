@@ -62,9 +62,10 @@ public class DnevniIzvestajForm {
         // Dodavanje svih elemenata u layout
         VBox layout = new VBox(10, datumPicker, scrollPane, stampaBtn);
         layout.setPadding(new Insets(20));
+        layout.setStyle("-fx-font-size: 16px;");
 
         // Postavljanje scene i prikazivanje prozora
-        stage.setScene(new Scene(layout, 600, 600));
+        stage.setScene(new Scene(layout, 800, 600));
         stage.showAndWait();
     }
 

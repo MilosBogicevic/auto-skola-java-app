@@ -33,7 +33,7 @@ public class KandidatForm {
         emailPolje.setPromptText("Email (opciono)");
 
         ComboBox<String> kategorijaBox = new ComboBox<>();
-        kategorijaBox.getItems().addAll("A", "A1", "B", "C", "CE", "D");
+        kategorijaBox.getItems().addAll("A1", "A2", "A", "B", "C", "CE");
         if (postojeći != null) kategorijaBox.setValue(postojeći.getKategorija());
 
         CheckBox polozioTeoriju = new CheckBox("Položio teoriju");
@@ -105,6 +105,7 @@ public class KandidatForm {
                 sacuvajBtn
         );
         forma.setPadding(new Insets(20));
+        forma.setStyle("-fx-font-size: 16px;");
 
         stage.setScene(new Scene(forma, 450, 600));
         stage.showAndWait();
