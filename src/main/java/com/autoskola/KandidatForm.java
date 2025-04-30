@@ -6,8 +6,10 @@ import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.function.Consumer;
 
 public class KandidatForm {
@@ -16,6 +18,19 @@ public class KandidatForm {
         Stage stage = new Stage();
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.setTitle(postojeći == null ? "Novi kandidat" : "Izmena kandidata");
+
+        DateTimeFormatter srpskiFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy.");
+        StringConverter<LocalDate> converter = new StringConverter<>() {
+            @Override
+            public String toString(LocalDate date) {
+                return date != null ? date.format(srpskiFormat) : "";
+            }
+
+            @Override
+            public LocalDate fromString(String string) {
+                return (string != null && !string.isEmpty()) ? LocalDate.parse(string, srpskiFormat) : null;
+            }
+        };
 
         TextField idKandidatPolje = new TextField(postojeći != null ? postojeći.getIdKandidata() : "");
         idKandidatPolje.setPromptText("ID kandidata (šifra iz evidencije)");
@@ -44,6 +59,7 @@ public class KandidatForm {
 
         DatePicker datumUpisaPicker = new DatePicker(postojeći != null ? postojeći.getDatumUpisa() : LocalDate.now());
         datumUpisaPicker.setPromptText("Datum upisa");
+        datumUpisaPicker.setConverter(converter);
 
         TextField cenaTeorijaPolje = new TextField(postojeći != null ? String.valueOf(postojeći.getCenaTeorija()) : "");
         cenaTeorijaPolje.setPromptText("Cena teorijske obuke (RSD)");
@@ -116,6 +132,7 @@ public class KandidatForm {
         alert.setTitle("Greška u unosu");
         alert.setHeaderText(null);
         alert.setContentText(poruka);
+        alert.getDialogPane().setStyle("-fx-font-size: 16px;");
         alert.showAndWait();
     }
 }

@@ -6,8 +6,10 @@ import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.function.Consumer;
 
 public class VoziloForm {
@@ -16,6 +18,19 @@ public class VoziloForm {
         Stage stage = new Stage();
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.setTitle(postojece == null ? "Novo vozilo" : "Izmena vozila");
+
+        DateTimeFormatter srpskiFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy.");
+        StringConverter<LocalDate> converter = new StringConverter<>() {
+            @Override
+            public String toString(LocalDate date) {
+                return date != null ? date.format(srpskiFormat) : "";
+            }
+
+            @Override
+            public LocalDate fromString(String string) {
+                return (string != null && !string.isEmpty()) ? LocalDate.parse(string, srpskiFormat) : null;
+            }
+        };
 
         TextField nazivPolje = new TextField();
         nazivPolje.setPromptText("Naziv vozila");
@@ -26,11 +41,13 @@ public class VoziloForm {
         if (postojece != null) tablicePolje.setText(postojece.getTablice());
 
         DatePicker registracijaPicker = new DatePicker();
-        registracijaPicker.setPromptText("Registracija rađena");
+        registracijaPicker.setPromptText("Datum registracije");
+        registracijaPicker.setConverter(converter);
         if (postojece != null) registracijaPicker.setValue(postojece.getRegistracijaIstice());
 
         DatePicker tehnickiPicker = new DatePicker();
-        tehnickiPicker.setPromptText("Tehnički pregled urađen");
+        tehnickiPicker.setPromptText("Datum tehničkog");
+        tehnickiPicker.setConverter(converter);
         if (postojece != null) tehnickiPicker.setValue(postojece.getTehnickiIstice());
 
         Button sacuvajBtn = new Button("Sačuvaj");

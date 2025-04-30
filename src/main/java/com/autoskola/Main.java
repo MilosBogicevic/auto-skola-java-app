@@ -93,8 +93,8 @@ public class Main extends Application {
         vozilaTable.getColumns().addAll(
                 kol("Naziv", Vozilo::getNaziv),
                 kol("Tablice", Vozilo::getTablice),
-                kol("Registracija rađena", v -> v.getRegistracijaIstice().format(srpskiFormat)),
-                kol("Tehnički pregled urađen", v -> v.getTehnickiIstice().format(srpskiFormat))
+                kol("Datum registracije", v -> v.getRegistracijaIstice().format(srpskiFormat)),
+                kol("Datum tehničkog", v -> v.getTehnickiIstice().format(srpskiFormat))
         );
 
         vozilaTable.setRowFactory(tv -> {

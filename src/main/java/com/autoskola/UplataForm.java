@@ -6,8 +6,10 @@ import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.function.Consumer;
 
 public class UplataForm {
@@ -17,8 +19,22 @@ public class UplataForm {
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.setTitle("Nova uplata");
 
+        DateTimeFormatter srpskiFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy.");
+        StringConverter<LocalDate> converter = new StringConverter<>() {
+            @Override
+            public String toString(LocalDate date) {
+                return date != null ? date.format(srpskiFormat) : "";
+            }
+
+            @Override
+            public LocalDate fromString(String string) {
+                return (string != null && !string.isEmpty()) ? LocalDate.parse(string, srpskiFormat) : null;
+            }
+        };
+
         DatePicker datumPicker = new DatePicker(LocalDate.now());
         datumPicker.setPromptText("Datum uplate");
+        datumPicker.setConverter(converter);
 
         TextField iznosField = new TextField();
         iznosField.setPromptText("Iznos uplate (RSD)");

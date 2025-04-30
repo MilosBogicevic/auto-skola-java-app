@@ -6,8 +6,10 @@ import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.function.Consumer;
 
 public class InstruktorForm {
@@ -17,17 +19,33 @@ public class InstruktorForm {
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.setTitle(postojeći == null ? "Novi instruktor" : "Izmena instruktora");
 
+        DateTimeFormatter srpskiFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy.");
+        StringConverter<LocalDate> converter = new StringConverter<>() {
+            @Override
+            public String toString(LocalDate date) {
+                return date != null ? date.format(srpskiFormat) : "";
+            }
+
+            @Override
+            public LocalDate fromString(String string) {
+                return (string != null && !string.isEmpty()) ? LocalDate.parse(string, srpskiFormat) : null;
+            }
+        };
+
         TextField imePolje = new TextField(postojeći != null ? postojeći.getIme() : "");
         imePolje.setPromptText("Ime i prezime");
 
         DatePicker lekarskiPicker = new DatePicker(postojeći != null ? postojeći.getLekarskiIstice() : null);
         lekarskiPicker.setPromptText("Lekarski ističe");
+        lekarskiPicker.setConverter(converter);
 
         DatePicker vozackaPicker = new DatePicker(postojeći != null ? postojeći.getVozackaIstice() : null);
         vozackaPicker.setPromptText("Vozačka ističe");
+        vozackaPicker.setConverter(converter);
 
         DatePicker licencaPicker = new DatePicker(postojeći != null ? postojeći.getLicencaIstice() : null);
         licencaPicker.setPromptText("Licenca ističe");
+        licencaPicker.setConverter(converter);
 
         Button sacuvajBtn = new Button("Sačuvaj");
 
