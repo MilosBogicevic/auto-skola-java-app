@@ -70,14 +70,14 @@ public class DnevniIzvestajForm {
         layout.setPadding(new Insets(20));
         layout.setStyle("-fx-font-size: 16px;");
 
-        stage.setScene(new Scene(layout, 600, 600));
+        stage.setScene(new Scene(layout, 800, 600));
         stage.showAndWait();
     }
 
     private void prikaziUplate(List<Uplata> uplate, VBox prikazIzvestajaBox, LocalDate datum) {
         prikazIzvestajaBox.getChildren().clear();
         Label naslovLabel = new Label("Uplate na dan: " + datum.format(srpskiFormat));
-        naslovLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 16px;");
+        naslovLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 18px;");
         prikazIzvestajaBox.getChildren().add(naslovLabel);
 
         if (uplate.isEmpty()) {
