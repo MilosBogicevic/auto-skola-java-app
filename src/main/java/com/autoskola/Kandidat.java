@@ -12,16 +12,16 @@ public class Kandidat {
     private String kategorija;
     private boolean polozioTeoriju;
     private boolean polozioVoznju;
-
     private LocalDate datumUpisa;
     private double cenaTeorija;
     private double cenaPraksa;
     private double placeno;
+    private LocalDate datumIsplate;
 
     public Kandidat(int id, String idKandidata, String ime, String prezime, String telefon, String email,
                     String kategorija, boolean polozioTeoriju, boolean polozioVoznju,
                     LocalDate datumUpisa, double cenaTeorija, double cenaPraksa,
-                    double placeno) {
+                    double placeno, LocalDate datumIsplate) {
 
         this.id = id;
         this.idKandidata = idKandidata;
@@ -36,6 +36,7 @@ public class Kandidat {
         this.cenaTeorija = cenaTeorija;
         this.cenaPraksa = cenaPraksa;
         this.placeno = placeno;
+        this.datumIsplate = datumIsplate;
     }
 
     public int getId() { return id; }
@@ -52,9 +53,14 @@ public class Kandidat {
     public double getCenaTeorija() { return cenaTeorija; }
     public double getCenaPraksa() { return cenaPraksa; }
     public double getPlaceno() { return placeno; }
+    public LocalDate getDatumIsplate() { return datumIsplate; }
 
     public void setPlaceno(double placeno) {
         this.placeno = placeno;
+    }
+
+    public void setDatumIsplate(LocalDate datumIsplate) {
+        this.datumIsplate = datumIsplate;
     }
 
     public double getUkupnaCena() {

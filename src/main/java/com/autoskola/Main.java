@@ -11,9 +11,13 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+
+import static com.autoskola.Database.connect;
 
 public class Main extends Application {
 
@@ -34,6 +38,22 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) {
         Database.initialize();
+        try (Statement stmt = connect().createStatement()) {
+            stmt.execute("ALTER TABLE kandidati ADD COLUMN datum_isplate TEXT");
+        } catch (SQLException ignored) {
+            // Kolona već postoji, ignoriši grešku
+        }
+
+        // Uklanjanje kandidata kojima je proslo 30 dana od potpune isplate
+        LocalDate danas = LocalDate.now();
+        for (Kandidat k : Database.vratiSve()) {
+            if (k.getPreostalo() == 0 && k.getDatumIsplate() != null) {
+                long proslo = ChronoUnit.DAYS.between(k.getDatumIsplate(), danas);
+                if (proslo >= 30) {
+                    Database.obrisiKandidata(k.getId());
+                }
+            }
+        }
 
         kandidatiLista.setAll(Database.vratiSve());
         instruktoriLista.setAll(Database.vratiInstruktore());
@@ -48,11 +68,11 @@ public class Main extends Application {
                 kol("Ime", Kandidat::getIme),
                 kol("Prezime", Kandidat::getPrezime),
                 kol("Telefon", Kandidat::getTelefon),
-                kol("Email", Kandidat::getEmail),
+//                kol("Email", Kandidat::getEmail),
                 kol("Kategorija", Kandidat::getKategorija),
                 kol("Datum upisa", k -> k.getDatumUpisa().format(srpskiFormat)),
-                kol("Položena teorija", k -> k.isPolozioTeoriju() ? "DA" : "NE"),
-                kol("Položena vožnja", k -> k.isPolozioVoznju() ? "DA" : "NE"),
+                kol("Položena teorija", k -> k.isPolozioTeoriju() ? "da" : "ne"),
+                kol("Položena vožnja", k -> k.isPolozioVoznju() ? "da" : "ne"),
                 kol("Cena (RSD)", k -> String.format("%.0f", k.getUkupnaCena())),
                 kol("Plaćeno", k -> String.format("%.0f", k.getPlaceno())),
                 kolBoja("Preostalo", Kandidat::getPreostalo)
@@ -144,10 +164,33 @@ public class Main extends Application {
                             .stream().mapToDouble(Uplata::getIznos).sum();
 
                     selektovani.setPlaceno(ukupno);
+
+                    if (selektovani.getPreostalo() == 0 && selektovani.getDatumIsplate() == null) {
+                        LocalDate poslednjaUplata = Database.vratiUplateZaKandidata(selektovani.getId())
+                                .stream()
+                                .map(Uplata::getDatum)
+                                .max(LocalDate::compareTo)
+                                .orElse(LocalDate.now()); // fallback ako nema uplata
+
+                        selektovani.setDatumIsplate(poslednjaUplata);
+                    }
+
                     Database.izmeniKandidata(selektovani);
 
                     // Osvežavanje obaveštenja nakon uplate
                     osveziObavestenja();
+
+                    kandidatiLista.setAll(Database.vratiSve());
+
+                    // ✅ Proveri da li nekome treba obrisati zapis jer je prošlo 30 dana od isplate
+                    for (Kandidat k : kandidatiLista) {
+                        if (k.getDatumIsplate() != null && k.getPreostalo() == 0) {
+                            long proslo = ChronoUnit.DAYS.between(k.getDatumIsplate(), danas);
+                            if (proslo >= 30) {
+                                Database.obrisiKandidata(k.getId());
+                            }
+                        }
+                    }
 
                     kandidatiLista.setAll(Database.vratiSve());
                 });
@@ -155,6 +198,7 @@ public class Main extends Application {
                 prikaziPoruku("Niste selektovali kandidata.");
             }
         });
+
 
         detaljiBtn.setOnAction(e -> {
             Kandidat k = kandidatiTable.getSelectionModel().getSelectedItem();

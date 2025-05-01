@@ -102,7 +102,8 @@ public class KandidatForm {
                         datumUpisaPicker.getValue(),
                         cenaTeorija,
                         cenaPraksa,
-                        placeno
+                        placeno,
+                        null
                 );
                 onSacuvaj.accept(novi);
                 stage.close();

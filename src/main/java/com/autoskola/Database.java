@@ -26,7 +26,8 @@ public class Database {
                     datum_upisa TEXT,
                     cena_teorija REAL,
                     cena_praksa REAL,
-                    placeno REAL
+                    placeno REAL,
+                    datum_isplate TEXT
                 );
             """);
 
@@ -75,8 +76,8 @@ public class Database {
             INSERT INTO kandidati (
                 id_kandidata, ime, prezime, telefon, email, kategorija,
                 polozio_teoriju, polozio_voznju, datum_upisa,
-                cena_teorija, cena_praksa, placeno
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                cena_teorija, cena_praksa, placeno, datum_isplate
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """;
 
         try (Connection conn = connect(); PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -92,6 +93,7 @@ public class Database {
             stmt.setDouble(10, k.getCenaTeorija());
             stmt.setDouble(11, k.getCenaPraksa());
             stmt.setDouble(12, k.getPlaceno());
+            stmt.setString(13, k.getDatumIsplate() != null ? k.getDatumIsplate().toString() : null);
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -103,7 +105,7 @@ public class Database {
             UPDATE kandidati SET
                 id_kandidata = ?, ime = ?, prezime = ?, telefon = ?, email = ?, kategorija = ?,
                 polozio_teoriju = ?, polozio_voznju = ?, datum_upisa = ?,
-                cena_teorija = ?, cena_praksa = ?, placeno = ?
+                cena_teorija = ?, cena_praksa = ?, placeno = ?, datum_isplate = ?
             WHERE id = ?
         """;
 
@@ -120,7 +122,8 @@ public class Database {
             stmt.setDouble(10, k.getCenaTeorija());
             stmt.setDouble(11, k.getCenaPraksa());
             stmt.setDouble(12, k.getPlaceno());
-            stmt.setInt(13, k.getId());
+            stmt.setString(13, k.getDatumIsplate() != null ? k.getDatumIsplate().toString() : null);
+            stmt.setInt(14, k.getId());
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -133,6 +136,9 @@ public class Database {
 
         try (Connection conn = connect(); ResultSet rs = conn.createStatement().executeQuery(sql)) {
             while (rs.next()) {
+                LocalDate datumIsplate = rs.getString("datum_isplate") != null
+                        ? LocalDate.parse(rs.getString("datum_isplate")) : null;
+
                 Kandidat k = new Kandidat(
                         rs.getInt("id"),
                         rs.getString("id_kandidata"),
@@ -146,7 +152,8 @@ public class Database {
                         LocalDate.parse(rs.getString("datum_upisa")),
                         rs.getDouble("cena_teorija"),
                         rs.getDouble("cena_praksa"),
-                        rs.getDouble("placeno")
+                        rs.getDouble("placeno"),
+                        datumIsplate
                 );
                 lista.add(k);
             }
@@ -155,6 +162,51 @@ public class Database {
         }
 
         return lista;
+    }
+
+    public static Kandidat vratiKandidataPoId(int kandidatId) {
+        Kandidat kandidat = null;
+        String sql = "SELECT * FROM kandidati WHERE id = ?";
+
+        try (Connection conn = connect(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, kandidatId);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                LocalDate datumIsplate = rs.getString("datum_isplate") != null
+                        ? LocalDate.parse(rs.getString("datum_isplate")) : null;
+
+                kandidat = new Kandidat(
+                        rs.getInt("id"),
+                        rs.getString("id_kandidata"),
+                        rs.getString("ime"),
+                        rs.getString("prezime"),
+                        rs.getString("telefon"),
+                        rs.getString("email"),
+                        rs.getString("kategorija"),
+                        rs.getBoolean("polozio_teoriju"),
+                        rs.getBoolean("polozio_voznju"),
+                        LocalDate.parse(rs.getString("datum_upisa")),
+                        rs.getDouble("cena_teorija"),
+                        rs.getDouble("cena_praksa"),
+                        rs.getDouble("placeno"),
+                        datumIsplate
+                );
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return kandidat;
+    }
+
+    public static void obrisiKandidata(int kandidatId) {
+        try (Connection conn = connect(); PreparedStatement stmt = conn.prepareStatement("DELETE FROM kandidati WHERE id = ?")) {
+            stmt.setInt(1, kandidatId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     // === INSTRUKTORI ===
@@ -309,37 +361,5 @@ public class Database {
         }
 
         return lista;
-    }
-
-    public static Kandidat vratiKandidataPoId(int kandidatId) {
-        Kandidat kandidat = null;
-        String sql = "SELECT * FROM kandidati WHERE id = ?";
-
-        try (Connection conn = connect(); PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, kandidatId);
-            ResultSet rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                kandidat = new Kandidat(
-                        rs.getInt("id"),
-                        rs.getString("id_kandidata"),
-                        rs.getString("ime"),
-                        rs.getString("prezime"),
-                        rs.getString("telefon"),
-                        rs.getString("email"),
-                        rs.getString("kategorija"),
-                        rs.getBoolean("polozio_teoriju"),
-                        rs.getBoolean("polozio_voznju"),
-                        LocalDate.parse(rs.getString("datum_upisa")),
-                        rs.getDouble("cena_teorija"),
-                        rs.getDouble("cena_praksa"),
-                        rs.getDouble("placeno")
-                );
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return kandidat;
     }
 }
