@@ -11,6 +11,11 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.NumberFormat;
@@ -41,6 +46,7 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage) {
+        napraviBackupAkoNijeDanasnji();
         Database.initialize();
 
         // Uklanjanje kandidata kojima je proslo 30 dana od potpune isplate
@@ -461,6 +467,60 @@ public class Main extends Application {
         alert.getDialogPane().setStyle("-fx-font-size: 16px;");
         alert.showAndWait();
     }
+
+    private void napraviBackupAkoNijeDanasnji() {
+        try {
+            String danas = LocalDate.now().toString();
+            Path izvor = Paths.get("kandidati.db");
+            Path backupFolder = Paths.get("backup");
+            Path odrediste = backupFolder.resolve("kandidati_" + danas + ".db");
+
+            Files.createDirectories(backupFolder);
+
+            if (!Files.exists(odrediste)) {
+                Files.copy(izvor, odrediste, StandardCopyOption.REPLACE_EXISTING);
+                System.out.println("Backup napravljen: " + odrediste);
+            } else {
+                System.out.println("Backup već postoji za danas: " + odrediste);
+            }
+
+            obrisiStareBackupFajlove();
+
+        } catch (IOException e) {
+            System.err.println("Greška prilikom backup-a: " + e.getMessage());
+        }
+    }
+
+    private void obrisiStareBackupFajlove() {
+        Path backupFolder = Paths.get("backup");
+        LocalDate danas = LocalDate.now();
+
+        try {
+            if (!Files.exists(backupFolder)) return;
+
+            Files.list(backupFolder)
+                    .filter(path -> path.getFileName().toString().startsWith("kandidati_") && path.toString().endsWith(".db"))
+                    .forEach(path -> {
+                        try {
+                            String ime = path.getFileName().toString(); // npr. kandidati_2025-04-01.db
+                            String datumString = ime.substring("kandidati_".length(), ime.length() - 3); // 2025-04-01
+                            LocalDate datum = LocalDate.parse(datumString);
+
+                            long dana = ChronoUnit.DAYS.between(datum, danas);
+                            if (dana > 30) {
+                                Files.delete(path);
+                                System.out.println("Obrisan stari backup: " + path.getFileName());
+                            }
+                        } catch (Exception e) {
+                            System.err.println("Ne mogu da obradim fajl: " + path + " → " + e.getMessage());
+                        }
+                    });
+
+        } catch (IOException e) {
+            System.err.println("Greška prilikom listanja backup foldera: " + e.getMessage());
+        }
+    }
+
 
     public static void main(String[] args) {
         launch();
