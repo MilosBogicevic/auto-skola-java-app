@@ -302,17 +302,28 @@ public class Main extends Application {
         obavestenjaBox.getChildren().add(naslov);
         osveziObavestenja();
 
-        HBox glavni = new HBox(20, levaStrana, obavestenjaBox);
+        Label footerLabel = new Label("Autor aplikacije: Miloš Bogićević. Sajt: ");
+        Hyperlink footerLink = new Hyperlink("www.milosb.rs");
+        footerLink.setOnAction(e -> getHostServices().showDocument("https://www.milosb.rs"));
+
+        HBox footer = new HBox(footerLabel, footerLink);
+        footer.setPadding(new Insets(2, 10, 2, 10));
+        footer.setStyle("-fx-background-color: #f0f0f0; -fx-alignment: center; -fx-font-size: 12px;");
+
+        VBox levaStranaSaFooterom = new VBox(10, levaStrana, footer);
+        VBox.setVgrow(levaStrana, Priority.ALWAYS);
+
+        HBox glavni = new HBox(20, levaStranaSaFooterom, obavestenjaBox);
         glavni.setPadding(new Insets(15));
-        HBox.setHgrow(levaStrana, Priority.ALWAYS);
+        HBox.setHgrow(levaStranaSaFooterom, Priority.ALWAYS);
 
         stage.setMaximized(true);
-
         stage.setTitle("Auto škola – Upravljanje");
         Scene scene = new Scene(glavni, 1350, 700);
         glavni.setStyle("-fx-font-size: 16px;");
         stage.setScene(scene);
         stage.show();
+
     }
 
     private <T> TableColumn<T, String> kol(String naslov, java.util.function.Function<T, String> getter) {
