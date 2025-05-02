@@ -25,7 +25,7 @@ public class DnevniIzvestajForm {
         DateTimeFormatter srpskiFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy.");
         NumberFormat rsdFormat = NumberFormat.getNumberInstance(new Locale("sr", "RS"));
 
-        Label naslov = new Label("Dnevni izveštaj uplata");
+        Label naslov = new Label("Uplate na dan: –");
         naslov.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
 
         Label datumLabel = new Label("Izaberite datum:");
@@ -53,7 +53,7 @@ public class DnevniIzvestajForm {
             LocalDate datum = datumPicker.getValue();
             if (datum == null) return;
 
-            naslov.setText("Uplate za dan: " + datum.format(srpskiFormat));
+            naslov.setText("Uplate na dan: " + datum.format(srpskiFormat));
 
             List<Uplata> uplate = Database.vratiUplateZaDatum(datum);
             double ukupno = 0;
@@ -74,6 +74,34 @@ public class DnevniIzvestajForm {
             ukupnoLabel.setText("Ukupno: " + rsdFormat.format(ukupno) + " RSD");
         });
 
+        stampajBtn.setOnAction(e -> {
+            VBox zaStampu = new VBox(10);
+            zaStampu.setPadding(new Insets(40));
+            zaStampu.setStyle("-fx-font-size: 14px;");
+
+            Label naslovZaStampu = new Label(naslov.getText());
+            naslovZaStampu.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
+
+            zaStampu.getChildren().add(naslovZaStampu);
+            zaStampu.getChildren().add(new Label("Uplate:"));
+
+            VBox listaStavki = new VBox(5);
+            for (String stavka : lista.getItems()) {
+                listaStavki.getChildren().add(new Label(stavka));
+            }
+
+            zaStampu.getChildren().add(listaStavki);
+            zaStampu.getChildren().add(new Label(ukupnoLabel.getText()));
+
+            PrinterJob job = PrinterJob.createPrinterJob();
+            if (job != null && job.showPrintDialog(stage)) {
+                boolean success = job.printPage(zaStampu);
+                if (success) {
+                    job.endJob();
+                }
+            }
+        });
+
         VBox box = new VBox(10,
                 naslov,
                 datumLabel, datumPicker,
@@ -85,16 +113,6 @@ public class DnevniIzvestajForm {
         );
         box.setPadding(new Insets(20));
         box.setStyle("-fx-font-size: 16px;");
-
-        stampajBtn.setOnAction(e -> {
-            PrinterJob job = PrinterJob.createPrinterJob();
-            if (job != null && job.showPrintDialog(stage)) {
-                boolean success = job.printPage(box);
-                if (success) {
-                    job.endJob();
-                }
-            }
-        });
 
         stage.setScene(new Scene(box, 500, 700));
         stage.showAndWait();
