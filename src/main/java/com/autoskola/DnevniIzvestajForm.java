@@ -1,29 +1,36 @@
 package com.autoskola;
 
+import javafx.geometry.Insets;
+import javafx.print.PrinterJob;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.print.PrinterJob;
-import javafx.geometry.Insets;
 import javafx.util.StringConverter;
 
+import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 
 public class DnevniIzvestajForm {
-
-    private static final DateTimeFormatter srpskiFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy.");
 
     public DnevniIzvestajForm() {
         Stage stage = new Stage();
         stage.initModality(Modality.APPLICATION_MODAL);
-        stage.setTitle("Dnevni izveštaj");
+        stage.setTitle("Dnevni izveštaj uplata");
 
         DateTimeFormatter srpskiFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy.");
-        StringConverter<LocalDate> converter = new StringConverter<>() {
+        NumberFormat rsdFormat = NumberFormat.getNumberInstance(new Locale("sr", "RS"));
+
+        Label naslov = new Label("Dnevni izveštaj uplata");
+        naslov.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+
+        Label datumLabel = new Label("Izaberite datum:");
+        DatePicker datumPicker = new DatePicker(LocalDate.now());
+        datumPicker.setConverter(new StringConverter<>() {
             @Override
             public String toString(LocalDate date) {
                 return date != null ? date.format(srpskiFormat) : "";
@@ -33,63 +40,63 @@ public class DnevniIzvestajForm {
             public LocalDate fromString(String string) {
                 return (string != null && !string.isEmpty()) ? LocalDate.parse(string, srpskiFormat) : null;
             }
-        };
-
-        DatePicker datumPicker = new DatePicker(LocalDate.now());
-        datumPicker.setPromptText("Izaberite datum");
-        datumPicker.setConverter(converter);
-
-        Button stampaBtn = new Button("Štampaj");
-
-        VBox prikazIzvestajaBox = new VBox(10);
-        ScrollPane scrollPane = new ScrollPane(prikazIzvestajaBox);
-        scrollPane.setPadding(new Insets(10));
-        scrollPane.setFitToWidth(true);
-        scrollPane.setPrefSize(500, 500);
-
-        datumPicker.setOnAction(e -> {
-            LocalDate datum = datumPicker.getValue();
-            List<Uplata> uplate = Database.vratiUplateZaDatum(datum);
-            prikaziUplate(uplate, prikazIzvestajaBox, datum);
         });
 
-        List<Uplata> uplateDanas = Database.vratiUplateZaDatum(LocalDate.now());
-        prikaziUplate(uplateDanas, prikazIzvestajaBox, LocalDate.now());
+        Button prikaziBtn = new Button("Prikaži izveštaj");
+        Button stampajBtn = new Button("Štampaj");
 
-        stampaBtn.setOnAction(e -> {
+        ListView<String> lista = new ListView<>();
+        Label ukupnoLabel = new Label("Ukupno: 0 RSD");
+
+        prikaziBtn.setOnAction(e -> {
+            lista.getItems().clear();
+            LocalDate datum = datumPicker.getValue();
+            if (datum == null) return;
+
+            naslov.setText("Uplate za dan: " + datum.format(srpskiFormat));
+
+            List<Uplata> uplate = Database.vratiUplateZaDatum(datum);
+            double ukupno = 0;
+
+            for (Uplata u : uplate) {
+                Kandidat k = Database.vratiKandidataPoId(u.getKandidatId());
+                String stavka = k.getIdKandidata() + " – " + k.getIme() + " " + k.getPrezime()
+                        + " – " + srpskiFormat.format(u.getDatum())
+                        + " – " + rsdFormat.format(u.getIznos()) + " RSD";
+                lista.getItems().add(stavka);
+                ukupno += u.getIznos();
+            }
+
+            if (uplate.isEmpty()) {
+                lista.getItems().add("Nema uplata za izabrani datum.");
+            }
+
+            ukupnoLabel.setText("Ukupno: " + rsdFormat.format(ukupno) + " RSD");
+        });
+
+        VBox box = new VBox(10,
+                naslov,
+                datumLabel, datumPicker,
+                prikaziBtn,
+                new Label("Uplate:"),
+                lista,
+                ukupnoLabel,
+                stampajBtn
+        );
+        box.setPadding(new Insets(20));
+        box.setStyle("-fx-font-size: 16px;");
+
+        stampajBtn.setOnAction(e -> {
             PrinterJob job = PrinterJob.createPrinterJob();
             if (job != null && job.showPrintDialog(stage)) {
-                boolean uspeh = job.printPage(prikazIzvestajaBox);
-                if (uspeh) {
+                boolean success = job.printPage(box);
+                if (success) {
                     job.endJob();
                 }
             }
         });
 
-        VBox layout = new VBox(10, datumPicker, scrollPane, stampaBtn);
-        layout.setPadding(new Insets(20));
-        layout.setStyle("-fx-font-size: 16px;");
-
-        stage.setScene(new Scene(layout, 800, 600));
+        stage.setScene(new Scene(box, 500, 700));
         stage.showAndWait();
-    }
-
-    private void prikaziUplate(List<Uplata> uplate, VBox prikazIzvestajaBox, LocalDate datum) {
-        prikazIzvestajaBox.getChildren().clear();
-        Label naslovLabel = new Label("Uplate na dan: " + datum.format(srpskiFormat));
-        naslovLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 18px;");
-        prikazIzvestajaBox.getChildren().add(naslovLabel);
-
-        if (uplate.isEmpty()) {
-            prikazIzvestajaBox.getChildren().add(new Label("Nema uplata za odabrani datum."));
-        } else {
-            for (Uplata u : uplate) {
-                Kandidat kandidat = Database.vratiKandidataPoId(u.getKandidatId());
-                prikazIzvestajaBox.getChildren().add(new Label(
-                        "ID broj kandidata: " + kandidat.getIdKandidata() + ". Kandidat: " + kandidat.getIme() + " " + kandidat.getPrezime() + ". Datum uplate: "
-                                + u.getDatum().format(srpskiFormat) + ". Iznos: " + u.getIznos() + " RSD"
-                ));
-            }
-        }
     }
 }
