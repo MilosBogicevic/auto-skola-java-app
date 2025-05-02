@@ -15,6 +15,7 @@ import java.util.List;
 
 public class KandidatDetaljiForm {
 
+    private final java.text.NumberFormat rsdFormat = java.text.NumberFormat.getNumberInstance(new java.util.Locale("sr", "RS"));
     public KandidatDetaljiForm(Kandidat kandidat) {
         if (kandidat == null) return;
 
@@ -37,10 +38,10 @@ public class KandidatDetaljiForm {
                 new Label("Datum upisa: " + kandidat.getDatumUpisa().format(format)),
                 new Label("Položio teoriju: " + (kandidat.isPolozioTeoriju() ? "DA" : "NE")),
                 new Label("Položio vožnju: " + (kandidat.isPolozioVoznju() ? "DA" : "NE")),
-                new Label("Cena teorijske obuke: " + String.format("%,.0f RSD", kandidat.getCenaTeorija())),
-                new Label("Cena praktične obuke: " + String.format("%,.0f RSD", kandidat.getCenaPraksa())),
-                new Label("Plaćeno: " + String.format("%,.0f RSD", kandidat.getPlaceno())),
-                new Label("Preostalo: " + String.format("%,.0f RSD", kandidat.getPreostalo())),
+                new Label("Cena teorijske obuke: " + rsdFormat.format(kandidat.getCenaTeorija()) + " RSD"),
+                new Label("Cena praktične obuke: " + rsdFormat.format(kandidat.getCenaPraksa()) + " RSD"),
+                new Label("Plaćeno: " + rsdFormat.format(kandidat.getPlaceno()) + " RSD"),
+                new Label("Preostalo: " + rsdFormat.format(kandidat.getPreostalo()) + " RSD"),
                 new Label(""),
                 new Label("Uplate kandidata:")
         );
@@ -51,7 +52,7 @@ public class KandidatDetaljiForm {
         } else {
             for (Uplata u : uplate) {
                 layout.getChildren().add(
-                        new Label("• " + u.getDatum().format(format) + " - " + String.format("%,.0f RSD", u.getIznos()))
+                        new Label("• " + u.getDatum().format(format) + " - " + rsdFormat.format(u.getIznos()) + " RSD")
                 );
             }
         }

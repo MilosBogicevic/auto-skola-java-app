@@ -8,11 +8,16 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.function.Consumer;
 
 public class KandidatForm {
+
+    private final NumberFormat rsdFormat = NumberFormat.getNumberInstance(new Locale("sr", "RS"));
 
     public KandidatForm(Kandidat postojeći, Consumer<Kandidat> onSacuvaj) {
         Stage stage = new Stage();
@@ -61,10 +66,10 @@ public class KandidatForm {
         datumUpisaPicker.setPromptText("Datum upisa");
         datumUpisaPicker.setConverter(converter);
 
-        TextField cenaTeorijaPolje = new TextField(postojeći != null ? String.valueOf(postojeći.getCenaTeorija()) : "");
+        TextField cenaTeorijaPolje = new TextField(postojeći != null ? rsdFormat.format(postojeći.getCenaTeorija()) : "");
         cenaTeorijaPolje.setPromptText("Cena teorijske obuke (RSD)");
 
-        TextField cenaPraksaPolje = new TextField(postojeći != null ? String.valueOf(postojeći.getCenaPraksa()) : "");
+        TextField cenaPraksaPolje = new TextField(postojeći != null ? rsdFormat.format(postojeći.getCenaPraksa()) : "");
         cenaPraksaPolje.setPromptText("Cena praktične obuke (RSD)");
 
         Button sacuvajBtn = new Button("Sačuvaj");
@@ -78,8 +83,16 @@ public class KandidatForm {
                     throw new IllegalArgumentException("Sva obavezna polja moraju biti popunjena.");
                 }
 
-                double cenaTeorija = Double.parseDouble(cenaTeorijaPolje.getText());
-                double cenaPraksa = Double.parseDouble(cenaPraksaPolje.getText());
+                String pattern = "^\\d{1,3}(\\.\\d{3})*$|^\\d+$";
+                if (!cenaTeorijaPolje.getText().matches(pattern)) {
+                    throw new IllegalArgumentException("Iznos mora biti u formatu 1.000 ili 1000.");
+                }
+                if (!cenaPraksaPolje.getText().matches(pattern)) {
+                    throw new IllegalArgumentException("Iznos mora biti u formatu 1.000 ili 1000.");
+                }
+
+                double cenaTeorija = rsdFormat.parse(cenaTeorijaPolje.getText()).doubleValue();
+                double cenaPraksa = rsdFormat.parse(cenaPraksaPolje.getText()).doubleValue();
 
                 double placeno = 0;
                 if (postojeći != null) {
@@ -92,9 +105,9 @@ public class KandidatForm {
                 Kandidat novi = new Kandidat(
                         postojeći != null ? postojeći.getId() : 0,
                         idKandidatPolje.getText().trim(),
-                        imePolje.getText(),
-                        prezimePolje.getText(),
-                        telefonPolje.getText(),
+                        imePolje.getText().trim(),
+                        prezimePolje.getText().trim(),
+                        telefonPolje.getText().trim(),
                         emailPolje.getText().trim(),
                         kategorijaBox.getValue(),
                         polozioTeoriju.isSelected(),
@@ -107,8 +120,8 @@ public class KandidatForm {
                 );
                 onSacuvaj.accept(novi);
                 stage.close();
-            } catch (NumberFormatException ex) {
-                prikaziGresku("Proverite da su cene ispravno unete.");
+            } catch (ParseException ex) {
+                prikaziGresku("Proverite da li su cene ispravno unete.");
             } catch (Exception ex) {
                 prikaziGresku(ex.getMessage());
             }

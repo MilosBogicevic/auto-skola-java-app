@@ -13,9 +13,11 @@ import javafx.stage.Stage;
 
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.Locale;
 
 import static com.autoskola.Database.connect;
 
@@ -34,15 +36,12 @@ public class Main extends Application {
     private HBox dugmiciInstruktori, dugmiciVozila;
     private TabPane tabPane;
     private TextField pretragaField;
+    private final NumberFormat rsdFormat = NumberFormat.getNumberInstance(new Locale("sr", "RS"));
+
 
     @Override
     public void start(Stage stage) {
         Database.initialize();
-        try (Statement stmt = connect().createStatement()) {
-            stmt.execute("ALTER TABLE kandidati ADD COLUMN datum_isplate TEXT");
-        } catch (SQLException ignored) {
-            // Kolona već postoji, ignoriši grešku
-        }
 
         // Uklanjanje kandidata kojima je proslo 30 dana od potpune isplate
         LocalDate danas = LocalDate.now();
@@ -73,8 +72,8 @@ public class Main extends Application {
                 kol("Datum upisa", k -> k.getDatumUpisa().format(srpskiFormat)),
                 kol("Položena teorija", k -> k.isPolozioTeoriju() ? "da" : "ne"),
                 kol("Položena vožnja", k -> k.isPolozioVoznju() ? "da" : "ne"),
-                kol("Cena (RSD)", k -> String.format("%.0f", k.getUkupnaCena())),
-                kol("Plaćeno", k -> String.format("%.0f", k.getPlaceno())),
+                kol("Cena (RSD)", k -> rsdFormat.format(k.getUkupnaCena())),
+                kol("Plaćeno", k -> rsdFormat.format(k.getPlaceno())),
                 kolBoja("Preostalo", Kandidat::getPreostalo)
         );
 
@@ -324,7 +323,10 @@ public class Main extends Application {
 
     private TableColumn<Kandidat, String> kolBoja(String naslov, java.util.function.Function<Kandidat, Double> getter) {
         TableColumn<Kandidat, String> col = new TableColumn<>(naslov);
-        col.setCellValueFactory(data -> new SimpleStringProperty(String.format("%.0f", getter.apply(data.getValue()))));
+        col.setCellValueFactory(data -> {
+            double iznos = getter.apply(data.getValue());
+            return new SimpleStringProperty(rsdFormat.format(iznos));
+        });
         col.setCellFactory(column -> new TableCell<>() {
             @Override
             protected void updateItem(String item, boolean empty) {
@@ -334,9 +336,15 @@ public class Main extends Application {
                     setStyle("");
                 } else {
                     setText(item);
-                    double iznos = Double.parseDouble(item);
-                    setStyle("-fx-alignment: CENTER; -fx-background-color: " +
-                            (iznos > 0 ? "#ffcccc" : "#ccffcc") + ";" + "-fx-text-fill: black;");
+
+                    // Moramo parsirati nazad broj za proveru boje
+                    try {
+                        double iznos = rsdFormat.parse(item).doubleValue();
+                        setStyle("-fx-alignment: CENTER; -fx-background-color: " +
+                                (iznos > 0 ? "#ffcccc" : "#ccffcc") + ";" + "-fx-text-fill: black;");
+                    } catch (Exception e) {
+                        setStyle(""); // fallback u slučaju greške u parsiranju
+                    }
                 }
             }
         });
@@ -356,8 +364,8 @@ public class Main extends Application {
             // Ako kandidat nije platio dovoljno za teoriju, dodaj obaveštenje
             if (dana >= 30 && razlika > 0) {
                 Label l = new Label("❗ " + k.getIme() + " " + k.getPrezime() +
-                        " duguje " + String.format("%,.0f RSD", razlika) +
-                        " za teoriju");
+                        " duguje " + rsdFormat.format(razlika) +
+                        " za teorijsku obuku");
                 l.setStyle("-fx-text-fill: red;");
                 obavestenjaBox.getChildren().add(l);
                 imaKandidata = true;
