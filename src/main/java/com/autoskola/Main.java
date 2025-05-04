@@ -1,6 +1,7 @@
 package com.autoskola;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -46,6 +47,15 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage) {
+        if (!SecurityLock.jeDozvoljenoPokretanje()) {
+            prikaziZatvarajuciAlert("Greška", "Ovaj računar nema dozvolu za korišćenje ove aplikacije.", Alert.AlertType.ERROR);
+            return;
+        }
+
+        if (!AppLock.zakljucaj()) {
+            prikaziZatvarajuciAlert("Greška", "Aplikacija je već pokrenuta na drugom računaru.", Alert.AlertType.ERROR);
+            return;
+        }
         napraviBackupAkoNijeDanasnji();
         Database.initialize();
 
@@ -466,6 +476,18 @@ public class Main extends Application {
         alert.setContentText(tekst);
         alert.getDialogPane().setStyle("-fx-font-size: 16px;");
         alert.showAndWait();
+    }
+
+    private void prikaziZatvarajuciAlert(String naslov, String poruka, Alert.AlertType tip) {
+        Alert alert = new Alert(tip);
+        alert.setTitle(naslov);
+        alert.setHeaderText(null);
+        alert.setContentText(poruka);
+
+        DialogPane pane = alert.getDialogPane();
+        pane.setStyle("-fx-font-size: 16px; -fx-background-color: white;");
+        alert.showAndWait();
+        Platform.exit();
     }
 
     private void napraviBackupAkoNijeDanasnji() {
