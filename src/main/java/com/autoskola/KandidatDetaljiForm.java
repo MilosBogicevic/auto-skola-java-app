@@ -10,12 +10,12 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import java.text.NumberFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class KandidatDetaljiForm {
 
-    private final java.text.NumberFormat rsdFormat = java.text.NumberFormat.getNumberInstance(new java.util.Locale("sr", "RS"));
     public KandidatDetaljiForm(Kandidat kandidat) {
         if (kandidat == null) return;
 
@@ -38,10 +38,10 @@ public class KandidatDetaljiForm {
                 new Label("Datum upisa: " + kandidat.getDatumUpisa().format(format)),
                 new Label("Položio teoriju: " + (kandidat.isPolozioTeoriju() ? "DA" : "NE")),
                 new Label("Položio vožnju: " + (kandidat.isPolozioVoznju() ? "DA" : "NE")),
-                new Label("Cena teorijske obuke: " + rsdFormat.format(kandidat.getCenaTeorija()) + " RSD"),
-                new Label("Cena praktične obuke: " + rsdFormat.format(kandidat.getCenaPraksa()) + " RSD"),
-                new Label("Plaćeno: " + rsdFormat.format(kandidat.getPlaceno()) + " RSD"),
-                new Label("Preostalo: " + rsdFormat.format(kandidat.getPreostalo()) + " RSD"),
+                new Label("Cena teorijske obuke: " + FormatUtil.format(kandidat.getCenaTeorija()) + " RSD"),
+                new Label("Cena praktične obuke: " + FormatUtil.format(kandidat.getCenaPraksa()) + " RSD"),
+                new Label("Plaćeno: " + FormatUtil.format(kandidat.getPlaceno()) + " RSD"),
+                new Label("Preostalo: " + FormatUtil.format(kandidat.getPreostalo()) + " RSD"),
                 new Label(""),
                 new Label("Uplate kandidata:")
         );
@@ -52,7 +52,7 @@ public class KandidatDetaljiForm {
         } else {
             for (Uplata u : uplate) {
                 layout.getChildren().add(
-                        new Label("• " + u.getDatum().format(format) + " - " + rsdFormat.format(u.getIznos()) + " RSD")
+                        new Label("• " + u.getDatum().format(format) + " - " + FormatUtil.format(u.getIznos()) + " RSD")
                 );
             }
         }

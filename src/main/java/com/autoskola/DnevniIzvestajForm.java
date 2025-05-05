@@ -23,8 +23,6 @@ public class DnevniIzvestajForm {
         stage.setTitle("Dnevni izveštaj uplata");
 
         DateTimeFormatter srpskiFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy.");
-        NumberFormat rsdFormat = NumberFormat.getNumberInstance(new Locale("sr", "RS"));
-
         Label naslov = new Label("Uplate na dan: –");
         naslov.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
 
@@ -62,7 +60,7 @@ public class DnevniIzvestajForm {
                 Kandidat k = Database.vratiKandidataPoId(u.getKandidatId());
                 String stavka = k.getIdKandidata() + " – " + k.getIme() + " " + k.getPrezime()
                         + " – " + srpskiFormat.format(u.getDatum())
-                        + " – " + rsdFormat.format(u.getIznos()) + " RSD";
+                        + " – " + FormatUtil.format(u.getIznos()) + " RSD";
                 lista.getItems().add(stavka);
                 ukupno += u.getIznos();
             }
@@ -71,7 +69,7 @@ public class DnevniIzvestajForm {
                 lista.getItems().add("Nema uplata za izabrani datum.");
             }
 
-            ukupnoLabel.setText("Ukupno: " + rsdFormat.format(ukupno) + " RSD");
+            ukupnoLabel.setText("Ukupno: " + FormatUtil.format(ukupno) + " RSD");
         });
 
         stampajBtn.setOnAction(e -> {

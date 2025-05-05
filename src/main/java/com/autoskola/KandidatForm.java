@@ -17,8 +17,6 @@ import java.util.function.Consumer;
 
 public class KandidatForm {
 
-    private final NumberFormat rsdFormat = NumberFormat.getNumberInstance(new Locale("sr", "RS"));
-
     public KandidatForm(Kandidat postojeći, Consumer<Kandidat> onSacuvaj) {
         Stage stage = new Stage();
         stage.initModality(Modality.APPLICATION_MODAL);
@@ -66,10 +64,10 @@ public class KandidatForm {
         datumUpisaPicker.setPromptText("Datum upisa");
         datumUpisaPicker.setConverter(converter);
 
-        TextField cenaTeorijaPolje = new TextField(postojeći != null ? rsdFormat.format(postojeći.getCenaTeorija()) : "");
+        TextField cenaTeorijaPolje = new TextField(postojeći != null ? FormatUtil.format(postojeći.getCenaTeorija()) : "");
         cenaTeorijaPolje.setPromptText("Cena teorijske obuke (RSD)");
 
-        TextField cenaPraksaPolje = new TextField(postojeći != null ? rsdFormat.format(postojeći.getCenaPraksa()) : "");
+        TextField cenaPraksaPolje = new TextField(postojeći != null ? FormatUtil.format(postojeći.getCenaPraksa()) : "");
         cenaPraksaPolje.setPromptText("Cena praktične obuke (RSD)");
 
         Button sacuvajBtn = new Button("Sačuvaj");
@@ -91,8 +89,8 @@ public class KandidatForm {
                     throw new IllegalArgumentException("Iznos mora biti u formatu 1.000 ili 1000.");
                 }
 
-                double cenaTeorija = rsdFormat.parse(cenaTeorijaPolje.getText()).doubleValue();
-                double cenaPraksa = rsdFormat.parse(cenaPraksaPolje.getText()).doubleValue();
+                double cenaTeorija = FormatUtil.parse(cenaTeorijaPolje.getText());
+                double cenaPraksa = FormatUtil.parse(cenaPraksaPolje.getText());
 
                 double placeno = 0;
                 if (postojeći != null) {

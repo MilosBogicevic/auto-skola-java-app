@@ -1,12 +1,22 @@
 package com.autoskola;
 
+import java.io.File;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Database {
-    private static final String URL = "jdbc:sqlite:kandidati.db";
+    private static final String URL;
+    static {
+        String path;
+        try {
+            path = new File(System.getProperty("user.dir")).getAbsolutePath();
+        } catch (Exception e) {
+            path = new File("").getAbsolutePath(); // fallback
+        }
+        URL = "jdbc:sqlite:" + path + File.separator + "kandidati.db";
+    }
 
     public static void initialize() {
         try (Connection conn = connect()) {
@@ -67,6 +77,10 @@ public class Database {
 
     public static Connection connect() throws SQLException {
         return DriverManager.getConnection(URL);
+    }
+
+    public static String getDatabasePath() {
+        return URL.replace("jdbc:sqlite:", "");
     }
 
     // === KANDIDATI ===

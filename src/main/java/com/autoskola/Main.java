@@ -19,6 +19,8 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -42,11 +44,11 @@ public class Main extends Application {
     private HBox dugmiciInstruktori, dugmiciVozila;
     private TabPane tabPane;
     private TextField pretragaField;
-    private final NumberFormat rsdFormat = NumberFormat.getNumberInstance(new Locale("sr", "RS"));
-
 
     @Override
     public void start(Stage stage) {
+        Locale.setDefault(new Locale("sr", "RS"));
+
         if (!SecurityLock.jeDozvoljenoPokretanje()) {
             prikaziZatvarajuciAlert("Greška", "Ovaj računar nema dozvolu za korišćenje ove aplikacije.", Alert.AlertType.ERROR);
             return;
@@ -56,8 +58,9 @@ public class Main extends Application {
             prikaziZatvarajuciAlert("Greška", "Aplikacija je već pokrenuta na drugom računaru.", Alert.AlertType.ERROR);
             return;
         }
-        napraviBackupAkoNijeDanasnji();
+
         Database.initialize();
+        napraviBackupAkoNijeDanasnji();
 
         // Uklanjanje kandidata kojima je proslo 30 dana od potpune isplate
         LocalDate danas = LocalDate.now();
@@ -88,8 +91,8 @@ public class Main extends Application {
                 kol("Datum upisa", k -> k.getDatumUpisa().format(srpskiFormat)),
                 kol("Položena teorija", k -> k.isPolozioTeoriju() ? "da" : "ne"),
                 kol("Položena vožnja", k -> k.isPolozioVoznju() ? "da" : "ne"),
-                kol("Cena (RSD)", k -> rsdFormat.format(k.getUkupnaCena())),
-                kol("Plaćeno", k -> rsdFormat.format(k.getPlaceno())),
+                kol("Cena (RSD)", k -> FormatUtil.format(k.getUkupnaCena())),
+                kol("Plaćeno", k -> FormatUtil.format(k.getPlaceno())),
                 kolBoja("Preostalo", Kandidat::getPreostalo)
         );
 
@@ -352,7 +355,7 @@ public class Main extends Application {
         TableColumn<Kandidat, String> col = new TableColumn<>(naslov);
         col.setCellValueFactory(data -> {
             double iznos = getter.apply(data.getValue());
-            return new SimpleStringProperty(rsdFormat.format(iznos));
+            return new SimpleStringProperty(FormatUtil.format(iznos));
         });
         col.setCellFactory(column -> new TableCell<>() {
             @Override
@@ -366,7 +369,7 @@ public class Main extends Application {
 
                     // Moramo parsirati nazad broj za proveru boje
                     try {
-                        double iznos = rsdFormat.parse(item).doubleValue();
+                        double iznos = FormatUtil.parse(item);
                         setStyle("-fx-alignment: CENTER; -fx-background-color: " +
                                 (iznos > 0 ? "#ffcccc" : "#ccffcc") + ";" + "-fx-text-fill: black;");
                     } catch (Exception e) {
@@ -391,7 +394,7 @@ public class Main extends Application {
             // Ako kandidat nije platio dovoljno za teoriju, dodaj obaveštenje
             if (dana >= 30 && razlika > 0) {
                 Label l = new Label("❗ " + k.getIme() + " " + k.getPrezime() +
-                        " duguje " + rsdFormat.format(razlika) +
+                        " duguje " + FormatUtil.format(razlika) +
                         " za teorijsku obuku");
                 l.setStyle("-fx-text-fill: red;");
                 obavestenjaBox.getChildren().add(l);
@@ -493,7 +496,7 @@ public class Main extends Application {
     private void napraviBackupAkoNijeDanasnji() {
         try {
             String danas = LocalDate.now().toString();
-            Path izvor = Paths.get("kandidati.db");
+            Path izvor = Paths.get(Database.getDatabasePath());
             Path backupFolder = Paths.get("backup");
             Path odrediste = backupFolder.resolve("kandidati_" + danas + ".db");
 

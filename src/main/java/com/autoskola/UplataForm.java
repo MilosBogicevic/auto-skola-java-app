@@ -17,8 +17,6 @@ import java.util.function.Consumer;
 
 public class UplataForm {
 
-    private final NumberFormat rsdFormat = NumberFormat.getNumberInstance(new Locale("sr", "RS"));
-
     public UplataForm(int kandidatId, Consumer<Uplata> onSacuvaj) {
         Stage stage = new Stage();
         stage.initModality(Modality.APPLICATION_MODAL);
@@ -58,7 +56,7 @@ public class UplataForm {
                 }
 
                 LocalDate datum = datumPicker.getValue();
-                double iznos = rsdFormat.parse(iznosField.getText()).doubleValue();
+                double iznos = FormatUtil.parse(iznosField.getText());
 
                 Uplata uplata = new Uplata(0, kandidatId, datum, iznos);
                 onSacuvaj.accept(uplata);
