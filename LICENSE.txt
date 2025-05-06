@@ -1,0 +1,13 @@
+© Miloš Bogićević – Sva prava zadržana.
+
+Ovaj softver je vlasništvo autora. Zabranjeno je svako neovlašćeno korišćenje, kopiranje,
+distribucija, prodaja, ili modifikacija ovog softvera, u celini ili delimično,
+bez izričite pismene dozvole autora.
+
+Ovaj softver je licenciran isključivo za korišćenje na tačno određenom računaru koji je prethodno autorizovan od strane autora.
+Pokretanje na drugim računarima bez izričite dozvole predstavlja kršenje autorskih prava.
+Autorizacija se vrši preko tehničke identifikacije uređaja (npr. MAC adrese) i nije prenosiva.
+
+Kršenje ove licence podložno je pravnim merama u skladu sa zakonima Republike Srbije.
+
+Više informacija i kontakt: www.milosb.rs

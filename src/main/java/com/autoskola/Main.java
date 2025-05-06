@@ -1,3 +1,9 @@
+/*
+ * Miloš Bogićević – Sva prava zadržana.
+ * Ovaj softver je zaštićen autorskim pravom. Neovlašćeno kopiranje, distribucija ili izmene su zabranjeni.
+ * Više informacija na www.milosb.rs
+ */
+
 package com.autoskola;
 
 import javafx.application.Application;
