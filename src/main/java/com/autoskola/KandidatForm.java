@@ -139,6 +139,9 @@ public class KandidatForm {
             }
         });
 
+        Region spacer = new Region();
+        VBox.setVgrow(spacer, Priority.ALWAYS);
+
         VBox forma = new VBox(10,
                 new Label("ID broj kandidata:"), idKandidatPolje,
                 imePrezimeBox,
@@ -149,6 +152,7 @@ public class KandidatForm {
                 polozioTeoriju,
                 polozioVoznju,
                 cenaBox,
+                spacer,
                 sacuvajBtn
         );
         forma.setPadding(new Insets(20));

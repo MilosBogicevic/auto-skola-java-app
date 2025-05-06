@@ -278,20 +278,23 @@ public class Main extends Application {
                 Alert potvrda = new Alert(Alert.AlertType.CONFIRMATION);
                 potvrda.setTitle("Potvrda brisanja");
                 potvrda.setHeaderText("Da li ste sigurni da želite da obrišete instruktora?");
-                potvrda.setContentText(selektovani.getIme());
-                potvrda.showAndWait().ifPresent(rezultat -> {
-                    if (rezultat == ButtonType.OK) {
+                potvrda.setContentText("Ova radnja je trajna.");
+
+                ButtonType dugmeDa = new ButtonType("Da", ButtonBar.ButtonData.YES);
+                ButtonType dugmeNe = new ButtonType("Ne", ButtonBar.ButtonData.NO);
+                potvrda.getButtonTypes().setAll(dugmeDa, dugmeNe);
+
+                potvrda.showAndWait().ifPresent(izabrano -> {
+                    if (izabrano == dugmeDa) {
                         Database.obrisiInstruktora(selektovani.getId());
                         instruktoriLista.setAll(Database.vratiInstruktore());
-                        osveziObavestenja(); // ← dodato
+                        osveziObavestenja();
                     }
                 });
             } else {
                 prikaziPoruku("Niste selektovali instruktora.");
             }
         });
-
-
 
         dugmiciInstruktori = new HBox(10, dodajInstruktora, izmeniInstruktora, obrisiInstruktora);
 
@@ -324,18 +327,24 @@ public class Main extends Application {
                 Alert potvrda = new Alert(Alert.AlertType.CONFIRMATION);
                 potvrda.setTitle("Potvrda brisanja");
                 potvrda.setHeaderText("Da li ste sigurni da želite da obrišete vozilo?");
-                potvrda.setContentText(selektovano.getNaziv() + " – " + selektovano.getTablice());
-                potvrda.showAndWait().ifPresent(rezultat -> {
-                    if (rezultat == ButtonType.OK) {
+                potvrda.setContentText("Ova radnja je trajna.");
+
+                ButtonType dugmeDa = new ButtonType("Da", ButtonBar.ButtonData.YES);
+                ButtonType dugmeNe = new ButtonType("Ne", ButtonBar.ButtonData.NO);
+                potvrda.getButtonTypes().setAll(dugmeDa, dugmeNe);
+
+                potvrda.showAndWait().ifPresent(izabrano -> {
+                    if (izabrano == dugmeDa) {
                         Database.obrisiVozilo(selektovano.getId());
                         vozilaLista.setAll(Database.vratiVozila());
-                        osveziObavestenja(); // ← dodato
+                        osveziObavestenja();
                     }
                 });
             } else {
                 prikaziPoruku("Niste selektovali vozilo.");
             }
         });
+
 
 
         dugmiciVozila = new HBox(10, dodajVozilo, izmeniVozilo, obrisiVozilo);

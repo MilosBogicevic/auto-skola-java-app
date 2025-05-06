@@ -3,6 +3,8 @@ package com.autoskola;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -74,12 +76,14 @@ public class VoziloForm {
             }
         });
 
-        VBox layout = new VBox(12, nazivBox, tabliceBox, regBox, tehnickiBox, sacuvajBtn);
+        Region spacer = new Region();
+        VBox.setVgrow(spacer, Priority.ALWAYS);
+
+        VBox layout = new VBox(12, nazivBox, tabliceBox, regBox, tehnickiBox, spacer, sacuvajBtn);
         layout.setPadding(new Insets(20));
         layout.setStyle("-fx-font-size: 16px;");
 
-        Scene scene = new Scene(layout);
-        layout.setPrefWidth(500);
+        Scene scene = new Scene(layout, 450, Region.USE_COMPUTED_SIZE);
         stage.setScene(scene);
         stage.sizeToScene();
         stage.showAndWait();

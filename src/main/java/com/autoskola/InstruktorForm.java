@@ -97,12 +97,14 @@ public class InstruktorForm {
             }
         });
 
-        VBox layout = new VBox(10, imePrezimeBox, lekarskiPicker, vozackaPicker, licencaPicker, sacuvajBtn);
+        Region spacer = new Region();
+        VBox.setVgrow(spacer, Priority.ALWAYS);
+
+        VBox layout = new VBox(10, imePrezimeBox, lekarskiPicker, vozackaPicker, licencaPicker, spacer, sacuvajBtn);
         layout.setPadding(new Insets(20));
         layout.setStyle("-fx-font-size: 16px;");
 
-        Scene scene = new Scene(layout);
-        layout.setPrefWidth(500);
+        Scene scene = new Scene(layout, 450, Region.USE_COMPUTED_SIZE);
         stage.setScene(scene);
         stage.sizeToScene();
         stage.showAndWait();
