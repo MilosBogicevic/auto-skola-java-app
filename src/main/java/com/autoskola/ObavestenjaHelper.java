@@ -12,30 +12,35 @@ public class ObavestenjaHelper {
 
     private static final DateTimeFormatter srpskiFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy.");
 
-    public static void prikaziObavestenjaInstruktora(VBox box) {
+    public static boolean prikaziObavestenjaInstruktora(VBox box) {
         List<Instruktor> svi = Database.vratiInstruktore();
         LocalDate danas = LocalDate.now();
+        boolean ima = false;
 
         for (Instruktor i : svi) {
-            dodajUpozorenje(box, "Lekarski", i.getIme(), i.getLekarskiIstice(), danas);
-            dodajUpozorenje(box, "Vozačka", i.getIme(), i.getVozackaIstice(), danas);
-            dodajUpozorenje(box, "Licenca", i.getIme(), i.getLicencaIstice(), danas);
+            if (dodajUpozorenje(box, "Lekarski", i.getIme(), i.getLekarskiIstice(), danas)) ima = true;
+            if (dodajUpozorenje(box, "Vozačka", i.getIme(), i.getVozackaIstice(), danas)) ima = true;
+            if (dodajUpozorenje(box, "Licenca", i.getIme(), i.getLicencaIstice(), danas)) ima = true;
         }
+
+        return ima;
     }
 
-    public static void prikaziObavestenjaVozila(VBox box) {
+    public static boolean prikaziObavestenjaVozila(VBox box) {
         List<Vozilo> vozila = Database.vratiVozila();
         LocalDate danas = LocalDate.now();
+        boolean ima = false;
 
         for (Vozilo v : vozila) {
             LocalDate registracijaIstice = v.getRegistracijaIstice().plusYears(1);
-            dodajUpozorenje(box, "Registracija", v.getTablice(), registracijaIstice, danas);
-
-            dodajTehnickiUpozorenje(box, v.getTablice(), v.getTehnickiIstice(), danas);
+            if (dodajUpozorenje(box, "Registracija", v.getTablice(), registracijaIstice, danas)) ima = true;
+            if (dodajTehnickiUpozorenje(box, v.getTablice(), v.getTehnickiIstice(), danas)) ima = true;
         }
+
+        return ima;
     }
 
-    private static void dodajUpozorenje(VBox box, String tip, String ime, LocalDate datumIsteka, LocalDate danas) {
+    private static boolean dodajUpozorenje(VBox box, String tip, String ime, LocalDate datumIsteka, LocalDate danas) {
         long dana = ChronoUnit.DAYS.between(danas, datumIsteka);
 
         if (tip.equals("Registracija")) {
@@ -43,12 +48,14 @@ public class ObavestenjaHelper {
                 Label l = new Label("❌ " + tip + " istekla za " + ime + " (" + datumIsteka.format(srpskiFormat) + ")");
                 l.setStyle("-fx-text-fill: red;");
                 box.getChildren().add(l);
+                return true;
             } else if (dana <= 7) {
                 Label l = new Label("⚠ " + tip + " uskoro ističe za " + ime + " (" + datumIsteka.format(srpskiFormat) + ")");
                 l.setStyle("-fx-text-fill: orange;");
                 box.getChildren().add(l);
+                return true;
             }
-            return;
+            return false;
         }
 
         String glagol = switch (tip) {
@@ -65,15 +72,18 @@ public class ObavestenjaHelper {
             Label l = new Label("❌ " + tip + " " + glagol + " za " + ime + " (" + datumIsteka.format(srpskiFormat) + ")");
             l.setStyle("-fx-text-fill: red;");
             box.getChildren().add(l);
+            return true;
         } else if (dana <= prag) {
             Label l = new Label("⚠ " + tip + " uskoro ističe za " + ime + " (" + datumIsteka.format(srpskiFormat) + ")");
             l.setStyle("-fx-text-fill: orange;");
             box.getChildren().add(l);
+            return true;
         }
+
+        return false;
     }
 
-
-    private static void dodajTehnickiUpozorenje(VBox box, String tablice, LocalDate datumTehnickog, LocalDate danas) {
+    private static boolean dodajTehnickiUpozorenje(VBox box, String tablice, LocalDate datumTehnickog, LocalDate danas) {
         long proslo = ChronoUnit.DAYS.between(datumTehnickog, danas);
         LocalDate datumIsteka = datumTehnickog.plusDays(180);
 
@@ -81,10 +91,14 @@ public class ObavestenjaHelper {
             Label l = new Label("❌ Tehnički istekao za " + tablice + " (istekao: " + datumIsteka.format(srpskiFormat) + ")");
             l.setStyle("-fx-text-fill: red;");
             box.getChildren().add(l);
+            return true;
         } else if (proslo >= 171) {
             Label l = new Label("⚠ Tehnički uskoro ističe za " + tablice + " (ističe: " + datumIsteka.format(srpskiFormat) + ")");
             l.setStyle("-fx-text-fill: orange;");
             box.getChildren().add(l);
+            return true;
         }
+
+        return false;
     }
 }

@@ -39,7 +39,7 @@ public class Main extends Application {
     private TableView<Instruktor> instruktoriTable;
     private TableView<Vozilo> vozilaTable;
 
-    private VBox obavestenjaBox;
+    private VBox obavestenjaKandidatiBox, obavestenjaInstruktoriBox, obavestenjaVozilaBox;
     private HBox dugmiciKandidati;
     private HBox dugmiciInstruktori, dugmiciVozila;
     private TabPane tabPane;
@@ -47,7 +47,7 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage) {
-        Locale.setDefault(new Locale("sr", "RS"));
+        Locale.setDefault(new Locale.Builder().setLanguage("sr").setRegion("RS").setScript("Latn").build());
 
         if (!SecurityLock.jeDozvoljenoPokretanje()) {
             prikaziZatvarajuciAlert("Greška", "Ovaj računar nema dozvolu za korišćenje ove aplikacije.", Alert.AlertType.ERROR);
@@ -312,13 +312,12 @@ public class Main extends Application {
         VBox levaStrana = new VBox(10, dugmici, tabPane);
         VBox.setVgrow(tabPane, Priority.ALWAYS);
 
-        obavestenjaBox = new VBox(10);
-        obavestenjaBox.setPadding(new Insets(10));
-        obavestenjaBox.setPrefWidth(420);
-        obavestenjaBox.setStyle("-fx-background-color: #fdfdfd; -fx-border-color: #ccc;");
-        Label naslov = new Label("Obaveštenja");
-        naslov.setStyle("-fx-font-weight: bold;");
-        obavestenjaBox.getChildren().add(naslov);
+        obavestenjaKandidatiBox = napraviBoxSaNaslovom("Obaveštenja – Kandidati");
+        obavestenjaInstruktoriBox = napraviBoxSaNaslovom("Obaveštenja – Instruktori");
+        obavestenjaVozilaBox = napraviBoxSaNaslovom("Obaveštenja – Vozila");
+
+        VBox obavestenjaGlavniBox = new VBox(20, obavestenjaKandidatiBox, obavestenjaInstruktoriBox, obavestenjaVozilaBox);
+        obavestenjaGlavniBox.setPrefWidth(420);
         osveziObavestenja();
 
         Label footerLabel = new Label("Aplikaciju razvio Miloš Bogićević. Više informacija: ");
@@ -332,7 +331,12 @@ public class Main extends Application {
         VBox levaStranaSaFooterom = new VBox(10, levaStrana, footer);
         VBox.setVgrow(levaStrana, Priority.ALWAYS);
 
-        HBox glavni = new HBox(20, levaStranaSaFooterom, obavestenjaBox);
+        ScrollPane obavestenjaScroll = new ScrollPane(obavestenjaGlavniBox);
+        obavestenjaScroll.setFitToWidth(true);
+        obavestenjaScroll.setPrefWidth(420);
+        obavestenjaScroll.setStyle("-fx-background-color: transparent; -fx-border-color: transparent;");
+
+        HBox glavni = new HBox(20, levaStranaSaFooterom, obavestenjaScroll);
         glavni.setPadding(new Insets(15));
         HBox.setHgrow(levaStranaSaFooterom, Priority.ALWAYS);
 
@@ -381,45 +385,68 @@ public class Main extends Application {
         return col;
     }
 
-    private void osveziObavestenja() {
-        obavestenjaBox.getChildren().removeIf(n -> n instanceof Label && n != obavestenjaBox.getChildren().get(0));
+    private VBox napraviBoxSaNaslovom(String naslovTekst) {
+        VBox box = new VBox(10);
+        box.setPadding(new Insets(10));
+        box.setStyle("-fx-background-color: #fdfdfd; -fx-border-color: #ccc;");
+        Label naslov = new Label(naslovTekst);
+        naslov.setStyle("-fx-font-weight: bold;");
+        box.getChildren().add(naslov);
+        return box;
+    }
 
+    private void osveziObavestenja() {
         LocalDate danas = LocalDate.now();
+
+        obavestenjaKandidatiBox.getChildren().removeIf(n -> n instanceof Label && ((Label) n).getText() != null && !((Label) n).getText().startsWith("Obaveštenja"));
+        obavestenjaInstruktoriBox.getChildren().removeIf(n -> n instanceof Label && ((Label) n).getText() != null && !((Label) n).getText().startsWith("Obaveštenja"));
+        obavestenjaVozilaBox.getChildren().removeIf(n -> n instanceof Label && ((Label) n).getText() != null && !((Label) n).getText().startsWith("Obaveštenja"));
 
         boolean imaKandidata = false;
         for (Kandidat k : kandidatiLista) {
             long dana = ChronoUnit.DAYS.between(k.getDatumUpisa(), danas);
             double razlika = k.getCenaTeorija() - k.getPlaceno();
-
-            // Ako kandidat nije platio dovoljno za teoriju, dodaj obaveštenje
             if (dana >= 30 && razlika > 0) {
-                Label l = new Label("❗ " + k.getIme() + " " + k.getPrezime() +
-                        " duguje " + FormatUtil.format(razlika) +
-                        " za teorijsku obuku");
+                Label l = new Label("❗ " + k.getIme() + " " + k.getPrezime() + " duguje " + FormatUtil.format(razlika) + " za teorijsku obuku");
                 l.setStyle("-fx-text-fill: red;");
-                obavestenjaBox.getChildren().add(l);
+                l.setOnMouseClicked(this::obradiKlikNaObavestenje);
+                obavestenjaKandidatiBox.getChildren().add(l);
                 imaKandidata = true;
             }
         }
 
-        // Instruktori i vozila
-        ObavestenjaHelper.prikaziObavestenjaInstruktora(obavestenjaBox);
-        ObavestenjaHelper.prikaziObavestenjaVozila(obavestenjaBox);
-
-        // Ako nema obaveštenja, prikaži poruku
-        if (obavestenjaBox.getChildren().size() == 1) {
+        if (!imaKandidata) {
             Label nema = new Label("✓ Nema aktivnih obaveštenja.");
             nema.setStyle("-fx-text-fill: green;");
-            obavestenjaBox.getChildren().add(nema);
+            obavestenjaKandidatiBox.getChildren().add(nema);
         }
 
-        // Dodavanje klikabilnih obaveštenja
-        for (var node : obavestenjaBox.getChildren()) {
-            if (node instanceof Label l && !l.getText().startsWith("📢") && !l.getText().startsWith("✓")) {
-                l.setOnMouseClicked(this::obradiKlikNaObavestenje);
+        // Instruktori
+        boolean imaInstruktora = ObavestenjaHelper.prikaziObavestenjaInstruktora(obavestenjaInstruktoriBox);
+        if (!imaInstruktora) {
+            Label nema = new Label("✓ Nema aktivnih obaveštenja.");
+            nema.setStyle("-fx-text-fill: green;");
+            obavestenjaInstruktoriBox.getChildren().add(nema);
+        }
+
+        // Vozila
+        boolean imaVozila = ObavestenjaHelper.prikaziObavestenjaVozila(obavestenjaVozilaBox);
+        if (!imaVozila) {
+            Label nema = new Label("✓ Nema aktivnih obaveštenja.");
+            nema.setStyle("-fx-text-fill: green;");
+            obavestenjaVozilaBox.getChildren().add(nema);
+        }
+
+        // Klikovi na sve
+        for (var box : new VBox[]{obavestenjaKandidatiBox, obavestenjaInstruktoriBox, obavestenjaVozilaBox}) {
+            for (var node : box.getChildren()) {
+                if (node instanceof Label l && !l.getText().startsWith("📢") && !l.getText().startsWith("✓") && !l.getText().startsWith("Obaveštenja")) {
+                    l.setOnMouseClicked(this::obradiKlikNaObavestenje);
+                }
             }
         }
     }
+
 
 
     private void obradiKlikNaObavestenje(MouseEvent event) {
