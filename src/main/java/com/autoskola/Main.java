@@ -250,6 +250,7 @@ public class Main extends Application {
 
         Button dodajInstruktora = new Button("Dodaj instruktora");
         Button izmeniInstruktora = new Button("Izmeni instruktora");
+        Button obrisiInstruktora = new Button("Obriši instruktora");
 
         dodajInstruktora.setOnAction(e -> new InstruktorForm(null, i -> {
             Database.sacuvajInstruktora(i);
@@ -270,10 +271,33 @@ public class Main extends Application {
             }
         });
 
-        dugmiciInstruktori = new HBox(10, dodajInstruktora, izmeniInstruktora);
+
+        obrisiInstruktora.setOnAction(e -> {
+            Instruktor selektovani = instruktoriTable.getSelectionModel().getSelectedItem();
+            if (selektovani != null) {
+                Alert potvrda = new Alert(Alert.AlertType.CONFIRMATION);
+                potvrda.setTitle("Potvrda brisanja");
+                potvrda.setHeaderText("Da li ste sigurni da želite da obrišete instruktora?");
+                potvrda.setContentText(selektovani.getIme());
+                potvrda.showAndWait().ifPresent(rezultat -> {
+                    if (rezultat == ButtonType.OK) {
+                        Database.obrisiInstruktora(selektovani.getId());
+                        instruktoriLista.setAll(Database.vratiInstruktore());
+                        osveziObavestenja(); // ← dodato
+                    }
+                });
+            } else {
+                prikaziPoruku("Niste selektovali instruktora.");
+            }
+        });
+
+
+
+        dugmiciInstruktori = new HBox(10, dodajInstruktora, izmeniInstruktora, obrisiInstruktora);
 
         Button dodajVozilo = new Button("Dodaj vozilo");
         Button izmeniVozilo = new Button("Izmeni vozilo");
+        Button obrisiVozilo = new Button("Obriši vozilo");
 
         dodajVozilo.setOnAction(e -> new VoziloForm(null, v -> {
             Database.sacuvajVozilo(v);
@@ -294,7 +318,27 @@ public class Main extends Application {
             }
         });
 
-        dugmiciVozila = new HBox(10, dodajVozilo, izmeniVozilo);
+        obrisiVozilo.setOnAction(e -> {
+            Vozilo selektovano = vozilaTable.getSelectionModel().getSelectedItem();
+            if (selektovano != null) {
+                Alert potvrda = new Alert(Alert.AlertType.CONFIRMATION);
+                potvrda.setTitle("Potvrda brisanja");
+                potvrda.setHeaderText("Da li ste sigurni da želite da obrišete vozilo?");
+                potvrda.setContentText(selektovano.getNaziv() + " – " + selektovano.getTablice());
+                potvrda.showAndWait().ifPresent(rezultat -> {
+                    if (rezultat == ButtonType.OK) {
+                        Database.obrisiVozilo(selektovano.getId());
+                        vozilaLista.setAll(Database.vratiVozila());
+                        osveziObavestenja(); // ← dodato
+                    }
+                });
+            } else {
+                prikaziPoruku("Niste selektovali vozilo.");
+            }
+        });
+
+
+        dugmiciVozila = new HBox(10, dodajVozilo, izmeniVozilo, obrisiVozilo);
 
         tabPane = new TabPane(
                 new Tab("Kandidati", kandidatiTable),

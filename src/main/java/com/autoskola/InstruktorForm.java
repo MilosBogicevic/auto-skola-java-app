@@ -60,7 +60,7 @@ public class InstruktorForm {
         licencaPicker.setConverter(converter);
 
         Button sacuvajBtn = new Button("Sačuvaj");
-        VBox.setMargin(sacuvajBtn, new Insets(10, 0, 0, 0));
+        VBox.setMargin(sacuvajBtn, new Insets(10, 0, 10, 0));
 
         sacuvajBtn.setOnAction(e -> {
             sacuvajBtn.setDisable(true);
@@ -101,7 +101,10 @@ public class InstruktorForm {
         layout.setPadding(new Insets(20));
         layout.setStyle("-fx-font-size: 16px;");
 
-        stage.setScene(new Scene(layout, 400, 300));
+        Scene scene = new Scene(layout);
+        layout.setPrefWidth(500);
+        stage.setScene(scene);
+        stage.sizeToScene();
         stage.showAndWait();
     }
 }

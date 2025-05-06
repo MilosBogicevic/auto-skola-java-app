@@ -84,7 +84,7 @@ public class KandidatForm {
         datumBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
         Button sacuvajBtn = new Button("Sačuvaj");
-        VBox.setMargin(sacuvajBtn, new Insets(10, 0, 0, 0));
+        VBox.setMargin(sacuvajBtn, new Insets(10, 0, 10, 0));
 
         sacuvajBtn.setOnAction(e -> {
             try {
@@ -154,7 +154,10 @@ public class KandidatForm {
         forma.setPadding(new Insets(20));
         forma.setStyle("-fx-font-size: 16px;");
 
-        stage.setScene(new Scene(forma, 550, 650));
+        Scene scene = new Scene(forma);
+        forma.setPrefWidth(500);
+        stage.setScene(scene);
+        stage.sizeToScene();
         stage.showAndWait();
     }
 

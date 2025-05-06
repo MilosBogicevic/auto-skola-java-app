@@ -47,7 +47,7 @@ public class VoziloForm {
         VBox tehnickiBox = new VBox(5, new Label("Datum tehničkog pregleda:"), tehnickiPicker);
 
         Button sacuvajBtn = new Button("Sačuvaj");
-        VBox.setMargin(sacuvajBtn, new Insets(10, 0, 0, 0));
+        VBox.setMargin(sacuvajBtn, new Insets(10, 0, 10, 0));
 
         sacuvajBtn.setOnAction(e -> {
             try {
@@ -78,7 +78,10 @@ public class VoziloForm {
         layout.setPadding(new Insets(20));
         layout.setStyle("-fx-font-size: 16px;");
 
-        stage.setScene(new Scene(layout, 450, 400));
+        Scene scene = new Scene(layout);
+        layout.setPrefWidth(500);
+        stage.setScene(scene);
+        stage.sizeToScene();
         stage.showAndWait();
     }
 }

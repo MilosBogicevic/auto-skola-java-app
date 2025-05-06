@@ -252,6 +252,16 @@ public class Database {
         }
     }
 
+    public static void obrisiInstruktora(int id) {
+        String sql = "DELETE FROM instruktori WHERE id = ?";
+        try (Connection conn = connect(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static List<Instruktor> vratiInstruktore() {
         List<Instruktor> lista = new ArrayList<>();
         try (Connection conn = connect(); ResultSet rs = conn.createStatement().executeQuery("SELECT * FROM instruktori")) {
@@ -293,6 +303,16 @@ public class Database {
             stmt.setString(3, v.getRegistracijaIstice().toString());
             stmt.setString(4, v.getTehnickiIstice().toString());
             stmt.setInt(5, v.getId());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void obrisiVozilo(int id) {
+        String sql = "DELETE FROM vozila WHERE id = ?";
+        try (Connection conn = connect(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, id);
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
