@@ -321,7 +321,7 @@ public class Main extends Application {
         obavestenjaBox.getChildren().add(naslov);
         osveziObavestenja();
 
-        Label footerLabel = new Label("Autor aplikacije: Miloš Bogićević. Sajt: ");
+        Label footerLabel = new Label("Aplikaciju razvio Miloš Bogićević. Više informacija: ");
         Hyperlink footerLink = new Hyperlink("www.milosb.rs");
         footerLink.setOnAction(e -> getHostServices().showDocument("https://www.milosb.rs"));
 
@@ -337,7 +337,7 @@ public class Main extends Application {
         HBox.setHgrow(levaStranaSaFooterom, Priority.ALWAYS);
 
         stage.setMaximized(true);
-        stage.setTitle("Auto škola – Upravljanje");
+        stage.setTitle("Auto škola „Dušan Start”");
         Scene scene = new Scene(glavni, 1350, 700);
         glavni.setStyle("-fx-font-size: 16px;");
         stage.setScene(scene);
