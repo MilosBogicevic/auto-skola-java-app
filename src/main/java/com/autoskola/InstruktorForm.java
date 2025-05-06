@@ -60,6 +60,7 @@ public class InstruktorForm {
         licencaPicker.setConverter(converter);
 
         Button sacuvajBtn = new Button("Sačuvaj");
+        VBox.setMargin(sacuvajBtn, new Insets(10, 0, 0, 0));
 
         sacuvajBtn.setOnAction(e -> {
             sacuvajBtn.setDisable(true);
