@@ -271,26 +271,14 @@ public class Main extends Application {
             }
         });
 
-
         obrisiInstruktora.setOnAction(e -> {
             Instruktor selektovani = instruktoriTable.getSelectionModel().getSelectedItem();
             if (selektovani != null) {
-                Alert potvrda = new Alert(Alert.AlertType.CONFIRMATION);
-                potvrda.setTitle("Potvrda brisanja");
-                potvrda.setHeaderText("Da li ste sigurni da želite da obrišete instruktora?");
-                potvrda.setContentText("Ova radnja je trajna.");
-
-                ButtonType dugmeDa = new ButtonType("Da", ButtonBar.ButtonData.YES);
-                ButtonType dugmeNe = new ButtonType("Ne", ButtonBar.ButtonData.NO);
-                potvrda.getButtonTypes().setAll(dugmeDa, dugmeNe);
-
-                potvrda.showAndWait().ifPresent(izabrano -> {
-                    if (izabrano == dugmeDa) {
-                        Database.obrisiInstruktora(selektovani.getId());
-                        instruktoriLista.setAll(Database.vratiInstruktore());
-                        osveziObavestenja();
-                    }
-                });
+                if (potvrdiBrisanje("Potvrda brisanja", "Da li ste sigurni da želite da obrišete instruktora?")) {
+                    Database.obrisiInstruktora(selektovani.getId());
+                    instruktoriLista.setAll(Database.vratiInstruktore());
+                    osveziObavestenja();
+                }
             } else {
                 prikaziPoruku("Niste selektovali instruktora.");
             }
@@ -324,22 +312,11 @@ public class Main extends Application {
         obrisiVozilo.setOnAction(e -> {
             Vozilo selektovano = vozilaTable.getSelectionModel().getSelectedItem();
             if (selektovano != null) {
-                Alert potvrda = new Alert(Alert.AlertType.CONFIRMATION);
-                potvrda.setTitle("Potvrda brisanja");
-                potvrda.setHeaderText("Da li ste sigurni da želite da obrišete vozilo?");
-                potvrda.setContentText("Ova radnja je trajna.");
-
-                ButtonType dugmeDa = new ButtonType("Da", ButtonBar.ButtonData.YES);
-                ButtonType dugmeNe = new ButtonType("Ne", ButtonBar.ButtonData.NO);
-                potvrda.getButtonTypes().setAll(dugmeDa, dugmeNe);
-
-                potvrda.showAndWait().ifPresent(izabrano -> {
-                    if (izabrano == dugmeDa) {
-                        Database.obrisiVozilo(selektovano.getId());
-                        vozilaLista.setAll(Database.vratiVozila());
-                        osveziObavestenja();
-                    }
-                });
+                if (potvrdiBrisanje("Potvrda brisanja", "Da li ste sigurni da želite da obrišete vozilo?")) {
+                    Database.obrisiVozilo(selektovano.getId());
+                    vozilaLista.setAll(Database.vratiVozila());
+                    osveziObavestenja();
+                }
             } else {
                 prikaziPoruku("Niste selektovali vozilo.");
             }
@@ -390,7 +367,7 @@ public class Main extends Application {
                 "-fx-underline: true; -fx-padding: 0; -fx-border-color: transparent; -fx-background-color: transparent;"
         ));
 
-// Vraća se na početni stil kada miš izađe
+        // Vraća se na početni stil kada miš izađe
         footerLink.setOnMouseExited(e -> footerLink.setStyle(
                 "-fx-underline: false; -fx-padding: 0; -fx-border-color: transparent; -fx-background-color: transparent;"
         ));
@@ -514,8 +491,6 @@ public class Main extends Application {
         }
     }
 
-
-
     private void obradiKlikNaObavestenje(MouseEvent event) {
         String text = ((Label) event.getSource()).getText();
 
@@ -565,6 +540,18 @@ public class Main extends Application {
         }
     }
 
+    private boolean potvrdiBrisanje(String naslov, String poruka) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle(naslov);
+        alert.setHeaderText(poruka);
+        alert.setContentText("Ova radnja je trajna.");
+
+        ButtonType dugmeDa = new ButtonType("Da", ButtonBar.ButtonData.YES);
+        ButtonType dugmeNe = new ButtonType("Ne", ButtonBar.ButtonData.NO);
+        alert.getButtonTypes().setAll(dugmeDa, dugmeNe);
+
+        return alert.showAndWait().filter(t -> t == dugmeDa).isPresent();
+    }
 
     private void prikaziPoruku(String tekst) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
