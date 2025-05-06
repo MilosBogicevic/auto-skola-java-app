@@ -3,7 +3,7 @@ package com.autoskola;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
@@ -32,8 +32,20 @@ public class InstruktorForm {
             }
         };
 
-        TextField imePolje = new TextField(postojeći != null ? postojeći.getIme() : "");
-        imePolje.setPromptText("Ime i prezime");
+        TextField imePolje = new TextField();
+        TextField prezimePolje = new TextField();
+
+        if (postojeći != null) {
+            String[] delovi = postojeći.getIme().split(" ", 2);
+            imePolje.setText(delovi.length > 0 ? delovi[0] : "");
+            prezimePolje.setText(delovi.length > 1 ? delovi[1] : "");
+        }
+
+        VBox imeBox = new VBox(5, new Label("Ime:"), imePolje);
+        VBox prezimeBox = new VBox(5, new Label("Prezime:"), prezimePolje);
+        HBox imePrezimeBox = new HBox(10, imeBox, prezimeBox);
+        HBox.setHgrow(imeBox, Priority.ALWAYS);
+        HBox.setHgrow(prezimeBox, Priority.ALWAYS);
 
         DatePicker lekarskiPicker = new DatePicker(postojeći != null ? postojeći.getLekarskiIstice() : null);
         lekarskiPicker.setPromptText("Lekarski ističe");
@@ -50,22 +62,22 @@ public class InstruktorForm {
         Button sacuvajBtn = new Button("Sačuvaj");
 
         sacuvajBtn.setOnAction(e -> {
-            // Disable button to prevent multiple clicks
             sacuvajBtn.setDisable(true);
 
             try {
                 String ime = imePolje.getText().trim();
+                String prezime = prezimePolje.getText().trim();
                 LocalDate lekarski = lekarskiPicker.getValue();
                 LocalDate vozacka = vozackaPicker.getValue();
                 LocalDate licenca = licencaPicker.getValue();
 
-                if (ime.isEmpty() || lekarski == null || vozacka == null || licenca == null) {
+                if (ime.isEmpty() || prezime.isEmpty() || lekarski == null || vozacka == null || licenca == null) {
                     throw new IllegalArgumentException("Sva polja moraju biti popunjena.");
                 }
 
                 Instruktor novi = new Instruktor(
                         postojeći != null ? postojeći.getId() : 0,
-                        ime,
+                        (ime + " " + prezime).trim(),
                         lekarski,
                         vozacka,
                         licenca
@@ -80,11 +92,11 @@ public class InstruktorForm {
                 alert.setHeaderText("Neispravan unos");
                 alert.setContentText("Sva polja moraju biti ispravno popunjena. " + ex.getMessage());
                 alert.showAndWait();
-                sacuvajBtn.setDisable(false); // Re-enable button if failed
+                sacuvajBtn.setDisable(false);
             }
         });
 
-        VBox layout = new VBox(10, imePolje, lekarskiPicker, vozackaPicker, licencaPicker, sacuvajBtn);
+        VBox layout = new VBox(10, imePrezimeBox, lekarskiPicker, vozackaPicker, licencaPicker, sacuvajBtn);
         layout.setPadding(new Insets(20));
         layout.setStyle("-fx-font-size: 16px;");
 

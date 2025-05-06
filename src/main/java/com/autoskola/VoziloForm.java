@@ -32,23 +32,19 @@ public class VoziloForm {
             }
         };
 
-        TextField nazivPolje = new TextField();
-        nazivPolje.setPromptText("Naziv vozila");
-        if (postojece != null) nazivPolje.setText(postojece.getNaziv());
+        TextField nazivPolje = new TextField(postojece != null ? postojece.getNaziv() : "");
+        VBox nazivBox = new VBox(5, new Label("Naziv vozila:"), nazivPolje);
 
-        TextField tablicePolje = new TextField();
-        tablicePolje.setPromptText("Registarske tablice");
-        if (postojece != null) tablicePolje.setText(postojece.getTablice());
+        TextField tablicePolje = new TextField(postojece != null ? postojece.getTablice() : "");
+        VBox tabliceBox = new VBox(5, new Label("Registarske tablice:"), tablicePolje);
 
-        DatePicker registracijaPicker = new DatePicker();
-        registracijaPicker.setPromptText("Datum registracije");
+        DatePicker registracijaPicker = new DatePicker(postojece != null ? postojece.getRegistracijaIstice() : null);
         registracijaPicker.setConverter(converter);
-        if (postojece != null) registracijaPicker.setValue(postojece.getRegistracijaIstice());
+        VBox regBox = new VBox(5, new Label("Datum registracije:"), registracijaPicker);
 
-        DatePicker tehnickiPicker = new DatePicker();
-        tehnickiPicker.setPromptText("Datum tehničkog");
+        DatePicker tehnickiPicker = new DatePicker(postojece != null ? postojece.getTehnickiIstice() : null);
         tehnickiPicker.setConverter(converter);
-        if (postojece != null) tehnickiPicker.setValue(postojece.getTehnickiIstice());
+        VBox tehnickiBox = new VBox(5, new Label("Datum tehničkog pregleda:"), tehnickiPicker);
 
         Button sacuvajBtn = new Button("Sačuvaj");
 
@@ -77,11 +73,11 @@ public class VoziloForm {
             }
         });
 
-        VBox layout = new VBox(10, nazivPolje, tablicePolje, registracijaPicker, tehnickiPicker, sacuvajBtn);
+        VBox layout = new VBox(12, nazivBox, tabliceBox, regBox, tehnickiBox, sacuvajBtn);
         layout.setPadding(new Insets(20));
         layout.setStyle("-fx-font-size: 16px;");
 
-        stage.setScene(new Scene(layout, 400, 280));
+        stage.setScene(new Scene(layout, 450, 400));
         stage.showAndWait();
     }
 }

@@ -31,6 +31,9 @@ import static com.autoskola.Database.connect;
 
 public class Main extends Application {
 
+    @SuppressWarnings("unused")
+    private static final String _legal = "© Miloš Bogićević – Sva prava zadržana. Ovaj softver je zaštićen autorskim pravom. Neovlašćeno kopiranje, distribucija ili izmene su zabranjeni. www.milosb.rs";
+
     private ObservableList<Kandidat> kandidatiLista = FXCollections.observableArrayList();
     private ObservableList<Instruktor> instruktoriLista = FXCollections.observableArrayList();
     private ObservableList<Vozilo> vozilaLista = FXCollections.observableArrayList();
@@ -320,13 +323,24 @@ public class Main extends Application {
         obavestenjaGlavniBox.setPrefWidth(420);
         osveziObavestenja();
 
-        Label footerLabel = new Label("Aplikaciju razvio Miloš Bogićević. Više informacija: ");
+        Label footerLabel = new Label("Aplikaciju razvio Miloš Bogićević. Više informacija na: ");
         Hyperlink footerLink = new Hyperlink("www.milosb.rs");
         footerLink.setOnAction(e -> getHostServices().showDocument("https://www.milosb.rs"));
+        footerLink.setStyle(
+                "-fx-underline: false; -fx-padding: 0; -fx-border-color: transparent;"
+        );
 
         HBox footer = new HBox(footerLabel, footerLink);
         footer.setPadding(new Insets(2, 10, 2, 10));
         footer.setStyle("-fx-background-color: #f0f0f0; -fx-alignment: center; -fx-font-size: 12px;");
+        footerLink.setOnMouseEntered(e -> footerLink.setStyle(
+                "-fx-underline: true; -fx-padding: 0; -fx-border-color: transparent; -fx-background-color: transparent;"
+        ));
+
+// Vraća se na početni stil kada miš izađe
+        footerLink.setOnMouseExited(e -> footerLink.setStyle(
+                "-fx-underline: false; -fx-padding: 0; -fx-border-color: transparent; -fx-background-color: transparent;"
+        ));
 
         VBox levaStranaSaFooterom = new VBox(10, levaStrana, footer);
         VBox.setVgrow(levaStrana, Priority.ALWAYS);

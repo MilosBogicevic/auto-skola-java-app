@@ -3,16 +3,14 @@ package com.autoskola;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
-import java.text.NumberFormat;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Locale;
 import java.util.function.Consumer;
 
 public class KandidatForm {
@@ -36,23 +34,19 @@ public class KandidatForm {
         };
 
         TextField idKandidatPolje = new TextField(postojeći != null ? postojeći.getIdKandidata() : "");
-        idKandidatPolje.setPromptText("ID kandidata (šifra iz evidencije)");
 
         TextField imePolje = new TextField(postojeći != null ? postojeći.getIme() : "");
-        imePolje.setPromptText("Ime");
-
         TextField prezimePolje = new TextField(postojeći != null ? postojeći.getPrezime() : "");
-        prezimePolje.setPromptText("Prezime");
 
         TextField telefonPolje = new TextField(postojeći != null ? postojeći.getTelefon() : "");
-        telefonPolje.setPromptText("Telefon");
-
         TextField emailPolje = new TextField(postojeći != null ? postojeći.getEmail() : "");
-        emailPolje.setPromptText("Email (opciono)");
 
         ComboBox<String> kategorijaBox = new ComboBox<>();
         kategorijaBox.getItems().addAll("A1", "A2", "A", "B", "C", "CE");
         if (postojeći != null) kategorijaBox.setValue(postojeći.getKategorija());
+
+        DatePicker datumUpisaPicker = new DatePicker(postojeći != null ? postojeći.getDatumUpisa() : LocalDate.now());
+        datumUpisaPicker.setConverter(converter);
 
         CheckBox polozioTeoriju = new CheckBox("Položio teoriju");
         if (postojeći != null) polozioTeoriju.setSelected(postojeći.isPolozioTeoriju());
@@ -60,15 +54,34 @@ public class KandidatForm {
         CheckBox polozioVoznju = new CheckBox("Položio vožnju");
         if (postojeći != null) polozioVoznju.setSelected(postojeći.isPolozioVoznju());
 
-        DatePicker datumUpisaPicker = new DatePicker(postojeći != null ? postojeći.getDatumUpisa() : LocalDate.now());
-        datumUpisaPicker.setPromptText("Datum upisa");
-        datumUpisaPicker.setConverter(converter);
-
         TextField cenaTeorijaPolje = new TextField(postojeći != null ? FormatUtil.format(postojeći.getCenaTeorija()) : "");
-        cenaTeorijaPolje.setPromptText("Cena teorijske obuke (RSD)");
-
         TextField cenaPraksaPolje = new TextField(postojeći != null ? FormatUtil.format(postojeći.getCenaPraksa()) : "");
-        cenaPraksaPolje.setPromptText("Cena praktične obuke (RSD)");
+
+        // Ime i prezime u jednom redu sa labelama iznad
+        VBox imeBox = new VBox(2, new Label("Ime:"), imePolje);
+        VBox prezimeBox = new VBox(2, new Label("Prezime:"), prezimePolje);
+        HBox imePrezimeBox = new HBox(10, imeBox, prezimeBox);
+        HBox.setHgrow(imeBox, Priority.ALWAYS);
+        HBox.setHgrow(prezimeBox, Priority.ALWAYS);
+
+        // Cena teorije i prakse u jednom redu sa labelama iznad
+        VBox teorijskaBox = new VBox(2, new Label("Cena teorijske obuke (RSD):"), cenaTeorijaPolje);
+        VBox prakticnaBox = new VBox(2, new Label("Cena praktične obuke (RSD):"), cenaPraksaPolje);
+        HBox cenaBox = new HBox(10, teorijskaBox, prakticnaBox);
+        HBox.setHgrow(teorijskaBox, Priority.ALWAYS);
+        HBox.setHgrow(prakticnaBox, Priority.ALWAYS);
+
+        // Kategorija i dropdown u istom redu
+        Label kategorijaLabel = new Label("Kategorija:");
+        HBox kategorijaBoxHBox = new HBox(10, kategorijaLabel, kategorijaBox);
+        HBox.setHgrow(kategorijaBox, Priority.ALWAYS);
+        kategorijaBoxHBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+
+        // Datum upisa i picker u istom redu
+        Label datumLabel = new Label("Datum upisa:");
+        HBox datumBox = new HBox(10, datumLabel, datumUpisaPicker);
+        HBox.setHgrow(datumUpisaPicker, Priority.ALWAYS);
+        datumBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
         Button sacuvajBtn = new Button("Sačuvaj");
 
@@ -114,7 +127,7 @@ public class KandidatForm {
                         cenaTeorija,
                         cenaPraksa,
                         placeno,
-                        null
+                        postojeći != null ? postojeći.getDatumIsplate() : null
                 );
                 onSacuvaj.accept(novi);
                 stage.close();
@@ -126,16 +139,21 @@ public class KandidatForm {
         });
 
         VBox forma = new VBox(10,
-                idKandidatPolje, imePolje, prezimePolje, telefonPolje, emailPolje,
-                kategorijaBox, datumUpisaPicker,
-                polozioTeoriju, polozioVoznju,
-                cenaTeorijaPolje, cenaPraksaPolje,
+                new Label("ID broj kandidata:"), idKandidatPolje,
+                imePrezimeBox,
+                new Label("Telefon:"), telefonPolje,
+                new Label("Email (opciono):"), emailPolje,
+                kategorijaBoxHBox,
+                datumBox,
+                polozioTeoriju,
+                polozioVoznju,
+                cenaBox,
                 sacuvajBtn
         );
         forma.setPadding(new Insets(20));
         forma.setStyle("-fx-font-size: 16px;");
 
-        stage.setScene(new Scene(forma, 450, 600));
+        stage.setScene(new Scene(forma, 500, 650));
         stage.showAndWait();
     }
 

@@ -92,7 +92,7 @@ public class ObavestenjaHelper {
             l.setStyle("-fx-text-fill: red;");
             box.getChildren().add(l);
             return true;
-        } else if (proslo >= 171) {
+        } else if (proslo >= 174) {
             Label l = new Label("⚠ Tehnički uskoro ističe za " + tablice + " (ističe: " + datumIsteka.format(srpskiFormat) + ")");
             l.setStyle("-fx-text-fill: orange;");
             box.getChildren().add(l);
