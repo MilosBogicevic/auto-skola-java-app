@@ -36,6 +36,13 @@
             <artifactId>sqlite-jdbc</artifactId>
             <version>3.44.1.0</version>
         </dependency>
+
+        <!-- Apache POI za rad sa .docx -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>5.4.0</version> <!-- ili novije ako postoji -->
+        </dependency>
     </dependencies>
 
     <build>
