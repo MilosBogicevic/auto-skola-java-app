@@ -63,6 +63,7 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>3.3.0</version>
                 <configuration>
+                    <finalName>autoskola-fat</finalName> <!-- Naziv izlaznog JAR-a -->
                     <archive>
                         <manifest>
                             <mainClass>com.autoskola.Main</mainClass>
