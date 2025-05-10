@@ -7,6 +7,11 @@ public class Kandidat {
     private String idKandidata;
     private String ime;
     private String prezime;
+    private String idb;
+    private String jmbg;
+    private String brojLicneKarte;
+    private String adresa;
+    private String grad;
     private String telefon;
     private String email;
     private String kategorija;
@@ -18,7 +23,8 @@ public class Kandidat {
     private double placeno;
     private LocalDate datumIsplate;
 
-    public Kandidat(int id, String idKandidata, String ime, String prezime, String telefon, String email,
+    public Kandidat(int id, String idKandidata, String ime, String prezime, String idb, String jmbg,
+                    String brojLicneKarte, String adresa, String grad, String telefon, String email,
                     String kategorija, boolean polozioTeoriju, boolean polozioVoznju,
                     LocalDate datumUpisa, double cenaTeorija, double cenaPraksa,
                     double placeno, LocalDate datumIsplate) {
@@ -27,6 +33,11 @@ public class Kandidat {
         this.idKandidata = idKandidata;
         this.ime = ime;
         this.prezime = prezime;
+        this.idb = idb;
+        this.jmbg = jmbg;
+        this.brojLicneKarte = brojLicneKarte;
+        this.adresa = adresa;
+        this.grad = grad;
         this.telefon = telefon;
         this.email = email;
         this.kategorija = kategorija;
@@ -43,12 +54,16 @@ public class Kandidat {
     public String getIdKandidata() { return idKandidata; }
     public String getIme() { return ime; }
     public String getPrezime() { return prezime; }
+    public String getIdb() { return idb; }
+    public String getJmbg() { return jmbg; }
+    public String getBrojLicneKarte() { return brojLicneKarte; }
+    public String getAdresa() { return adresa; }
+    public String getGrad() { return grad; }
     public String getTelefon() { return telefon; }
     public String getEmail() { return email; }
     public String getKategorija() { return kategorija; }
     public boolean isPolozioTeoriju() { return polozioTeoriju; }
     public boolean isPolozioVoznju() { return polozioVoznju; }
-
     public LocalDate getDatumUpisa() { return datumUpisa; }
     public double getCenaTeorija() { return cenaTeorija; }
     public double getCenaPraksa() { return cenaPraksa; }

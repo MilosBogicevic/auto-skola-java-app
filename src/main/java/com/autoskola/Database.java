@@ -28,6 +28,11 @@ public class Database {
                     id_kandidata TEXT,
                     ime TEXT,
                     prezime TEXT,
+                    idb TEXT,
+                    jmbg TEXT,
+                    broj_licne_karte TEXT,
+                    adresa TEXT,
+                    grad TEXT,
                     telefon TEXT,
                     email TEXT,
                     kategorija TEXT,
@@ -91,23 +96,28 @@ public class Database {
                 id_kandidata, ime, prezime, telefon, email, kategorija,
                 polozio_teoriju, polozio_voznju, datum_upisa,
                 cena_teorija, cena_praksa, placeno, datum_isplate
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """;
 
         try (Connection conn = connect(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, k.getIdKandidata());
             stmt.setString(2, k.getIme());
             stmt.setString(3, k.getPrezime());
-            stmt.setString(4, k.getTelefon());
-            stmt.setString(5, k.getEmail());
-            stmt.setString(6, k.getKategorija());
-            stmt.setBoolean(7, k.isPolozioTeoriju());
-            stmt.setBoolean(8, k.isPolozioVoznju());
-            stmt.setString(9, k.getDatumUpisa().toString());
-            stmt.setDouble(10, k.getCenaTeorija());
-            stmt.setDouble(11, k.getCenaPraksa());
-            stmt.setDouble(12, k.getPlaceno());
-            stmt.setString(13, k.getDatumIsplate() != null ? k.getDatumIsplate().toString() : null);
+            stmt.setString(4, k.getIdb());
+            stmt.setString(5, k.getJmbg());
+            stmt.setString(6, k.getBrojLicneKarte());
+            stmt.setString(7, k.getAdresa());
+            stmt.setString(8, k.getGrad());
+            stmt.setString(9, k.getTelefon());
+            stmt.setString(10, k.getEmail());
+            stmt.setString(11, k.getKategorija());
+            stmt.setBoolean(12, k.isPolozioTeoriju());
+            stmt.setBoolean(13, k.isPolozioVoznju());
+            stmt.setString(14, k.getDatumUpisa().toString());
+            stmt.setDouble(15, k.getCenaTeorija());
+            stmt.setDouble(16, k.getCenaPraksa());
+            stmt.setDouble(17, k.getPlaceno());
+            stmt.setString(18, k.getDatumIsplate() != null ? k.getDatumIsplate().toString() : null);
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -117,7 +127,8 @@ public class Database {
     public static void izmeniKandidata(Kandidat k) {
         String sql = """
             UPDATE kandidati SET
-                id_kandidata = ?, ime = ?, prezime = ?, telefon = ?, email = ?, kategorija = ?,
+                id_kandidata = ?, ime = ?, prezime = ?, idb = ?, jmbg = ?, broj_licne_karte = ?,
+                adresa = ?, grad = ?, telefon = ?, email = ?, kategorija = ?,
                 polozio_teoriju = ?, polozio_voznju = ?, datum_upisa = ?,
                 cena_teorija = ?, cena_praksa = ?, placeno = ?, datum_isplate = ?
             WHERE id = ?
@@ -127,17 +138,22 @@ public class Database {
             stmt.setString(1, k.getIdKandidata());
             stmt.setString(2, k.getIme());
             stmt.setString(3, k.getPrezime());
-            stmt.setString(4, k.getTelefon());
-            stmt.setString(5, k.getEmail());
-            stmt.setString(6, k.getKategorija());
-            stmt.setBoolean(7, k.isPolozioTeoriju());
-            stmt.setBoolean(8, k.isPolozioVoznju());
-            stmt.setString(9, k.getDatumUpisa().toString());
-            stmt.setDouble(10, k.getCenaTeorija());
-            stmt.setDouble(11, k.getCenaPraksa());
-            stmt.setDouble(12, k.getPlaceno());
-            stmt.setString(13, k.getDatumIsplate() != null ? k.getDatumIsplate().toString() : null);
-            stmt.setInt(14, k.getId());
+            stmt.setString(4, k.getIdb());
+            stmt.setString(5, k.getJmbg());
+            stmt.setString(6, k.getBrojLicneKarte());
+            stmt.setString(7, k.getAdresa());
+            stmt.setString(8, k.getGrad());
+            stmt.setString(9, k.getTelefon());
+            stmt.setString(10, k.getEmail());
+            stmt.setString(11, k.getKategorija());
+            stmt.setBoolean(12, k.isPolozioTeoriju());
+            stmt.setBoolean(13, k.isPolozioVoznju());
+            stmt.setString(14, k.getDatumUpisa().toString());
+            stmt.setDouble(15, k.getCenaTeorija());
+            stmt.setDouble(16, k.getCenaPraksa());
+            stmt.setDouble(17, k.getPlaceno());
+            stmt.setString(18, k.getDatumIsplate() != null ? k.getDatumIsplate().toString() : null);
+            stmt.setInt(19, k.getId());
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -158,6 +174,11 @@ public class Database {
                         rs.getString("id_kandidata"),
                         rs.getString("ime"),
                         rs.getString("prezime"),
+                        rs.getString("idb"),
+                        rs.getString("jmbg"),
+                        rs.getString("broj_licne_karte"),
+                        rs.getString("adresa"),
+                        rs.getString("grad"),
                         rs.getString("telefon"),
                         rs.getString("email"),
                         rs.getString("kategorija"),
@@ -195,6 +216,11 @@ public class Database {
                         rs.getString("id_kandidata"),
                         rs.getString("ime"),
                         rs.getString("prezime"),
+                        rs.getString("idb"),
+                        rs.getString("jmbg"),
+                        rs.getString("broj_licne_karte"),
+                        rs.getString("adresa"),
+                        rs.getString("grad"),
                         rs.getString("telefon"),
                         rs.getString("email"),
                         rs.getString("kategorija"),

@@ -48,15 +48,12 @@ public class InstruktorForm {
         HBox.setHgrow(prezimeBox, Priority.ALWAYS);
 
         DatePicker lekarskiPicker = new DatePicker(postojeći != null ? postojeći.getLekarskiIstice() : null);
-        lekarskiPicker.setPromptText("Lekarski ističe");
         lekarskiPicker.setConverter(converter);
 
         DatePicker vozackaPicker = new DatePicker(postojeći != null ? postojeći.getVozackaIstice() : null);
-        vozackaPicker.setPromptText("Vozačka ističe");
         vozackaPicker.setConverter(converter);
 
         DatePicker licencaPicker = new DatePicker(postojeći != null ? postojeći.getLicencaIstice() : null);
-        licencaPicker.setPromptText("Licenca ističe");
         licencaPicker.setConverter(converter);
 
         Button sacuvajBtn = new Button("Sačuvaj");
@@ -100,7 +97,19 @@ public class InstruktorForm {
         Region spacer = new Region();
         VBox.setVgrow(spacer, Priority.ALWAYS);
 
-        VBox layout = new VBox(10, imePrezimeBox, lekarskiPicker, vozackaPicker, licencaPicker, spacer, sacuvajBtn);
+        VBox lekarskiBox = new VBox(5, new Label("Lekarski pregled ističe:"), lekarskiPicker);
+        VBox vozackaBox = new VBox(5, new Label("Vozačka dozvola ističe:"), vozackaPicker);
+        VBox licencaBox = new VBox(5, new Label("Licenca ističe:"), licencaPicker);
+
+        VBox layout = new VBox(10,
+                imePrezimeBox,
+                lekarskiBox,
+                vozackaBox,
+                licencaBox,
+                spacer,
+                sacuvajBtn
+        );
+
         layout.setPadding(new Insets(20));
         layout.setStyle("-fx-font-size: 16px;");
 

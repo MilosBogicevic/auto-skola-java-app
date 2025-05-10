@@ -3,6 +3,8 @@ package com.autoskola;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -68,11 +70,15 @@ public class UplataForm {
             }
         });
 
-        VBox layout = new VBox(10, datumPicker, iznosField, sacuvajBtn);
+        Region spacer = new Region();
+        VBox.setVgrow(spacer, Priority.ALWAYS);
+
+        VBox layout = new VBox(10, datumPicker, iznosField, spacer, sacuvajBtn);
         layout.setPadding(new Insets(20));
         layout.setStyle("-fx-font-size: 16px;");
 
         stage.setScene(new Scene(layout, 300, 180));
+        stage.setOnShown(ev -> iznosField.requestFocus());
         stage.showAndWait();
     }
 
