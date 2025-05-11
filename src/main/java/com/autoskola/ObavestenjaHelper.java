@@ -88,12 +88,12 @@ public class ObavestenjaHelper {
         LocalDate datumIsteka = datumTehnickog.plusDays(180);
 
         if (proslo >= 181) {
-            Label l = new Label("❌ Tehnički istekao za " + tablice + " (istekao: " + datumIsteka.format(srpskiFormat) + ")");
+            Label l = new Label("❌ Tehnički istekao za " + tablice + " (" + datumIsteka.format(srpskiFormat) + ")");
             l.setStyle("-fx-text-fill: red;");
             box.getChildren().add(l);
             return true;
         } else if (proslo >= 174) {
-            Label l = new Label("⚠ Tehnički uskoro ističe za " + tablice + " (ističe: " + datumIsteka.format(srpskiFormat) + ")");
+            Label l = new Label("⚠ Tehnički uskoro ističe za " + tablice + " (" + datumIsteka.format(srpskiFormat) + ")");
             l.setStyle("-fx-text-fill: orange;");
             box.getChildren().add(l);
             return true;

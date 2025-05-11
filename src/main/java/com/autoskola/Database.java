@@ -93,7 +93,8 @@ public class Database {
     public static void sacuvajKandidata(Kandidat k) {
         String sql = """
             INSERT INTO kandidati (
-                id_kandidata, ime, prezime, telefon, email, kategorija,
+                id_kandidata, ime, prezime, idb, jmbg, broj_licne_karte,
+                adresa, grad, telefon, email, kategorija,
                 polozio_teoriju, polozio_voznju, datum_upisa,
                 cena_teorija, cena_praksa, placeno, datum_isplate
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
