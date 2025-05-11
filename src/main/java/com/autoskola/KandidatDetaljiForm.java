@@ -79,7 +79,7 @@ public class KandidatDetaljiForm {
         ugovorBtn.setOnAction(e -> {
             try {
                 String sablon = "sabloni/ugovor_" + kandidat.getKategorija() + ".docx";
-                String izlaz = "ugovori/ugovor-" + kandidat.getIdKandidata() + ".docx";
+                String izlaz = "ugovori/ugovor-" + kandidat.getIme() + "-" + kandidat.getPrezime() + "-" + kandidat.getIdb() + ".docx";
 
                 // Kreiraj folder ako ne postoji
                 File izlazFajl = new File(izlaz);
