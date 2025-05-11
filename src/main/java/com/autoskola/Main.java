@@ -90,7 +90,7 @@ public class Main extends Application {
         kandidatiTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         DateTimeFormatter srpskiFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy.");
         kandidatiTable.getColumns().addAll(
-                kol("R. br.", k -> String.valueOf(k.getId())),
+//                kol("R. br.", k -> String.valueOf(k.getId())),
                 kol("ID br.", Kandidat::getIdKandidata),
                 kol("Ime", Kandidat::getIme),
                 kol("Prezime", Kandidat::getPrezime),
@@ -337,6 +337,7 @@ public class Main extends Application {
                 new Tab("Instruktori", instruktoriTable),
                 new Tab("Vozila", vozilaTable)
         );
+        tabPane.setStyle("-fx-focus-color: transparent; -fx-faint-focus-color: transparent;");
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
 
         HBox dugmici = new HBox(10, dugmiciKandidati, pretragaField);
@@ -383,7 +384,7 @@ public class Main extends Application {
 
         ScrollPane obavestenjaScroll = new ScrollPane(obavestenjaGlavniBox);
         obavestenjaScroll.setFitToWidth(true);
-        obavestenjaScroll.setPrefWidth(420);
+        obavestenjaScroll.setPrefWidth(460);
         obavestenjaScroll.setStyle("-fx-background-color: transparent; -fx-border-color: transparent;");
 
         HBox glavni = new HBox(20, levaStranaSaFooterom, obavestenjaScroll);
@@ -393,7 +394,7 @@ public class Main extends Application {
         stage.setMaximized(true);
         stage.setTitle("Auto škola „Dušan Start”");
         Scene scene = new Scene(glavni, 1350, 700);
-        glavni.setStyle("-fx-font-size: 16px;");
+        glavni.setStyle("-fx-font-size: 18px;");
         stage.setScene(scene);
         stage.show();
 

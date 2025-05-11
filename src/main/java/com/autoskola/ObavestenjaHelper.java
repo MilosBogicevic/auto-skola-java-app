@@ -51,7 +51,7 @@ public class ObavestenjaHelper {
                 return true;
             } else if (dana <= 7) {
                 Label l = new Label("⚠ " + tip + " uskoro ističe za " + ime + " (" + datumIsteka.format(srpskiFormat) + ")");
-                l.setStyle("-fx-text-fill: orange;");
+                l.setStyle("-fx-text-fill: #CC7722;");
                 box.getChildren().add(l);
                 return true;
             }
@@ -75,7 +75,7 @@ public class ObavestenjaHelper {
             return true;
         } else if (dana <= prag) {
             Label l = new Label("⚠ " + tip + " uskoro ističe za " + ime + " (" + datumIsteka.format(srpskiFormat) + ")");
-            l.setStyle("-fx-text-fill: orange;");
+            l.setStyle("-fx-text-fill: #CC7722;");
             box.getChildren().add(l);
             return true;
         }
@@ -94,7 +94,7 @@ public class ObavestenjaHelper {
             return true;
         } else if (proslo >= 174) {
             Label l = new Label("⚠ Tehnički uskoro ističe za " + tablice + " (" + datumIsteka.format(srpskiFormat) + ")");
-            l.setStyle("-fx-text-fill: orange;");
+            l.setStyle("-fx-text-fill: #CC7722;");
             box.getChildren().add(l);
             return true;
         }
