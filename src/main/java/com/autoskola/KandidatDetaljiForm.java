@@ -3,10 +3,7 @@ package com.autoskola;
 import javafx.geometry.Insets;
 import javafx.print.PrinterJob;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
@@ -26,41 +23,52 @@ public class KandidatDetaljiForm {
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.setTitle("Detalji kandidata - " + kandidat.getIme() + " " + kandidat.getPrezime());
 
-        VBox layout = new VBox(10);
-        layout.setPadding(new Insets(20));
-        layout.setStyle("-fx-font-size: 16px;");
-
         DateTimeFormatter format = DateTimeFormatter.ofPattern("dd.MM.yyyy.");
 
-        layout.getChildren().addAll(
+        Label naslov = new Label("Detalji kandidata:");
+        naslov.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+
+        VBox detaljiBox = new VBox(6);
+        detaljiBox.getChildren().addAll(
                 new Label("ID broj kandidata: " + kandidat.getIdKandidata()),
                 new Label("Ime i prezime: " + kandidat.getIme() + " " + kandidat.getPrezime()),
                 new Label("Telefon: " + kandidat.getTelefon()),
                 new Label("Email: " + (kandidat.getEmail().isEmpty() ? "nema" : kandidat.getEmail())),
                 new Label("Kategorija: " + kandidat.getKategorija()),
                 new Label("Datum upisa: " + kandidat.getDatumUpisa().format(format)),
-                new Label("Položio teoriju: " + (kandidat.isPolozioTeoriju() ? "DA" : "NE")),
-                new Label("Položio vožnju: " + (kandidat.isPolozioVoznju() ? "DA" : "NE")),
+                new Label("Položio teoriju: " + (kandidat.isPolozioTeoriju() ? "da" : "ne")),
+                new Label("Položio vožnju: " + (kandidat.isPolozioVoznju() ? "da" : "ne")),
                 new Label("Cena teorijske obuke: " + FormatUtil.format(kandidat.getCenaTeorija()) + " RSD"),
                 new Label("Cena praktične obuke: " + FormatUtil.format(kandidat.getCenaPraksa()) + " RSD"),
                 new Label("Plaćeno: " + FormatUtil.format(kandidat.getPlaceno()) + " RSD"),
-                new Label("Preostalo: " + FormatUtil.format(kandidat.getPreostalo()) + " RSD"),
-                new Label(""),
-                new Label("Uplate kandidata:")
+                new Label("Preostalo: " + FormatUtil.format(kandidat.getPreostalo()) + " RSD")
         );
 
+        Label uplateNaslov = new Label("Uplate kandidata:");
+        uplateNaslov.setStyle("-fx-font-weight: bold; -fx-font-size: 18px;");
+
+        VBox listaUplataBox = new VBox(5);
         List<Uplata> uplate = Database.vratiUplateZaKandidata(kandidat.getId());
         if (uplate.isEmpty()) {
-            layout.getChildren().add(new Label("- Nema zabeleženih uplata."));
+            listaUplataBox.getChildren().add(new Label("- Nema zabeleženih uplata."));
         } else {
             for (Uplata u : uplate) {
-                layout.getChildren().add(
-                        new Label("• " + u.getDatum().format(format) + " - " + FormatUtil.format(u.getIznos()) + " RSD")
-                );
+                Label stavka = new Label("• " + u.getDatum().format(format) + " – " + FormatUtil.format(u.getIznos()) + " RSD");
+                listaUplataBox.getChildren().add(stavka);
             }
         }
 
-        ScrollPane scroll = new ScrollPane(layout);
+        VBox sadrzaj = new VBox(12,
+                naslov,
+                detaljiBox,
+                new Separator(),
+                uplateNaslov,
+                listaUplataBox
+        );
+        sadrzaj.setPadding(new Insets(30));
+        sadrzaj.setStyle("-fx-font-size: 18px;");
+
+        ScrollPane scroll = new ScrollPane(sadrzaj);
         scroll.setFitToWidth(true);
         scroll.setPrefSize(500, 600);
 
@@ -68,10 +76,8 @@ public class KandidatDetaljiForm {
         stampajBtn.setOnAction(e -> {
             PrinterJob job = PrinterJob.createPrinterJob();
             if (job != null && job.showPrintDialog(stage)) {
-                boolean uspeh = job.printPage(layout);
-                if (uspeh) {
-                    job.endJob();
-                }
+                boolean uspeh = job.printPage(sadrzaj);
+                if (uspeh) job.endJob();
             }
         });
 
@@ -81,7 +87,6 @@ public class KandidatDetaljiForm {
                 String sablon = "sabloni/ugovor_" + kandidat.getKategorija() + ".docx";
                 String izlaz = "ugovori/ugovor-" + kandidat.getIme() + "-" + kandidat.getPrezime() + "-" + kandidat.getIdb() + ".docx";
 
-                // Kreiraj folder ako ne postoji
                 File izlazFajl = new File(izlaz);
                 File parentDir = izlazFajl.getParentFile();
                 if (parentDir != null && !parentDir.exists()) {
@@ -90,7 +95,6 @@ public class KandidatDetaljiForm {
 
                 UgovorGenerator.generisiUgovor(kandidat, sablon, izlaz);
                 Desktop.getDesktop().open(izlazFajl);
-
             } catch (Exception ex) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Greška");

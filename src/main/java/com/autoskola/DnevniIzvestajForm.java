@@ -41,7 +41,9 @@ public class DnevniIzvestajForm {
         });
 
         Button prikaziBtn = new Button("Prikaži izveštaj");
+        prikaziBtn.setStyle("-fx-font-size: 16px;");
         Button stampajBtn = new Button("Štampaj");
+        stampajBtn.setStyle("-fx-font-size: 16px;");
 
         ListView<String> lista = new ListView<>();
         Label ukupnoLabel = new Label("Ukupno: 0 RSD");
@@ -110,7 +112,7 @@ public class DnevniIzvestajForm {
                 stampajBtn
         );
         box.setPadding(new Insets(20));
-        box.setStyle("-fx-font-size: 16px;");
+        box.setStyle("-fx-font-size: 18px;");
 
         stage.setScene(new Scene(box, 500, 700));
         stage.showAndWait();

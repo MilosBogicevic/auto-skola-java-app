@@ -249,6 +249,7 @@ public class Main extends Application {
         pretragaField.textProperty().addListener((obs, oldVal, newVal) -> {
             kandidatiTable.setItems(kandidatiLista.filtered(k ->
                     (k.getIdKandidata() != null && k.getIdKandidata().toLowerCase().contains(newVal.toLowerCase())) ||
+                            (k.getIdb() != null && k.getIdb().toLowerCase().contains(newVal.toLowerCase())) ||
                             k.getIme().toLowerCase().contains(newVal.toLowerCase()) ||
                             k.getPrezime().toLowerCase().contains(newVal.toLowerCase())
             ));

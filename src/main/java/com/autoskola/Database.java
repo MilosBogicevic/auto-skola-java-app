@@ -163,7 +163,7 @@ public class Database {
 
     public static List<Kandidat> vratiSve() {
         List<Kandidat> lista = new ArrayList<>();
-        String sql = "SELECT * FROM kandidati";
+        String sql = "SELECT * FROM kandidati ORDER BY datum_upisa DESC";
 
         try (Connection conn = connect(); ResultSet rs = conn.createStatement().executeQuery(sql)) {
             while (rs.next()) {
