@@ -584,7 +584,8 @@ public class Main extends Application {
 
     private void napraviBackupAkoNijeDanasnji() {
         try {
-            String danas = LocalDate.now().toString();
+            DateTimeFormatter fajlFormat = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+            String danas = LocalDate.now().format(fajlFormat);
             Path izvor = Paths.get(Database.getDatabasePath());
             Path backupFolder = Paths.get("backup");
             Path odrediste = backupFolder.resolve("kandidati_" + danas + ".db");

@@ -87,7 +87,7 @@ public class ObavestenjaHelper {
         long proslo = ChronoUnit.DAYS.between(datumTehnickog, danas);
         LocalDate datumIsteka = datumTehnickog.plusDays(180);
 
-        if (proslo >= 181) {
+        if (proslo >= 180) {
             Label l = new Label("❌ Tehnički istekao za " + tablice + " (" + datumIsteka.format(srpskiFormat) + ")");
             l.setStyle("-fx-text-fill: red;");
             box.getChildren().add(l);
