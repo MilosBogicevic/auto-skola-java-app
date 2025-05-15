@@ -6,9 +6,9 @@ import java.util.List;
 
 public class SecurityLock {
     private static final List<String> DOZVOLJENE_MAC_ADRESE = List.of(
-            "00-11-22-33-44-55", // Prvi računar
-            "E4-E7-49-A1-9E-11",
-            "66-77-88-99-AA-BB"  // Drugi računar
+            "D4-3D-7E-DA-9C-E8", // Glavni računar
+            "88-51-FB-41-AF-13", // Drugi računar
+            "E4-E7-49-A1-9E-11"  // Radni za test
     );
 
     public static boolean jeDozvoljenoPokretanje() {

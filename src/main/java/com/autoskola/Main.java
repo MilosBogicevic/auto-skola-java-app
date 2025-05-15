@@ -609,6 +609,7 @@ public class Main extends Application {
     private void obrisiStareBackupFajlove() {
         Path backupFolder = Paths.get("backup");
         LocalDate danas = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
         try {
             if (!Files.exists(backupFolder)) return;
@@ -617,9 +618,9 @@ public class Main extends Application {
                     .filter(path -> path.getFileName().toString().startsWith("kandidati_") && path.toString().endsWith(".db"))
                     .forEach(path -> {
                         try {
-                            String ime = path.getFileName().toString(); // npr. kandidati_2025-04-01.db
-                            String datumString = ime.substring("kandidati_".length(), ime.length() - 3); // 2025-04-01
-                            LocalDate datum = LocalDate.parse(datumString);
+                            String ime = path.getFileName().toString(); // npr. kandidati_15-05-2025.db
+                            String datumString = ime.substring("kandidati_".length(), ime.length() - 3); // 15-05-2025
+                            LocalDate datum = LocalDate.parse(datumString, formatter);
 
                             long dana = ChronoUnit.DAYS.between(datum, danas);
                             if (dana > 30) {
@@ -635,7 +636,6 @@ public class Main extends Application {
             System.err.println("Greška prilikom listanja backup foldera: " + e.getMessage());
         }
     }
-
 
     public static void main(String[] args) {
         launch();
