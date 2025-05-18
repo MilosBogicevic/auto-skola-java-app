@@ -149,11 +149,11 @@ public class Main extends Application {
             return row;
         });
 
-        Button dodajKandidata = new Button("Dodaj kandidata");
-        Button izmeniKandidata = new Button("Izmeni kandidata");
-        Button dodajUplatu = new Button("Dodaj uplatu");
-        Button detaljiBtn = new Button("Detalji / Štampa");
-        Button dnevniIzvestajBtn = new Button("Dnevni izveštaj");
+        Button dodajKandidata = new Button("Dodaj kandidata", ikonicaDugmeta("add.png"));
+        Button izmeniKandidata = new Button("Izmeni kandidata", ikonicaDugmeta("edit.png"));
+        Button dodajUplatu = new Button("Dodaj uplatu", ikonicaDugmeta("wallet.png"));
+        Button detaljiBtn = new Button("Detalji / Štampa", ikonicaDugmeta("print.png"));
+        Button dnevniIzvestajBtn = new Button("Dnevni izveštaj", ikonicaDugmeta("report.png"));
 
         dugmiciKandidati = new HBox(10, dnevniIzvestajBtn);
 
@@ -250,9 +250,9 @@ public class Main extends Application {
             ));
         });
 
-        Button dodajInstruktora = new Button("Dodaj instruktora");
-        Button izmeniInstruktora = new Button("Izmeni instruktora");
-        Button obrisiInstruktora = new Button("Obriši instruktora");
+        Button dodajInstruktora = new Button("Dodaj instruktora", ikonicaDugmeta("add.png"));
+        Button izmeniInstruktora = new Button("Izmeni instruktora", ikonicaDugmeta("edit.png"));
+        Button obrisiInstruktora = new Button("Obriši instruktora", ikonicaDugmeta("trash.png"));
 
         dodajInstruktora.setOnAction(e -> new InstruktorForm(null, i -> {
             Database.sacuvajInstruktora(i);
@@ -288,9 +288,18 @@ public class Main extends Application {
 
         dugmiciInstruktori = new HBox(10, dodajInstruktora, izmeniInstruktora, obrisiInstruktora);
 
-        Button dodajVozilo = new Button("Dodaj vozilo");
-        Button izmeniVozilo = new Button("Izmeni vozilo");
-        Button obrisiVozilo = new Button("Obriši vozilo");
+        Button dodajVozilo = new Button("Dodaj vozilo", ikonicaDugmeta("add.png"));
+        Button izmeniVozilo = new Button("Izmeni vozilo", ikonicaDugmeta("edit.png"));
+        Button obrisiVozilo = new Button("Obriši vozilo", ikonicaDugmeta("trash.png"));
+
+        for (Button b : new Button[]{
+                dodajKandidata, izmeniKandidata, dodajUplatu, detaljiBtn, dnevniIzvestajBtn,
+                dodajInstruktora, izmeniInstruktora, obrisiInstruktora,
+                dodajVozilo, izmeniVozilo, obrisiVozilo
+        }) {
+            b.setGraphicTextGap(8);
+            b.setContentDisplay(ContentDisplay.LEFT);
+        }
 
         dodajVozilo.setOnAction(e -> new VoziloForm(null, v -> {
             Database.sacuvajVozilo(v);
@@ -637,6 +646,13 @@ public class Main extends Application {
         } catch (IOException e) {
             System.err.println("Greška prilikom listanja backup foldera: " + e.getMessage());
         }
+    }
+
+    private ImageView ikonicaDugmeta(String naziv) {
+        ImageView ikonica = new ImageView(new Image(getClass().getResourceAsStream("/icons/" + naziv)));
+        ikonica.setFitWidth(24);
+        ikonica.setFitHeight(24);
+        return ikonica;
     }
 
     public static void main(String[] args) {
