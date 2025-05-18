@@ -20,9 +20,9 @@ public class ObavestenjaHelper {
         boolean ima = false;
 
         for (Instruktor i : svi) {
-            if (dodajUpozorenje(box, "Lekarski", i.getIme(), i.getLekarskiIstice(), danas)) ima = true;
-            if (dodajUpozorenje(box, "Vozačka", i.getIme(), i.getVozackaIstice(), danas)) ima = true;
-            if (dodajUpozorenje(box, "Licenca", i.getIme(), i.getLicencaIstice(), danas)) ima = true;
+            if (dodajUpozorenje(box, "Lekarski", i, i.getLekarskiIstice(), danas)) ima = true;
+            if (dodajUpozorenje(box, "Vozačka", i, i.getVozackaIstice(), danas)) ima = true;
+            if (dodajUpozorenje(box, "Licenca", i, i.getLicencaIstice(), danas)) ima = true;
         }
 
         return ima;
@@ -42,19 +42,11 @@ public class ObavestenjaHelper {
         return ima;
     }
 
-    private static boolean dodajUpozorenje(VBox box, String tip, String ime, LocalDate datumIsteka, LocalDate danas) {
+    private static boolean dodajUpozorenje(VBox box, String tip, Instruktor instruktor, LocalDate datumIsteka, LocalDate danas) {
         long dana = ChronoUnit.DAYS.between(danas, datumIsteka);
 
-        if (tip.equals("Registracija")) {
-            if (dana < 0) {
-                dodajLabel(box, "Registracija istekla za " + ime + " (" + datumIsteka.format(srpskiFormat) + ")", "red", "error.png");
-                return true;
-            } else if (dana <= 7) {
-                dodajLabel(box, "Registracija uskoro ističe za " + ime + " (" + datumIsteka.format(srpskiFormat) + ")", "#CC7722", "warning.png");
-                return true;
-            }
-            return false;
-        }
+        String ime = instruktor.getIme();
+        int id = instruktor.getId();
 
         String glagol = switch (tip) {
             case "Vozačka", "Licenca" -> "istekla";
@@ -67,11 +59,28 @@ public class ObavestenjaHelper {
         };
 
         if (dana < 0 || dana == 0) {
-            dodajLabel(box, tip + " " + glagol + " za " + ime + " (" + datumIsteka.format(srpskiFormat) + ")", "red", "error.png");
+            dodajLabel(box, tip + " " + glagol + " za " + ime + " (" + datumIsteka.format(srpskiFormat) + ")", "red", "error.png", id);
             return true;
         } else if (dana <= prag) {
-            dodajLabel(box, tip + " uskoro ističe za " + ime + " (" + datumIsteka.format(srpskiFormat) + ")", "#CC7722", "warning.png");
+            dodajLabel(box, tip + " uskoro ističe za " + ime + " (" + datumIsteka.format(srpskiFormat) + ")", "#CC7722", "warning.png", id);
             return true;
+        }
+
+        return false;
+    }
+
+    private static boolean dodajUpozorenje(VBox box, String tip, String ime, LocalDate datumIsteka, LocalDate danas) {
+        long dana = ChronoUnit.DAYS.between(danas, datumIsteka);
+
+        if (tip.equals("Registracija")) {
+            if (dana < 0) {
+                dodajLabel(box, "Registracija istekla za " + ime + " (" + datumIsteka.format(srpskiFormat) + ")", "red", "error.png");
+                return true;
+            } else if (dana <= 7) {
+                dodajLabel(box, "Registracija uskoro ističe za " + ime + " (" + datumIsteka.format(srpskiFormat) + ")", "#CC7722", "warning.png");
+                return true;
+            }
+            return false;
         }
 
         return false;
@@ -102,6 +111,20 @@ public class ObavestenjaHelper {
         label.setGraphic(icon);
         label.setGraphicTextGap(8);
 
+        box.getChildren().add(label);
+    }
+
+    private static void dodajLabel(VBox box, String tekst, String boja, String ikonica, int idInstruktora) {
+        Label label = new Label(tekst);
+        label.setStyle("-fx-text-fill: " + boja);
+
+        ImageView icon = new ImageView(new Image(ObavestenjaHelper.class.getResourceAsStream("/icons/" + ikonica)));
+        icon.setFitWidth(20);
+        icon.setFitHeight(20);
+        label.setGraphic(icon);
+        label.setGraphicTextGap(8);
+
+        label.setUserData(idInstruktora); // ✅ sakriven ID za selekciju
         box.getChildren().add(label);
     }
 }

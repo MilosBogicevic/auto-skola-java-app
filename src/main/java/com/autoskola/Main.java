@@ -15,6 +15,7 @@ import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
@@ -24,17 +25,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Locale;
-
-import static com.autoskola.Database.connect;
 
 public class Main extends Application {
 
@@ -463,8 +457,16 @@ public class Main extends Application {
             long dana = ChronoUnit.DAYS.between(k.getDatumUpisa(), danas);
             double razlika = k.getCenaTeorija() - k.getPlaceno();
             if (dana >= 30 && razlika > 0) {
-                Label l = new Label("❗ " + k.getIme() + " " + k.getPrezime() + " duguje " + FormatUtil.format(razlika) + " za teorijsku obuku");
+                Label l = new Label(k.getIme() + " " + k.getPrezime() + " duguje " + FormatUtil.format(razlika) + " za teorijsku obuku");
+                l.setUserData(k.getId());
                 l.setStyle("-fx-text-fill: red;");
+
+                ImageView icon = new ImageView(new Image(getClass().getResourceAsStream("/icons/info.png")));
+                icon.setFitWidth(20);
+                icon.setFitHeight(20);
+                l.setGraphic(icon);
+                l.setGraphicTextGap(8);
+
                 l.setOnMouseClicked(this::obradiKlikNaObavestenje);
                 obavestenjaKandidatiBox.getChildren().add(l);
                 imaKandidata = true;
@@ -508,13 +510,11 @@ public class Main extends Application {
 
         if (text.contains("duguje")) {
             tabPane.getSelectionModel().select(0);  // Kandidati
-            String[] delovi = text.split(" ");
-            if (delovi.length >= 3) {
-                String ime = delovi[1];
-                String prezime = delovi[2];
+            Object data = ((Label) event.getSource()).getUserData();
+            if (data instanceof Integer id) {
                 kandidatiTable.getSelectionModel().clearSelection();
                 for (Kandidat k : kandidatiTable.getItems()) {
-                    if (k.getIme().equals(ime) && k.getPrezime().equals(prezime)) {
+                    if (k.getId() == id) {
                         kandidatiTable.getSelectionModel().select(k);
                         kandidatiTable.scrollTo(k);
                         kandidatiTable.requestFocus();
@@ -523,18 +523,17 @@ public class Main extends Application {
                 }
             }
         } else if (text.contains("Lekarski") || text.contains("Vozačka") || text.contains("Licenca")) {
-            tabPane.getSelectionModel().select(1);  // Instruktori
-            int indeksZa = text.lastIndexOf("za ");
-            int indeksOtvorenaZagrada = text.indexOf("(", indeksZa);
-            String ime = text.substring(indeksZa + 3, indeksOtvorenaZagrada).trim();
-
-            instruktoriTable.getSelectionModel().clearSelection();
-            for (Instruktor i : instruktoriTable.getItems()) {
-                if (i.getIme().equals(ime)) {
-                    instruktoriTable.getSelectionModel().select(i);
-                    instruktoriTable.scrollTo(i);
-                    instruktoriTable.requestFocus();
-                    break;
+            Object data = ((Label) event.getSource()).getUserData();
+            if (data instanceof Integer id) {
+                tabPane.getSelectionModel().select(1);  // Instruktori
+                instruktoriTable.getSelectionModel().clearSelection();
+                for (Instruktor i : instruktoriTable.getItems()) {
+                    if (i.getId() == id) {
+                        instruktoriTable.getSelectionModel().select(i);
+                        instruktoriTable.scrollTo(i);
+                        instruktoriTable.requestFocus();
+                        break;
+                    }
                 }
             }
         } else if (text.contains("Registracija") || text.contains("Tehnički")) {
@@ -615,10 +614,10 @@ public class Main extends Application {
         LocalDate danas = LocalDate.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
-        try {
-            if (!Files.exists(backupFolder)) return;
+        if (!Files.exists(backupFolder)) return;
 
-            Files.list(backupFolder)
+        try (var stream = Files.list(backupFolder)) {
+            stream
                     .filter(path -> path.getFileName().toString().startsWith("kandidati_") && path.toString().endsWith(".db"))
                     .forEach(path -> {
                         try {
@@ -635,7 +634,6 @@ public class Main extends Application {
                             System.err.println("Ne mogu da obradim fajl: " + path + " → " + e.getMessage());
                         }
                     });
-
         } catch (IOException e) {
             System.err.println("Greška prilikom listanja backup foldera: " + e.getMessage());
         }
