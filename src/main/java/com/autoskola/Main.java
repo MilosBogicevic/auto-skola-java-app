@@ -14,6 +14,7 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
@@ -386,6 +387,8 @@ public class Main extends Application {
         ScrollPane obavestenjaScroll = new ScrollPane(obavestenjaGlavniBox);
         obavestenjaScroll.setFitToWidth(true);
         obavestenjaScroll.setPrefWidth(460);
+        obavestenjaScroll.setMinWidth(460);
+        obavestenjaScroll.setMaxWidth(460);
         obavestenjaScroll.setStyle("-fx-background-color: transparent; -fx-border-color: transparent;");
 
         HBox glavni = new HBox(20, levaStranaSaFooterom, obavestenjaScroll);
@@ -394,6 +397,7 @@ public class Main extends Application {
 
         stage.setMaximized(true);
         stage.setTitle("Auto škola „Dušan Start”");
+        stage.getIcons().add(new Image(getClass().getResourceAsStream("/icons/AutoSkola.png")));
         Scene scene = new Scene(glavni, 1350, 700);
         glavni.setStyle("-fx-font-size: 18px;");
         stage.setScene(scene);

@@ -1,6 +1,8 @@
 package com.autoskola;
 
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 
 import java.time.LocalDate;
@@ -45,14 +47,10 @@ public class ObavestenjaHelper {
 
         if (tip.equals("Registracija")) {
             if (dana < 0) {
-                Label l = new Label("❌ " + tip + " istekla za " + ime + " (" + datumIsteka.format(srpskiFormat) + ")");
-                l.setStyle("-fx-text-fill: red;");
-                box.getChildren().add(l);
+                dodajLabel(box, "Registracija istekla za " + ime + " (" + datumIsteka.format(srpskiFormat) + ")", "red", "error.png");
                 return true;
             } else if (dana <= 7) {
-                Label l = new Label("⚠ " + tip + " uskoro ističe za " + ime + " (" + datumIsteka.format(srpskiFormat) + ")");
-                l.setStyle("-fx-text-fill: #CC7722;");
-                box.getChildren().add(l);
+                dodajLabel(box, "Registracija uskoro ističe za " + ime + " (" + datumIsteka.format(srpskiFormat) + ")", "#CC7722", "warning.png");
                 return true;
             }
             return false;
@@ -69,14 +67,10 @@ public class ObavestenjaHelper {
         };
 
         if (dana < 0 || dana == 0) {
-            Label l = new Label("❌ " + tip + " " + glagol + " za " + ime + " (" + datumIsteka.format(srpskiFormat) + ")");
-            l.setStyle("-fx-text-fill: red;");
-            box.getChildren().add(l);
+            dodajLabel(box, tip + " " + glagol + " za " + ime + " (" + datumIsteka.format(srpskiFormat) + ")", "red", "error.png");
             return true;
         } else if (dana <= prag) {
-            Label l = new Label("⚠ " + tip + " uskoro ističe za " + ime + " (" + datumIsteka.format(srpskiFormat) + ")");
-            l.setStyle("-fx-text-fill: #CC7722;");
-            box.getChildren().add(l);
+            dodajLabel(box, tip + " uskoro ističe za " + ime + " (" + datumIsteka.format(srpskiFormat) + ")", "#CC7722", "warning.png");
             return true;
         }
 
@@ -88,17 +82,26 @@ public class ObavestenjaHelper {
         LocalDate datumIsteka = datumTehnickog.plusDays(180);
 
         if (proslo >= 180) {
-            Label l = new Label("❌ Tehnički istekao za " + tablice + " (" + datumIsteka.format(srpskiFormat) + ")");
-            l.setStyle("-fx-text-fill: red;");
-            box.getChildren().add(l);
+            dodajLabel(box, "Tehnički istekao za " + tablice + " (" + datumIsteka.format(srpskiFormat) + ")", "red", "error.png");
             return true;
         } else if (proslo >= 174) {
-            Label l = new Label("⚠ Tehnički uskoro ističe za " + tablice + " (" + datumIsteka.format(srpskiFormat) + ")");
-            l.setStyle("-fx-text-fill: #CC7722;");
-            box.getChildren().add(l);
+            dodajLabel(box, "Tehnički uskoro ističe za " + tablice + " (" + datumIsteka.format(srpskiFormat) + ")", "#CC7722", "warning.png");
             return true;
         }
 
         return false;
+    }
+
+    private static void dodajLabel(VBox box, String tekst, String boja, String ikonica) {
+        Label label = new Label(tekst);
+        label.setStyle("-fx-text-fill: " + boja);
+
+        ImageView icon = new ImageView(new Image(ObavestenjaHelper.class.getResourceAsStream("/icons/" + ikonica)));
+        icon.setFitWidth(20);
+        icon.setFitHeight(20);
+        label.setGraphic(icon);
+        label.setGraphicTextGap(8);
+
+        box.getChildren().add(label);
     }
 }

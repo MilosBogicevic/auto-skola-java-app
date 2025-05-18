@@ -8,7 +8,8 @@ public class SecurityLock {
     private static final List<String> DOZVOLJENE_MAC_ADRESE = List.of(
             "D4-3D-7E-DA-9C-E8", // Glavni računar
             "88-51-FB-41-AF-13", // Drugi računar
-            "E4-E7-49-A1-9E-11"  // Radni za test
+            "E4-E7-49-A1-9E-11",  // Radni za test
+            "70-5A-B6-BC-42-A4" // Win 7 za test
     );
 
     public static boolean jeDozvoljenoPokretanje() {
