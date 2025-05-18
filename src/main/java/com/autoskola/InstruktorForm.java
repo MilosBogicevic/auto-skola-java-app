@@ -56,7 +56,11 @@ public class InstruktorForm {
         DatePicker licencaPicker = new DatePicker(postojeći != null ? postojeći.getLicencaIstice() : null);
         licencaPicker.setConverter(converter);
 
-        Button sacuvajBtn = new Button("Sačuvaj");
+        Button sacuvajBtn = new Button("Sačuvaj", IkonicaUtil.napravi("save.png"));
+        sacuvajBtn.setGraphicTextGap(8);
+        sacuvajBtn.setContentDisplay(ContentDisplay.LEFT);
+        sacuvajBtn.setStyle("-fx-font-size: 16px;");
+
         VBox.setMargin(sacuvajBtn, new Insets(10, 0, 10, 0));
 
         sacuvajBtn.setOnAction(e -> {

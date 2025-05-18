@@ -44,7 +44,10 @@ public class UplataForm {
         TextField iznosField = new TextField();
         iznosField.setPromptText("Iznos uplate (RSD)");
 
-        Button sacuvajBtn = new Button("Sačuvaj");
+        Button sacuvajBtn = new Button("Sačuvaj", IkonicaUtil.napravi("save.png"));
+        sacuvajBtn.setGraphicTextGap(8);
+        sacuvajBtn.setContentDisplay(ContentDisplay.LEFT);
+        sacuvajBtn.setStyle("-fx-font-size: 16px;");
 
         sacuvajBtn.setOnAction(e -> {
             try {

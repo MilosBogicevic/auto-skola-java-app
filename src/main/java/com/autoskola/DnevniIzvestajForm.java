@@ -40,10 +40,14 @@ public class DnevniIzvestajForm {
             }
         });
 
-        Button prikaziBtn = new Button("Prikaži izveštaj");
-        prikaziBtn.setStyle("-fx-font-size: 16px;");
-        Button stampajBtn = new Button("Štampaj");
-        stampajBtn.setStyle("-fx-font-size: 16px;");
+        Button stampajBtn = new Button("Štampaj", IkonicaUtil.napravi("print.png"));
+        Button prikaziBtn = new Button("Prikaži izveštaj", IkonicaUtil.napravi("report.png"));
+
+        for (Button b : new Button[]{stampajBtn, prikaziBtn}) {
+            b.setGraphicTextGap(8);
+            b.setContentDisplay(ContentDisplay.LEFT);
+            b.setStyle("-fx-font-size: 16px;");
+        }
 
         ListView<String> lista = new ListView<>();
         Label ukupnoLabel = new Label("Ukupno: 0 RSD");

@@ -72,7 +72,15 @@ public class KandidatDetaljiForm {
         scroll.setFitToWidth(true);
         scroll.setPrefSize(500, 600);
 
-        Button stampajBtn = new Button("Štampaj detalje");
+        Button stampajBtn = new Button("Štampaj detalje", IkonicaUtil.napravi("print.png"));
+        Button ugovorBtn = new Button("Otvori ugovor", IkonicaUtil.napravi("contract.png"));
+
+        stampajBtn.setContentDisplay(ContentDisplay.LEFT);
+        ugovorBtn.setContentDisplay(ContentDisplay.LEFT);
+        stampajBtn.setGraphicTextGap(8);
+        ugovorBtn.setGraphicTextGap(8);
+
+
         stampajBtn.setOnAction(e -> {
             PrinterJob job = PrinterJob.createPrinterJob();
             if (job != null && job.showPrintDialog(stage)) {
@@ -81,7 +89,6 @@ public class KandidatDetaljiForm {
             }
         });
 
-        Button ugovorBtn = new Button("Otvori ugovor");
         ugovorBtn.setOnAction(e -> {
             try {
                 String sablon = "sabloni/ugovor_" + kandidat.getKategorija() + ".docx";

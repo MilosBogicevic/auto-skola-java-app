@@ -118,7 +118,11 @@ public class KandidatForm {
         HBox.setHgrow(datumUpisaPicker, Priority.ALWAYS);
         datumBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
-        Button sacuvajBtn = new Button("Sačuvaj");
+        Button sacuvajBtn = new Button("Sačuvaj", IkonicaUtil.napravi("save.png"));
+        sacuvajBtn.setGraphicTextGap(8);
+        sacuvajBtn.setContentDisplay(ContentDisplay.LEFT);
+        sacuvajBtn.setStyle("-fx-font-size: 16px;");
+
         VBox.setMargin(sacuvajBtn, new Insets(10, 0, 10, 0));
 
         sacuvajBtn.setOnAction(e -> {

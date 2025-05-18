@@ -48,7 +48,11 @@ public class VoziloForm {
         tehnickiPicker.setConverter(converter);
         VBox tehnickiBox = new VBox(5, new Label("Datum tehničkog pregleda:"), tehnickiPicker);
 
-        Button sacuvajBtn = new Button("Sačuvaj");
+        Button sacuvajBtn = new Button("Sačuvaj", IkonicaUtil.napravi("save.png"));
+        sacuvajBtn.setGraphicTextGap(8);
+        sacuvajBtn.setContentDisplay(ContentDisplay.LEFT);
+        sacuvajBtn.setStyle("-fx-font-size: 16px;");
+
         VBox.setMargin(sacuvajBtn, new Insets(10, 0, 10, 0));
 
         sacuvajBtn.setOnAction(e -> {
