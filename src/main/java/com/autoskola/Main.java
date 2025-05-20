@@ -238,7 +238,7 @@ public class Main extends Application {
         dugmiciKandidati = new HBox(10, dodajKandidata, izmeniKandidata, dodajUplatu, detaljiBtn, dnevniIzvestajBtn);
 
         pretragaField = new TextField();
-        pretragaField.setPromptText("🔍 Pretraga po ID broju, imenu ili prezimenu");
+        pretragaField.setPromptText("Pretraga po ID broju, imenu ili prezimenu");
         HBox.setHgrow(pretragaField, Priority.ALWAYS);
         pretragaField.setMaxWidth(Double.MAX_VALUE);
         pretragaField.textProperty().addListener((obs, oldVal, newVal) -> {
