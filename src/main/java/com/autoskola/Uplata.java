@@ -8,18 +8,19 @@ public class Uplata {
     private LocalDate datum;
     private double iznos;
     private String nacinUplate;
+    private String svrha;
 
-    public Uplata(int id, int kandidatId, LocalDate datum, double iznos, String nacinUplate) {
+    public Uplata(int id, int kandidatId, LocalDate datum, double iznos, String nacinUplate, String svrha) {
         this.id = id;
         this.kandidatId = kandidatId;
         this.datum = datum;
         this.iznos = iznos;
         this.nacinUplate = nacinUplate;
+        this.svrha = svrha;
     }
 
-    // Stari konstruktor (podrazumevano: Gotovina)
-    public Uplata(int id, int kandidatId, LocalDate datum, double iznos) {
-        this(id, kandidatId, datum, iznos, "Gotovina");
+    public Uplata(int id, int kandidatId, LocalDate datum, double iznos, String nacinUplate) {
+        this(id, kandidatId, datum, iznos, nacinUplate, "Obuka");
     }
 
     public int getId() {
@@ -42,7 +43,15 @@ public class Uplata {
         return nacinUplate;
     }
 
+    public String getSvrha() {
+        return svrha;
+    }
+
     public void setNacinUplate(String nacinUplate) {
         this.nacinUplate = nacinUplate;
+    }
+
+    public void setSvrha(String svrha) {
+        this.svrha = svrha;
     }
 }

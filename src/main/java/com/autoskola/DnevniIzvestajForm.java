@@ -9,11 +9,9 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
-import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Locale;
 
 public class DnevniIzvestajForm {
 
@@ -64,9 +62,12 @@ public class DnevniIzvestajForm {
 
             for (Uplata u : uplate) {
                 Kandidat k = Database.vratiKandidataPoId(u.getKandidatId());
-                String opis = FormatUtil.format(u.getIznos()) + " RSD";
+                StringBuilder opis = new StringBuilder();
+
+                opis.append(u.getSvrha() != null ? u.getSvrha() : "Obuka");
+                opis.append(" – ").append(FormatUtil.format(u.getIznos())).append(" RSD");
                 if (!u.getNacinUplate().equals("Gotovina")) {
-                    opis += " (" + u.getNacinUplate() + ")";
+                    opis.append(" – ").append(u.getNacinUplate());
                 }
 
                 String stavka = k.getIdKandidata() + " – " + k.getIme() + " " + k.getPrezime()
@@ -74,7 +75,7 @@ public class DnevniIzvestajForm {
                         + " – " + opis;
 
                 lista.getItems().add(stavka);
-                ukupno += u.getIznos();
+                ukupno += u.getIznos(); // Sabira SVE, uključujući i ispite i dopunske
             }
 
             if (uplate.isEmpty()) {
@@ -124,7 +125,7 @@ public class DnevniIzvestajForm {
         box.setPadding(new Insets(20));
         box.setStyle("-fx-font-size: 18px;");
 
-        stage.setScene(new Scene(box, 700, 700));
+        stage.setScene(new Scene(box, 960, 700));
         stage.showAndWait();
     }
 }

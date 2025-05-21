@@ -81,7 +81,8 @@ public class Database {
                     kandidat_id INTEGER,
                     datum TEXT,
                     iznos REAL,
-                    nacin_uplate TEXT
+                    nacin_uplate TEXT,
+                    svrha TEXT
                 );
             """);
 
@@ -390,12 +391,13 @@ public class Database {
     // === UPLATE ===
 
     public static void sacuvajUplatu(Uplata u) {
-        String sql = "INSERT INTO uplate (kandidat_id, datum, iznos, nacin_uplate) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO uplate (kandidat_id, datum, iznos, nacin_uplate, svrha) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = connect(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, u.getKandidatId());
             stmt.setString(2, u.getDatum().toString());
             stmt.setDouble(3, u.getIznos());
             stmt.setString(4, u.getNacinUplate());
+            stmt.setString(5, u.getSvrha());
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -411,12 +413,18 @@ public class Database {
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
+                String nacin = rs.getString("nacin_uplate");
+                if (nacin == null || nacin.isEmpty()) nacin = "Gotovina";
+                String svrha = rs.getString("svrha");
+                if (svrha == null || svrha.isEmpty()) svrha = "Obuka";
+
                 lista.add(new Uplata(
                         rs.getInt("id"),
                         rs.getInt("kandidat_id"),
                         LocalDate.parse(rs.getString("datum")),
                         rs.getDouble("iznos"),
-                        rs.getString("nacin_uplate") != null ? rs.getString("nacin_uplate") : "Gotovina"
+                        nacin,
+                        svrha
                 ));
             }
         } catch (SQLException e) {
@@ -435,12 +443,18 @@ public class Database {
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
+                String nacin = rs.getString("nacin_uplate");
+                if (nacin == null || nacin.isEmpty()) nacin = "Gotovina";
+                String svrha = rs.getString("svrha");
+                if (svrha == null || svrha.isEmpty()) svrha = "Obuka";
+
                 lista.add(new Uplata(
                         rs.getInt("id"),
                         rs.getInt("kandidat_id"),
                         LocalDate.parse(rs.getString("datum")),
                         rs.getDouble("iznos"),
-                        rs.getString("nacin_uplate") != null ? rs.getString("nacin_uplate") : "Gotovina"
+                        nacin,
+                        svrha
                 ));
             }
         } catch (SQLException e) {

@@ -183,7 +183,10 @@ public class Main extends Application {
                     Database.sacuvajUplatu(u);
 
                     double ukupno = Database.vratiUplateZaKandidata(selektovani.getId())
-                            .stream().mapToDouble(Uplata::getIznos).sum();
+                            .stream()
+                            .filter(upl -> upl.getSvrha() == null || upl.getSvrha().equalsIgnoreCase("Obuka"))
+                            .mapToDouble(Uplata::getIznos)
+                            .sum();
 
                     selektovani.setPlaceno(ukupno);
 

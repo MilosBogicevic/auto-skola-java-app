@@ -61,6 +61,11 @@ public class UplataForm {
         VBox radioBox = new VBox(5, gotovina, racun, zabrana, cekovi);
         radioBox.setPadding(new Insets(0, 0, 0, 10));
 
+        Label svrhaLabel = new Label("Svrha uplate:");
+        ComboBox<String> svrhaBox = new ComboBox<>();
+        svrhaBox.getItems().addAll("Obuka", "Teorijski ispit", "Praktični ispit", "Dopunski čas");
+        svrhaBox.setValue("Obuka");
+
         Button sacuvajBtn = new Button("Sačuvaj", IkonicaUtil.napravi("save.png"));
         sacuvajBtn.setGraphicTextGap(8);
         sacuvajBtn.setContentDisplay(ContentDisplay.LEFT);
@@ -80,8 +85,9 @@ public class UplataForm {
                 LocalDate datum = datumPicker.getValue();
                 double iznos = FormatUtil.parse(iznosField.getText());
                 String nacin = ((RadioButton) grupa.getSelectedToggle()).getText();
+                String svrha = svrhaBox.getValue();
 
-                Uplata uplata = new Uplata(0, kandidatId, datum, iznos, nacin);
+                Uplata uplata = new Uplata(0, kandidatId, datum, iznos, nacin, svrha);
                 onSacuvaj.accept(uplata);
                 stage.close();
             } catch (ParseException ex) {
@@ -99,13 +105,15 @@ public class UplataForm {
                 iznosField,
                 nacinLabel,
                 radioBox,
+                svrhaLabel,
+                svrhaBox,
                 spacer,
                 sacuvajBtn
         );
         layout.setPadding(new Insets(20));
         layout.setStyle("-fx-font-size: 16px;");
 
-        stage.setScene(new Scene(layout, 320, 420));
+        stage.setScene(new Scene(layout, 320, 460));
         stage.setOnShown(ev -> iznosField.requestFocus());
         stage.showAndWait();
     }

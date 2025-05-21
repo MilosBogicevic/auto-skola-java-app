@@ -49,14 +49,18 @@ public class KandidatDetaljiForm {
 
         VBox listaUplataBox = new VBox(5);
         List<Uplata> uplate = Database.vratiUplateZaKandidata(kandidat.getId());
+
         if (uplate.isEmpty()) {
             listaUplataBox.getChildren().add(new Label("- Nema zabeleženih uplata."));
         } else {
             for (Uplata u : uplate) {
-                String opis = FormatUtil.format(u.getIznos()) + " RSD";
+                StringBuilder opis = new StringBuilder();
+                opis.append(u.getSvrha() != null ? u.getSvrha() : "Obuka");
+                opis.append(" – ").append(FormatUtil.format(u.getIznos())).append(" RSD");
                 if (!u.getNacinUplate().equals("Gotovina")) {
-                    opis += " (" + u.getNacinUplate() + ")";
+                    opis.append(" – ").append(u.getNacinUplate());
                 }
+
                 Label stavka = new Label("• " + u.getDatum().format(format) + " – " + opis);
                 listaUplataBox.getChildren().add(stavka);
             }
@@ -74,7 +78,7 @@ public class KandidatDetaljiForm {
 
         ScrollPane scroll = new ScrollPane(sadrzaj);
         scroll.setFitToWidth(true);
-        scroll.setPrefSize(500, 600);
+        scroll.setPrefSize(650, 600);
 
         Button stampajBtn = new Button("Štampaj detalje", IkonicaUtil.napravi("print.png"));
         Button ugovorBtn = new Button("Otvori ugovor", IkonicaUtil.napravi("contract.png"));
@@ -83,7 +87,6 @@ public class KandidatDetaljiForm {
         ugovorBtn.setContentDisplay(ContentDisplay.LEFT);
         stampajBtn.setGraphicTextGap(8);
         ugovorBtn.setGraphicTextGap(8);
-
 
         stampajBtn.setOnAction(e -> {
             PrinterJob job = PrinterJob.createPrinterJob();
