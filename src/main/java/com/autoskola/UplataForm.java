@@ -10,11 +10,9 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
-import java.text.NumberFormat;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Locale;
 import java.util.function.Consumer;
 
 public class UplataForm {
@@ -44,6 +42,25 @@ public class UplataForm {
         TextField iznosField = new TextField();
         iznosField.setPromptText("Iznos uplate (RSD)");
 
+        Label nacinLabel = new Label("Način uplate:");
+        ToggleGroup grupa = new ToggleGroup();
+
+        RadioButton gotovina = new RadioButton("Gotovina");
+        gotovina.setToggleGroup(grupa);
+        gotovina.setSelected(true);
+
+        RadioButton racun = new RadioButton("Uplata na račun");
+        racun.setToggleGroup(grupa);
+
+        RadioButton zabrana = new RadioButton("Administrativna zabrana");
+        zabrana.setToggleGroup(grupa);
+
+        RadioButton cekovi = new RadioButton("Čekovi");
+        cekovi.setToggleGroup(grupa);
+
+        VBox radioBox = new VBox(5, gotovina, racun, zabrana, cekovi);
+        radioBox.setPadding(new Insets(0, 0, 0, 10));
+
         Button sacuvajBtn = new Button("Sačuvaj", IkonicaUtil.napravi("save.png"));
         sacuvajBtn.setGraphicTextGap(8);
         sacuvajBtn.setContentDisplay(ContentDisplay.LEFT);
@@ -62,8 +79,9 @@ public class UplataForm {
 
                 LocalDate datum = datumPicker.getValue();
                 double iznos = FormatUtil.parse(iznosField.getText());
+                String nacin = ((RadioButton) grupa.getSelectedToggle()).getText();
 
-                Uplata uplata = new Uplata(0, kandidatId, datum, iznos);
+                Uplata uplata = new Uplata(0, kandidatId, datum, iznos, nacin);
                 onSacuvaj.accept(uplata);
                 stage.close();
             } catch (ParseException ex) {
@@ -76,11 +94,18 @@ public class UplataForm {
         Region spacer = new Region();
         VBox.setVgrow(spacer, Priority.ALWAYS);
 
-        VBox layout = new VBox(10, datumPicker, iznosField, spacer, sacuvajBtn);
+        VBox layout = new VBox(10,
+                datumPicker,
+                iznosField,
+                nacinLabel,
+                radioBox,
+                spacer,
+                sacuvajBtn
+        );
         layout.setPadding(new Insets(20));
         layout.setStyle("-fx-font-size: 16px;");
 
-        stage.setScene(new Scene(layout, 300, 180));
+        stage.setScene(new Scene(layout, 320, 420));
         stage.setOnShown(ev -> iznosField.requestFocus());
         stage.showAndWait();
     }

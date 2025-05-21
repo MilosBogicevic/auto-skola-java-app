@@ -53,7 +53,11 @@ public class KandidatDetaljiForm {
             listaUplataBox.getChildren().add(new Label("- Nema zabeleženih uplata."));
         } else {
             for (Uplata u : uplate) {
-                Label stavka = new Label("• " + u.getDatum().format(format) + " – " + FormatUtil.format(u.getIznos()) + " RSD");
+                String opis = FormatUtil.format(u.getIznos()) + " RSD";
+                if (!u.getNacinUplate().equals("Gotovina")) {
+                    opis += " (" + u.getNacinUplate() + ")";
+                }
+                Label stavka = new Label("• " + u.getDatum().format(format) + " – " + opis);
                 listaUplataBox.getChildren().add(stavka);
             }
         }

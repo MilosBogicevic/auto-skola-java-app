@@ -80,7 +80,8 @@ public class Database {
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     kandidat_id INTEGER,
                     datum TEXT,
-                    iznos REAL
+                    iznos REAL,
+                    nacin_uplate TEXT
                 );
             """);
 
@@ -389,11 +390,12 @@ public class Database {
     // === UPLATE ===
 
     public static void sacuvajUplatu(Uplata u) {
-        String sql = "INSERT INTO uplate (kandidat_id, datum, iznos) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO uplate (kandidat_id, datum, iznos, nacin_uplate) VALUES (?, ?, ?, ?)";
         try (Connection conn = connect(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, u.getKandidatId());
             stmt.setString(2, u.getDatum().toString());
             stmt.setDouble(3, u.getIznos());
+            stmt.setString(4, u.getNacinUplate());
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -413,7 +415,8 @@ public class Database {
                         rs.getInt("id"),
                         rs.getInt("kandidat_id"),
                         LocalDate.parse(rs.getString("datum")),
-                        rs.getDouble("iznos")
+                        rs.getDouble("iznos"),
+                        rs.getString("nacin_uplate") != null ? rs.getString("nacin_uplate") : "Gotovina"
                 ));
             }
         } catch (SQLException e) {
@@ -436,7 +439,8 @@ public class Database {
                         rs.getInt("id"),
                         rs.getInt("kandidat_id"),
                         LocalDate.parse(rs.getString("datum")),
-                        rs.getDouble("iznos")
+                        rs.getDouble("iznos"),
+                        rs.getString("nacin_uplate") != null ? rs.getString("nacin_uplate") : "Gotovina"
                 ));
             }
         } catch (SQLException e) {

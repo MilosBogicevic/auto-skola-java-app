@@ -64,9 +64,15 @@ public class DnevniIzvestajForm {
 
             for (Uplata u : uplate) {
                 Kandidat k = Database.vratiKandidataPoId(u.getKandidatId());
+                String opis = FormatUtil.format(u.getIznos()) + " RSD";
+                if (!u.getNacinUplate().equals("Gotovina")) {
+                    opis += " (" + u.getNacinUplate() + ")";
+                }
+
                 String stavka = k.getIdKandidata() + " – " + k.getIme() + " " + k.getPrezime()
                         + " – " + srpskiFormat.format(u.getDatum())
-                        + " – " + FormatUtil.format(u.getIznos()) + " RSD";
+                        + " – " + opis;
+
                 lista.getItems().add(stavka);
                 ukupno += u.getIznos();
             }
@@ -118,7 +124,7 @@ public class DnevniIzvestajForm {
         box.setPadding(new Insets(20));
         box.setStyle("-fx-font-size: 18px;");
 
-        stage.setScene(new Scene(box, 600, 700));
+        stage.setScene(new Scene(box, 700, 700));
         stage.showAndWait();
     }
 }
