@@ -9,7 +9,7 @@ import java.util.Optional;
 public class AppLock {
     private static FileChannel channel;
     private static FileLock lock;
-    private static final Path LOCK_FILE = Paths.get("app.lock");
+    private static final Path LOCK_FILE = Paths.get(Database.getDatabasePath()).getParent().resolve("app.lock");
 
     public static boolean zakljucaj() {
         try {

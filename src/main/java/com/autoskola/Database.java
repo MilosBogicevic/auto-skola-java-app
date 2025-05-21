@@ -1,21 +1,30 @@
 package com.autoskola;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Database {
+    private static final String LOKALNA_PUTANJA = "C:/autoskola/kandidati.db";
+    private static final String MREZNA_PUTANJA = "Z:/kandidati.db";
+
     private static final String URL;
+
     static {
-        String path;
-        try {
-            path = new File(System.getProperty("user.dir")).getAbsolutePath();
-        } catch (Exception e) {
-            path = new File("").getAbsolutePath(); // fallback
+        Path lokalna = Paths.get("C:/autoskola/");
+
+        if (Files.exists(lokalna)) {
+            System.out.println("Koristi se LOKALNA baza: " + lokalna);
+            URL = "jdbc:sqlite:" + LOKALNA_PUTANJA;
+        } else {
+            System.out.println("Koristi se MREŽNA baza: " + MREZNA_PUTANJA);
+            URL = "jdbc:sqlite:" + MREZNA_PUTANJA;
         }
-        URL = "jdbc:sqlite:" + path + File.separator + "kandidati.db";
     }
 
     public static void initialize() {
@@ -88,6 +97,19 @@ public class Database {
         return URL.replace("jdbc:sqlite:", "");
     }
 
+    public static boolean bazaFizickiPostoji() {
+        return Files.exists(Paths.get(getDatabasePath()));
+    }
+
+    public static boolean postojiTabela(String nazivTabele) {
+        try (Connection conn = connect();
+             ResultSet rs = conn.getMetaData().getTables(null, null, nazivTabele, null)) {
+            return rs.next();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
     // === KANDIDATI ===
 
     public static void sacuvajKandidata(Kandidat k) {

@@ -33,55 +33,69 @@ public class UgovorGenerator {
 
             for (XWPFParagraph para : doc.getParagraphs()) {
                 List<XWPFRun> runs = para.getRuns();
-                if (runs == null) continue;
+                if (runs == null || runs.isEmpty()) continue;
 
-                StringBuilder punTekst = new StringBuilder();
+                // Prvo pokušaj jednostavnu zamenu u svakom run-u
+                boolean pronadjenJednostavanToken = false;
                 for (XWPFRun run : runs) {
-                    String tekst = run.getText(0);
-                    if (tekst != null) {
-                        punTekst.append(tekst);
+                    String text = run.getText(0);
+                    if (text == null) continue;
+
+                    boolean promenjeno = false;
+                    for (Map.Entry<String, String> entry : zamene.entrySet()) {
+                        if (text.contains(entry.getKey())) {
+                            text = text.replace(entry.getKey(), entry.getValue());
+                            promenjeno = true;
+                        }
+                    }
+
+                    if (promenjeno) {
+                        run.setText(text, 0);
+                        pronadjenJednostavanToken = true;
                     }
                 }
 
-                String paragrafTekst = punTekst.toString();
-                boolean trebaZamena = false;
+                if (pronadjenJednostavanToken) continue; // Ako smo sve zamenili jednostavno, nastavi dalje
 
+                // Ako nismo uspeli, pokušaj da spojiš sve run-ove i obradiš kao jedan tekst
+                StringBuilder sb = new StringBuilder();
+                for (XWPFRun run : runs) {
+                    String text = run.getText(0);
+                    if (text != null) sb.append(text);
+                }
+                String ceoTekst = sb.toString();
+
+                boolean sadrziToken = false;
                 for (String kljuc : zamene.keySet()) {
-                    if (paragrafTekst.contains(kljuc)) {
-                        trebaZamena = true;
+                    if (ceoTekst.contains(kljuc)) {
+                        sadrziToken = true;
                         break;
                     }
                 }
 
-                if (trebaZamena) {
-                    // Zameni tekst
-                    String zamenjeniTekst = paragrafTekst;
+                if (sadrziToken) {
+                    String zamenjeni = ceoTekst;
                     for (Map.Entry<String, String> entry : zamene.entrySet()) {
-                        zamenjeniTekst = zamenjeniTekst.replace(entry.getKey(), entry.getValue());
+                        zamenjeni = zamenjeni.replace(entry.getKey(), entry.getValue());
                     }
 
-                    // Obriši sve run-ove
-                    for (int i = runs.size() - 1; i >= 0; i--) {
-                        para.removeRun(i);
-                    }
+                    // Sačuvaj stil iz prvog run-a
+                    XWPFRun prvi = runs.get(0);
+                    String font = prvi.getFontFamily() != null ? prvi.getFontFamily() : "Times New Roman";
+                    int velicina = prvi.getFontSize() > 0 ? prvi.getFontSize() : 14;
+                    boolean bold = prvi.isBold();
+                    boolean italic = prvi.isItalic();
 
-                    // Napravi jedan novi run sa istim stilom kao prvi originalni run
-                    XWPFRun noviRun = para.createRun();
-                    noviRun.setText(zamenjeniTekst);
+                    // Obriši sve stare run-ove
+                    for (int i = runs.size() - 1; i >= 0; i--) para.removeRun(i);
 
-                    // Zadrži font iz originalnog teksta ako želiš
-                    if (!runs.isEmpty()) {
-                        XWPFRun original = runs.get(0);
-                        noviRun.setFontFamily("Times New Roman");
-                        noviRun.setFontSize(original.getFontSize());
-                        noviRun.setBold(original.isBold());
-                        noviRun.setItalic(original.isItalic());
-                    }
-
-                    // Ili možeš da nateraš da bude 18pt samo ako NIJE datum
-                    if (!zamenjeniTekst.contains(k.getDatumUpisa().format(dtf))) {
-                        noviRun.setFontSize(18);
-                    }
+                    // Napravi novi run sa zamenjenim tekstom i stilom
+                    XWPFRun novi = para.createRun();
+                    novi.setText(zamenjeni);
+                    novi.setFontFamily(font);
+                    novi.setFontSize(velicina);
+                    novi.setBold(bold);
+                    novi.setItalic(italic);
                 }
             }
 

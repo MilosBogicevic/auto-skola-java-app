@@ -118,7 +118,7 @@ public class DnevniIzvestajForm {
         box.setPadding(new Insets(20));
         box.setStyle("-fx-font-size: 18px;");
 
-        stage.setScene(new Scene(box, 500, 700));
+        stage.setScene(new Scene(box, 600, 700));
         stage.showAndWait();
     }
 }

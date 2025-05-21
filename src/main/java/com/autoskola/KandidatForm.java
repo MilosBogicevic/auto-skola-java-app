@@ -49,7 +49,7 @@ public class KandidatForm {
         TextField emailPolje = new TextField(postojeći != null ? postojeći.getEmail() : "");
 
         ComboBox<String> kategorijaBox = new ComboBox<>();
-        kategorijaBox.getItems().addAll("A1", "A2", "A", "B", "C", "CE");
+        kategorijaBox.getItems().addAll("A1", "A2", "A", "B", "C", "CE", "F");
         if (postojeći != null) kategorijaBox.setValue(postojeći.getKategorija());
 
         DatePicker datumUpisaPicker = new DatePicker(postojeći != null ? postojeći.getDatumUpisa() : LocalDate.now());
@@ -88,7 +88,7 @@ public class KandidatForm {
         // Adresa i grad
         VBox adresaBox = new VBox(2, new Label("Adresa stanovanja:"), adresaPolje);
         VBox gradBox = new VBox(2, new Label("Grad:"), gradPolje);
-        HBox adresaGradBox = new HBox(10, adresaBox, gradBox);
+        HBox adresaGradBox = new HBox(10, gradBox, adresaBox);
         HBox.setHgrow(adresaBox, Priority.ALWAYS);
         HBox.setHgrow(gradBox, Priority.ALWAYS);
 
