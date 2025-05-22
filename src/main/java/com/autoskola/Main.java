@@ -364,7 +364,7 @@ public class Main extends Application {
         obavestenjaInstruktoriBox = napraviBoxSaNaslovom("Obaveštenja – Instruktori");
         obavestenjaVozilaBox = napraviBoxSaNaslovom("Obaveštenja – Vozila");
 
-        VBox obavestenjaGlavniBox = new VBox(20, obavestenjaKandidatiBox, obavestenjaInstruktoriBox, obavestenjaVozilaBox);
+        VBox obavestenjaGlavniBox = new VBox(20, obavestenjaVozilaBox, obavestenjaInstruktoriBox, obavestenjaKandidatiBox);
         obavestenjaGlavniBox.setPrefWidth(420);
         osveziObavestenja();
 
