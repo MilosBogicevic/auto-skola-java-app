@@ -85,31 +85,14 @@ public class DnevniIzvestajForm {
             ukupnoLabel.setText("Ukupno: " + FormatUtil.format(ukupno) + " RSD");
         });
 
+        stampajBtn.setContentDisplay(ContentDisplay.LEFT);
+        stampajBtn.setGraphicTextGap(8);
+        stampajBtn.setStyle("-fx-font-size: 16px;");
+
         stampajBtn.setOnAction(e -> {
-            VBox zaStampu = new VBox(10);
-            zaStampu.setPadding(new Insets(40));
-            zaStampu.setStyle("-fx-font-size: 14px;");
-
-            Label naslovZaStampu = new Label(naslov.getText());
-            naslovZaStampu.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
-
-            zaStampu.getChildren().add(naslovZaStampu);
-            zaStampu.getChildren().add(new Label("Uplate:"));
-
-            VBox listaStavki = new VBox(5);
-            for (String stavka : lista.getItems()) {
-                listaStavki.getChildren().add(new Label(stavka));
-            }
-
-            zaStampu.getChildren().add(listaStavki);
-            zaStampu.getChildren().add(new Label(ukupnoLabel.getText()));
-
-            PrinterJob job = PrinterJob.createPrinterJob();
-            if (job != null && job.showPrintDialog(stage)) {
-                boolean success = job.printPage(zaStampu);
-                if (success) {
-                    job.endJob();
-                }
+            LocalDate datum = datumPicker.getValue();
+            if (datum != null) {
+                UgovorGenerator.generisiDnevniIzvestaj(datum);
             }
         });
 

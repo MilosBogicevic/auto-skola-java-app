@@ -88,12 +88,11 @@ public class KandidatDetaljiForm {
         stampajBtn.setGraphicTextGap(8);
         ugovorBtn.setGraphicTextGap(8);
 
+        stampajBtn.setContentDisplay(ContentDisplay.LEFT);
+        stampajBtn.setGraphicTextGap(8);
+
         stampajBtn.setOnAction(e -> {
-            PrinterJob job = PrinterJob.createPrinterJob();
-            if (job != null && job.showPrintDialog(stage)) {
-                boolean uspeh = job.printPage(sadrzaj);
-                if (uspeh) job.endJob();
-            }
+            UgovorGenerator.generisiDetaljeOKandidatu(kandidat);
         });
 
         ugovorBtn.setOnAction(e -> {
