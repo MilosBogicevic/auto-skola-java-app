@@ -1,7 +1,6 @@
 package com.autoskola;
 
 import javafx.geometry.Insets;
-import javafx.print.PrinterJob;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
@@ -16,7 +15,10 @@ import java.util.List;
 
 public class KandidatDetaljiForm {
 
-    public KandidatDetaljiForm(Kandidat kandidat) {
+    private final Label stanjeLabel = new Label();
+    private final ListView<Uplata> uplateList = new ListView<>();
+
+    public KandidatDetaljiForm(Kandidat kandidat, Runnable onOsvezi) {
         if (kandidat == null) return;
 
         Stage stage = new Stage();
@@ -26,86 +28,106 @@ public class KandidatDetaljiForm {
         DateTimeFormatter format = DateTimeFormatter.ofPattern("dd.MM.yyyy.");
 
         Label naslov = new Label("Detalji kandidata:");
-        naslov.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+        naslov.setStyle("-fx-size: 18px; -fx-font-weight: bold;");
 
         VBox detaljiBox = new VBox(6);
         detaljiBox.getChildren().addAll(
                 new Label("ID broj kandidata: " + kandidat.getIdKandidata()),
                 new Label("Ime i prezime: " + kandidat.getIme() + " " + kandidat.getPrezime()),
                 new Label("Telefon: " + kandidat.getTelefon()),
-                new Label("Email: " + (kandidat.getEmail().isEmpty() ? "nema" : kandidat.getEmail())),
                 new Label("Kategorija: " + kandidat.getKategorija()),
                 new Label("Datum upisa: " + kandidat.getDatumUpisa().format(format)),
                 new Label("Položio teoriju: " + (kandidat.isPolozioTeoriju() ? "da" : "ne")),
                 new Label("Položio vožnju: " + (kandidat.isPolozioVoznju() ? "da" : "ne")),
                 new Label("Cena teorijske obuke: " + FormatUtil.format(kandidat.getCenaTeorija()) + " RSD"),
-                new Label("Cena praktične obuke: " + FormatUtil.format(kandidat.getCenaPraksa()) + " RSD"),
-                new Label("Plaćeno: " + FormatUtil.format(kandidat.getPlaceno()) + " RSD"),
-                new Label("Preostalo: " + FormatUtil.format(kandidat.getPreostalo()) + " RSD")
+                new Label("Cena praktične obuke: " + FormatUtil.format(kandidat.getCenaPraksa()) + " RSD")
         );
 
         Label uplateNaslov = new Label("Uplate kandidata:");
         uplateNaslov.setStyle("-fx-font-weight: bold; -fx-font-size: 18px;");
 
-        VBox listaUplataBox = new VBox(5);
-        List<Uplata> uplate = Database.vratiUplateZaKandidata(kandidat.getId());
+        uplateList.setPrefHeight(250);
+        uplateList.setCellFactory(param -> new ListCell<>() {
+            @Override
+            protected void updateItem(Uplata u, boolean empty) {
+                super.updateItem(u, empty);
+                if (empty || u == null) {
+                    setText(null);
+                } else {
+                    String opis = u.getDatum().format(format) + " – " +
+                            FormatUtil.format(u.getIznos()) + " RSD – " +
+                            (u.getSvrha() != null ? u.getSvrha() : "Obuka");
 
-        if (uplate.isEmpty()) {
-            listaUplataBox.getChildren().add(new Label("- Nema zabeleženih uplata."));
-        } else {
-            for (Uplata u : uplate) {
-                StringBuilder opis = new StringBuilder();
-                opis.append(u.getSvrha() != null ? u.getSvrha() : "Obuka");
-                opis.append(" – ").append(FormatUtil.format(u.getIznos())).append(" RSD");
-                if (!u.getNacinUplate().equals("Gotovina")) {
-                    opis.append(" – ").append(u.getNacinUplate());
+                    if (u.getNacinUplate() != null && !u.getNacinUplate().equalsIgnoreCase("Gotovina")) {
+                        opis += " – " + u.getNacinUplate();
+                    }
+                    setText(opis);
                 }
-
-                Label stavka = new Label("• " + u.getDatum().format(format) + " – " + opis);
-                listaUplataBox.getChildren().add(stavka);
             }
-        }
+        });
 
-        VBox sadrzaj = new VBox(12,
-                naslov,
-                detaljiBox,
-                new Separator(),
-                uplateNaslov,
-                listaUplataBox
-        );
-        sadrzaj.setPadding(new Insets(30));
-        sadrzaj.setStyle("-fx-font-size: 18px;");
+        stanjeLabel.setStyle("-fx-font-size: 18px; -fx-padding: 10 0 0 0;");
 
-        ScrollPane scroll = new ScrollPane(sadrzaj);
-        scroll.setFitToWidth(true);
-        scroll.setPrefSize(650, 600);
+        Button obrisiUplatuBtn = new Button("Obriši uplatu", IkonicaUtil.napravi("trash.png"));
+        obrisiUplatuBtn.setContentDisplay(ContentDisplay.LEFT);
+        obrisiUplatuBtn.setGraphicTextGap(8);
+
+        obrisiUplatuBtn.setOnAction(e -> {
+            Uplata selektovana = uplateList.getSelectionModel().getSelectedItem();
+            if (selektovana == null) {
+                Alert poruka = new Alert(Alert.AlertType.INFORMATION);
+                poruka.setTitle("Obaveštenje");
+                poruka.setHeaderText(null);
+                poruka.setContentText("Niste selektovali uplatu.");
+                poruka.getDialogPane().setStyle("-fx-font-size: 16px;");
+                poruka.getButtonTypes().setAll(new ButtonType("U redu", ButtonBar.ButtonData.OK_DONE));
+                poruka.showAndWait();
+                return;
+            }
+
+            Alert potvrda = new Alert(Alert.AlertType.CONFIRMATION);
+            potvrda.setTitle("Potvrda brisanja");
+            potvrda.setHeaderText("Obriši izabranu uplatu?");
+            potvrda.setContentText("Datum: " + selektovana.getDatum().format(format) +
+                    "\nIznos: " + FormatUtil.format(selektovana.getIznos()) + " RSD");
+
+            potvrda.getButtonTypes().setAll(
+                    new ButtonType("Da", ButtonBar.ButtonData.YES),
+                    new ButtonType("Ne", ButtonBar.ButtonData.NO)
+            );
+            potvrda.getDialogPane().setStyle("-fx-font-size: 16px;");
+
+            if (potvrda.showAndWait().orElse(ButtonType.NO).getButtonData() == ButtonBar.ButtonData.YES) {
+                Database.obrisiUplatu(selektovana.getId());
+
+                double novoPlaceno = Database.vratiUplateZaKandidata(kandidat.getId()).stream()
+                        .filter(u -> u.getSvrha() == null || u.getSvrha().equalsIgnoreCase("Obuka"))
+                        .mapToDouble(Uplata::getIznos).sum();
+
+                kandidat.setPlaceno(novoPlaceno);
+                Database.izmeniKandidata(kandidat);
+
+                osveziStanjeIKandidata(kandidat);
+                onOsvezi.run();
+            }
+        });
 
         Button stampajBtn = new Button("Štampaj detalje", IkonicaUtil.napravi("print.png"));
         Button ugovorBtn = new Button("Otvori ugovor", IkonicaUtil.napravi("contract.png"));
 
-        stampajBtn.setContentDisplay(ContentDisplay.LEFT);
-        ugovorBtn.setContentDisplay(ContentDisplay.LEFT);
-        stampajBtn.setGraphicTextGap(8);
-        ugovorBtn.setGraphicTextGap(8);
+        for (Button b : new Button[]{stampajBtn, ugovorBtn}) {
+            b.setContentDisplay(ContentDisplay.LEFT);
+            b.setGraphicTextGap(8);
+        }
 
-        stampajBtn.setContentDisplay(ContentDisplay.LEFT);
-        stampajBtn.setGraphicTextGap(8);
-
-        stampajBtn.setOnAction(e -> {
-            UgovorGenerator.generisiDetaljeOKandidatu(kandidat);
-        });
+        stampajBtn.setOnAction(e -> UgovorGenerator.generisiDetaljeOKandidatu(kandidat));
 
         ugovorBtn.setOnAction(e -> {
             try {
                 String sablon = "sabloni/ugovor_" + kandidat.getKategorija() + ".docx";
                 String izlaz = "ugovori/ugovor-" + kandidat.getIme() + "-" + kandidat.getPrezime() + "-" + kandidat.getIdb() + ".docx";
-
                 File izlazFajl = new File(izlaz);
-                File parentDir = izlazFajl.getParentFile();
-                if (parentDir != null && !parentDir.exists()) {
-                    parentDir.mkdirs();
-                }
-
+                if (!izlazFajl.getParentFile().exists()) izlazFajl.getParentFile().mkdirs();
                 UgovorGenerator.generisiUgovor(kandidat, sablon, izlaz);
                 Desktop.getDesktop().open(izlazFajl);
             } catch (Exception ex) {
@@ -117,14 +139,43 @@ public class KandidatDetaljiForm {
             }
         });
 
-        HBox dugmici = new HBox(10, stampajBtn, ugovorBtn);
+        HBox dugmici = new HBox(10, obrisiUplatuBtn, stampajBtn, ugovorBtn);
         dugmici.setPadding(new Insets(10, 0, 0, 0));
+        dugmici.setStyle("-fx-font-size: 16px;");
 
-        VBox koren = new VBox(10, scroll, dugmici);
+        VBox sadrzaj = new VBox(12,
+                naslov,
+                detaljiBox,
+                new Separator(),
+                uplateNaslov,
+                uplateList,
+                stanjeLabel,
+                dugmici
+        );
+        sadrzaj.setPadding(new Insets(30));
+        sadrzaj.setStyle("-fx-font-size: 18px;");
+
+        ScrollPane scroll = new ScrollPane(sadrzaj);
+        scroll.setFitToWidth(true);
+        scroll.setPrefSize(700, 700);
+
+        VBox koren = new VBox(scroll);
         koren.setPadding(new Insets(10));
-        koren.setStyle("-fx-font-size: 16px;");
+        koren.setStyle("-fx-font-size: 18px;");
+
+        osveziStanjeIKandidata(kandidat);
 
         stage.setScene(new Scene(koren));
         stage.showAndWait();
+    }
+
+    private void osveziStanjeIKandidata(Kandidat kandidat) {
+        uplateList.getItems().setAll(Database.vratiUplateZaKandidata(kandidat.getId()));
+        stanjeLabel.setText("Plaćeno: " + FormatUtil.format(kandidat.getPlaceno()) +
+                " RSD / Preostalo: " + FormatUtil.format(kandidat.getPreostalo()) + " RSD");
+    }
+
+    public KandidatDetaljiForm(Kandidat kandidat) {
+        this(kandidat, () -> {});
     }
 }

@@ -224,11 +224,18 @@ public class Main extends Application {
             }
         });
 
-
         detaljiBtn.setOnAction(e -> {
             Kandidat k = kandidatiTable.getSelectionModel().getSelectedItem();
             if (k != null) {
-                new KandidatDetaljiForm(k);
+                new KandidatDetaljiForm(k, () -> {
+                    Kandidat osvezen = Database.vratiKandidataPoId(k.getId());
+                    for (int i = 0; i < kandidatiLista.size(); i++) {
+                        if (kandidatiLista.get(i).getId() == k.getId()) {
+                            kandidatiLista.set(i, osvezen);
+                            break;
+                        }
+                    }
+                });
             } else {
                 prikaziPoruku("Niste selektovali kandidata.");
             }
@@ -582,6 +589,7 @@ public class Main extends Application {
         alert.setHeaderText(null);
         alert.setContentText(tekst);
         alert.getDialogPane().setStyle("-fx-font-size: 16px;");
+        alert.getButtonTypes().setAll(new ButtonType("U redu", ButtonBar.ButtonData.OK_DONE));
         alert.showAndWait();
     }
 
@@ -591,8 +599,8 @@ public class Main extends Application {
         alert.setHeaderText(null);
         alert.setContentText(poruka);
 
-        DialogPane pane = alert.getDialogPane();
-        pane.setStyle("-fx-font-size: 16px; -fx-background-color: white;");
+        alert.getButtonTypes().setAll(new ButtonType("U redu", ButtonBar.ButtonData.OK_DONE));
+        alert.getDialogPane().setStyle("-fx-font-size: 16px; -fx-background-color: white;");
         alert.showAndWait();
         Platform.exit();
     }

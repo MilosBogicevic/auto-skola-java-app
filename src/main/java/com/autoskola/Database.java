@@ -463,4 +463,16 @@ public class Database {
 
         return lista;
     }
+
+    public static void obrisiUplatu(int uplataId) {
+        String sql = "DELETE FROM uplate WHERE id = ?";
+
+        try (Connection conn = connect(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, uplataId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

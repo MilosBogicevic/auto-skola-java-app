@@ -107,10 +107,9 @@ public class UgovorGenerator {
         try (XWPFDocument doc = new XWPFDocument(new FileInputStream("sabloni/kandidat_detalji.docx"))) {
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy.");
 
+            dodajParagraf(doc, "ID broj kandidata: " + k.getIdKandidata());
             dodajParagraf(doc, "Ime i prezime: " + k.getIme() + " " + k.getPrezime());
-            dodajParagraf(doc, "ID broj: " + k.getIdKandidata());
             dodajParagraf(doc, "Telefon: " + k.getTelefon());
-            dodajParagraf(doc, "Email: " + k.getEmail());
             dodajParagraf(doc, "Kategorija: " + k.getKategorija());
             dodajParagraf(doc, "Datum upisa: " + k.getDatumUpisa().format(dtf));
             dodajParagraf(doc, "Položio teoriju: " + (k.isPolozioTeoriju() ? "da" : "ne"));
