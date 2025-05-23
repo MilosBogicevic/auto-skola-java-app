@@ -37,8 +37,8 @@ public class KandidatDetaljiForm {
                 new Label("Telefon: " + kandidat.getTelefon()),
                 new Label("Kategorija: " + kandidat.getKategorija()),
                 new Label("Datum upisa: " + kandidat.getDatumUpisa().format(format)),
-                new Label("Položio teoriju: " + (kandidat.isPolozioTeoriju() ? "da" : "ne")),
-                new Label("Položio vožnju: " + (kandidat.isPolozioVoznju() ? "da" : "ne")),
+                new Label("Položena teorija: " + (kandidat.isPolozioTeoriju() ? "da" : "ne")),
+                new Label("Položena vožnja: " + (kandidat.isPolozioVoznju() ? "da" : "ne")),
                 new Label("Cena teorijske obuke: " + FormatUtil.format(kandidat.getCenaTeorija()) + " RSD"),
                 new Label("Cena praktične obuke: " + FormatUtil.format(kandidat.getCenaPraksa()) + " RSD")
         );

@@ -112,8 +112,8 @@ public class UgovorGenerator {
             dodajParagraf(doc, "Telefon: " + k.getTelefon());
             dodajParagraf(doc, "Kategorija: " + k.getKategorija());
             dodajParagraf(doc, "Datum upisa: " + k.getDatumUpisa().format(dtf));
-            dodajParagraf(doc, "Položio teoriju: " + (k.isPolozioTeoriju() ? "da" : "ne"));
-            dodajParagraf(doc, "Položio vožnju: " + (k.isPolozioVoznju() ? "da" : "ne"));
+            dodajParagraf(doc, "Položena teorija: " + (k.isPolozioTeoriju() ? "da" : "ne"));
+            dodajParagraf(doc, "Položena vožnja: " + (k.isPolozioVoznju() ? "da" : "ne"));
             dodajParagraf(doc, "Cena teorijske obuke: " + FormatUtil.format(k.getCenaTeorija()) + " RSD");
             dodajParagraf(doc, "Cena praktične obuke: " + FormatUtil.format(k.getCenaPraksa()) + " RSD");
             dodajParagraf(doc, "Plaćeno: " + FormatUtil.format(k.getPlaceno()) + " RSD");

@@ -55,10 +55,10 @@ public class KandidatForm {
         DatePicker datumUpisaPicker = new DatePicker(postojeći != null ? postojeći.getDatumUpisa() : LocalDate.now());
         datumUpisaPicker.setConverter(converter);
 
-        CheckBox polozioTeoriju = new CheckBox("Položio teoriju");
+        CheckBox polozioTeoriju = new CheckBox("Položena teorija");
         if (postojeći != null) polozioTeoriju.setSelected(postojeći.isPolozioTeoriju());
 
-        CheckBox polozioVoznju = new CheckBox("Položio vožnju");
+        CheckBox polozioVoznju = new CheckBox("Položena vožnja");
         if (postojeći != null) polozioVoznju.setSelected(postojeći.isPolozioVoznju());
 
         TextField cenaTeorijaPolje = new TextField(postojeći != null ? FormatUtil.format(postojeći.getCenaTeorija()) : "");
