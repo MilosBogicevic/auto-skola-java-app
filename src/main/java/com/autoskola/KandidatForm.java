@@ -67,7 +67,7 @@ public class KandidatForm {
         // ID i IDB
         VBox idBox = new VBox(2, new Label("ID broj kandidata:"), idKandidatPolje);
         VBox idbBox = new VBox(2, new Label("IDB (eUprava):"), idbPolje);
-        HBox idHBox = new HBox(10, idBox, idbBox);
+        HBox idHBox = new HBox(10, idbBox, idBox);
         HBox.setHgrow(idBox, Priority.ALWAYS);
         HBox.setHgrow(idbBox, Priority.ALWAYS);
 

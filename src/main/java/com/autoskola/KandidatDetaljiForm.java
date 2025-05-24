@@ -175,7 +175,7 @@ public class KandidatDetaljiForm {
 
     private void osveziStanjeIKandidata(Kandidat kandidat) {
         uplateList.getItems().setAll(Database.vratiUplateZaKandidata(kandidat.getId()));
-        stanjeLabel.setText("Plaćeno: " + FormatUtil.format(kandidat.getPlaceno()) +
+        stanjeLabel.setText("Plaćeno za obuku: " + FormatUtil.format(kandidat.getPlaceno()) +
                 " RSD / Preostalo: " + FormatUtil.format(kandidat.getPreostalo()) + " RSD");
     }
 

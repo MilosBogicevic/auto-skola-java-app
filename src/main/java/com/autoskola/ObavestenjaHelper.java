@@ -52,7 +52,7 @@ public class ObavestenjaHelper {
             double razlika = k.getCenaTeorija() - k.getPlaceno();
 
             if (dana >= 30 && razlika > 0) {
-                Label l = new Label(k.getIme() + " " + k.getPrezime() + " duguje " + FormatUtil.format(razlika) + " za teorijsku obuku " + "(" + k.getIdKandidata() + ")");
+                Label l = new Label(k.getIdKandidata() + " duguje " + FormatUtil.format(razlika) + " RSD za teorijsku obuku");
                 l.setUserData(k.getId());
                 l.setStyle("-fx-text-fill: red;");
 
@@ -90,7 +90,7 @@ public class ObavestenjaHelper {
             dodajLabel(box, tip + " " + glagol + " za " + ime + " (" + datumIsteka.format(srpskiFormat) + ")", "red", "error.png", id);
             return true;
         } else if (dana <= prag) {
-            dodajLabel(box, tip + " uskoro ističe za " + ime + " (" + datumIsteka.format(srpskiFormat) + ")", "#CC7722", "warning.png", id);
+            dodajLabel(box, tip + " ističe za " + ime + " (" + datumIsteka.format(srpskiFormat) + ")", "#CC7722", "warning.png", id);
             return true;
         }
 
@@ -105,7 +105,7 @@ public class ObavestenjaHelper {
                 dodajLabel(box, "Registracija istekla za " + ime + " (" + datumIsteka.format(srpskiFormat) + ")", "red", "error.png");
                 return true;
             } else if (dana <= 7) {
-                dodajLabel(box, "Registracija uskoro ističe za " + ime + " (" + datumIsteka.format(srpskiFormat) + ")", "#CC7722", "warning.png");
+                dodajLabel(box, "Registracija ističe za " + ime + " (" + datumIsteka.format(srpskiFormat) + ")", "#CC7722", "warning.png");
                 return true;
             }
             return false;
@@ -122,7 +122,7 @@ public class ObavestenjaHelper {
             dodajLabel(box, "Tehnički istekao za " + tablice + " (" + datumIsteka.format(srpskiFormat) + ")", "red", "error.png");
             return true;
         } else if (proslo >= 174) {
-            dodajLabel(box, "Tehnički uskoro ističe za " + tablice + " (" + datumIsteka.format(srpskiFormat) + ")", "#CC7722", "warning.png");
+            dodajLabel(box, "Tehnički ističe za " + tablice + " (" + datumIsteka.format(srpskiFormat) + ")", "#CC7722", "warning.png");
             return true;
         }
 
@@ -152,7 +152,7 @@ public class ObavestenjaHelper {
         label.setGraphic(icon);
         label.setGraphicTextGap(8);
 
-        label.setUserData(idInstruktora); // ✅ sakriven ID za selekciju
+        label.setUserData(idInstruktora); // sakriven ID za selekciju
         box.getChildren().add(label);
     }
 }

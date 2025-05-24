@@ -399,9 +399,9 @@ public class Main extends Application {
 
         ScrollPane obavestenjaScroll = new ScrollPane(obavestenjaGlavniBox);
         obavestenjaScroll.setFitToWidth(true);
-        obavestenjaScroll.setPrefWidth(460);
-        obavestenjaScroll.setMinWidth(460);
-        obavestenjaScroll.setMaxWidth(460);
+        obavestenjaScroll.setPrefWidth(480);
+        obavestenjaScroll.setMinWidth(480);
+        obavestenjaScroll.setMaxWidth(480);
         obavestenjaScroll.setStyle("-fx-background-color: transparent; -fx-border-color: transparent;");
 
         HBox glavni = new HBox(20, levaStranaSaFooterom, obavestenjaScroll);
@@ -409,7 +409,7 @@ public class Main extends Application {
         HBox.setHgrow(levaStranaSaFooterom, Priority.ALWAYS);
 
         stage.setMaximized(true);
-        stage.setTitle("Auto škola „Dušan Start”");
+        stage.setTitle("Auto škola „Dušan Start” - Aplikacija za vođenje evidencije");
         stage.getIcons().add(new Image(getClass().getResourceAsStream("/icons/AutoSkola.png")));
         Scene scene = new Scene(glavni, 1350, 700);
         glavni.setStyle("-fx-font-size: 18px;");
