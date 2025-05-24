@@ -14,6 +14,20 @@ public class ObavestenjaHelper {
 
     private static final DateTimeFormatter srpskiFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy.");
 
+    public static boolean prikaziObavestenjaVozila(VBox box) {
+        List<Vozilo> vozila = Database.vratiVozila();
+        LocalDate danas = LocalDate.now();
+        boolean ima = false;
+
+        for (Vozilo v : vozila) {
+            LocalDate registracijaIstice = v.getRegistracijaIstice().plusYears(1);
+            if (dodajUpozorenje(box, "Registracija", v.getTablice(), registracijaIstice, danas)) ima = true;
+            if (dodajTehnickiUpozorenje(box, v.getTablice(), v.getTehnickiIstice(), danas)) ima = true;
+        }
+
+        return ima;
+    }
+
     public static boolean prikaziObavestenjaInstruktora(VBox box) {
         List<Instruktor> svi = Database.vratiInstruktore();
         LocalDate danas = LocalDate.now();
@@ -28,15 +42,29 @@ public class ObavestenjaHelper {
         return ima;
     }
 
-    public static boolean prikaziObavestenjaVozila(VBox box) {
-        List<Vozilo> vozila = Database.vratiVozila();
+    public static boolean prikaziObavestenjaKandidata(VBox box) {
+        List<Kandidat> kandidati = Database.vratiSve();
         LocalDate danas = LocalDate.now();
         boolean ima = false;
 
-        for (Vozilo v : vozila) {
-            LocalDate registracijaIstice = v.getRegistracijaIstice().plusYears(1);
-            if (dodajUpozorenje(box, "Registracija", v.getTablice(), registracijaIstice, danas)) ima = true;
-            if (dodajTehnickiUpozorenje(box, v.getTablice(), v.getTehnickiIstice(), danas)) ima = true;
+        for (Kandidat k : kandidati) {
+            long dana = ChronoUnit.DAYS.between(k.getDatumUpisa(), danas);
+            double razlika = k.getCenaTeorija() - k.getPlaceno();
+
+            if (dana >= 30 && razlika > 0) {
+                Label l = new Label(k.getIme() + " " + k.getPrezime() + " duguje " + FormatUtil.format(razlika) + " za teorijsku obuku " + "(" + k.getIdKandidata() + ")");
+                l.setUserData(k.getId());
+                l.setStyle("-fx-text-fill: red;");
+
+                ImageView icon = new ImageView(new Image(ObavestenjaHelper.class.getResourceAsStream("/icons/info.png")));
+                icon.setFitWidth(20);
+                icon.setFitHeight(20);
+                l.setGraphic(icon);
+                l.setGraphicTextGap(8);
+
+                box.getChildren().add(l);
+                ima = true;
+            }
         }
 
         return ima;

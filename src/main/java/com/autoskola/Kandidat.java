@@ -85,4 +85,17 @@ public class Kandidat {
     public double getPreostalo() {
         return Math.max(0, getUkupnaCena() - placeno);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Kandidat)) return false;
+        Kandidat that = (Kandidat) o;
+        return id == that.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Integer.hashCode(id);
+    }
 }

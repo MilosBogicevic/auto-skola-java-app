@@ -4,6 +4,8 @@ import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -139,7 +141,9 @@ public class KandidatDetaljiForm {
             }
         });
 
-        HBox dugmici = new HBox(10, obrisiUplatuBtn, stampajBtn, ugovorBtn);
+        Region razmak = new Region();
+        HBox.setHgrow(razmak, Priority.ALWAYS);
+        HBox dugmici = new HBox(10, stampajBtn, ugovorBtn, razmak, obrisiUplatuBtn);
         dugmici.setPadding(new Insets(10, 0, 0, 0));
         dugmici.setStyle("-fx-font-size: 16px;");
 

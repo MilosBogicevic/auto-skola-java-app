@@ -471,27 +471,7 @@ public class Main extends Application {
         obavestenjaInstruktoriBox.getChildren().removeIf(n -> n instanceof Label && ((Label) n).getText() != null && !((Label) n).getText().startsWith("Obaveštenja"));
         obavestenjaVozilaBox.getChildren().removeIf(n -> n instanceof Label && ((Label) n).getText() != null && !((Label) n).getText().startsWith("Obaveštenja"));
 
-        boolean imaKandidata = false;
-        for (Kandidat k : kandidatiLista) {
-            long dana = ChronoUnit.DAYS.between(k.getDatumUpisa(), danas);
-            double razlika = k.getCenaTeorija() - k.getPlaceno();
-            if (dana >= 30 && razlika > 0) {
-                Label l = new Label(k.getIme() + " " + k.getPrezime() + " duguje " + FormatUtil.format(razlika) + " za teorijsku obuku");
-                l.setUserData(k.getId());
-                l.setStyle("-fx-text-fill: red;");
-
-                ImageView icon = new ImageView(new Image(getClass().getResourceAsStream("/icons/info.png")));
-                icon.setFitWidth(20);
-                icon.setFitHeight(20);
-                l.setGraphic(icon);
-                l.setGraphicTextGap(8);
-
-                l.setOnMouseClicked(this::obradiKlikNaObavestenje);
-                obavestenjaKandidatiBox.getChildren().add(l);
-                imaKandidata = true;
-            }
-        }
-
+        boolean imaKandidata = ObavestenjaHelper.prikaziObavestenjaKandidata(obavestenjaKandidatiBox);
         if (!imaKandidata) {
             Label nema = new Label("✓ Nema aktivnih obaveštenja.");
             nema.setStyle("-fx-text-fill: green;");
