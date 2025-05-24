@@ -315,7 +315,7 @@ public class Database {
 
     public static List<Instruktor> vratiInstruktore() {
         List<Instruktor> lista = new ArrayList<>();
-        try (Connection conn = connect(); ResultSet rs = conn.createStatement().executeQuery("SELECT * FROM instruktori")) {
+        try (Connection conn = connect(); ResultSet rs = conn.createStatement().executeQuery("SELECT * FROM instruktori ORDER BY id DESC")) {
             while (rs.next()) {
                 lista.add(new Instruktor(
                         rs.getInt("id"),
@@ -372,7 +372,7 @@ public class Database {
 
     public static List<Vozilo> vratiVozila() {
         List<Vozilo> lista = new ArrayList<>();
-        try (Connection conn = connect(); ResultSet rs = conn.createStatement().executeQuery("SELECT * FROM vozila")) {
+        try (Connection conn = connect(); ResultSet rs = conn.createStatement().executeQuery("SELECT * FROM vozila ORDER BY id DESC")) {
             while (rs.next()) {
                 lista.add(new Vozilo(
                         rs.getInt("id"),

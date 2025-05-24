@@ -473,25 +473,46 @@ public class Main extends Application {
 
         boolean imaKandidata = ObavestenjaHelper.prikaziObavestenjaKandidata(obavestenjaKandidatiBox);
         if (!imaKandidata) {
-            Label nema = new Label("✓ Nema aktivnih obaveštenja.");
-            nema.setStyle("-fx-text-fill: green;");
-            obavestenjaKandidatiBox.getChildren().add(nema);
+            ImageView iconK = new ImageView(new Image(getClass().getResourceAsStream("/icons/success.png")));
+            iconK.setFitWidth(20);
+            iconK.setFitHeight(20);
+
+            Label nemaK = new Label("Nema aktivnih obaveštenja.");
+            nemaK.setStyle("-fx-text-fill: green;");
+            nemaK.setGraphic(iconK);
+            nemaK.setGraphicTextGap(8);
+
+            obavestenjaKandidatiBox.getChildren().add(nemaK);
         }
 
         // Instruktori
         boolean imaInstruktora = ObavestenjaHelper.prikaziObavestenjaInstruktora(obavestenjaInstruktoriBox);
         if (!imaInstruktora) {
-            Label nema = new Label("✓ Nema aktivnih obaveštenja.");
-            nema.setStyle("-fx-text-fill: green;");
-            obavestenjaInstruktoriBox.getChildren().add(nema);
+            ImageView iconI = new ImageView(new Image(getClass().getResourceAsStream("/icons/success.png")));
+            iconI.setFitWidth(20);
+            iconI.setFitHeight(20);
+
+            Label nemaI = new Label("Nema aktivnih obaveštenja.");
+            nemaI.setStyle("-fx-text-fill: green;");
+            nemaI.setGraphic(iconI);
+            nemaI.setGraphicTextGap(8);
+
+            obavestenjaInstruktoriBox.getChildren().add(nemaI);
         }
 
         // Vozila
         boolean imaVozila = ObavestenjaHelper.prikaziObavestenjaVozila(obavestenjaVozilaBox);
         if (!imaVozila) {
-            Label nema = new Label("✓ Nema aktivnih obaveštenja.");
-            nema.setStyle("-fx-text-fill: green;");
-            obavestenjaVozilaBox.getChildren().add(nema);
+            ImageView iconV = new ImageView(new Image(getClass().getResourceAsStream("/icons/success.png")));
+            iconV.setFitWidth(20);
+            iconV.setFitHeight(20);
+
+            Label nemaV = new Label("Nema aktivnih obaveštenja.");
+            nemaV.setStyle("-fx-text-fill: green;");
+            nemaV.setGraphic(iconV);
+            nemaV.setGraphicTextGap(8);
+
+            obavestenjaVozilaBox.getChildren().add(nemaV);
         }
 
         // Klikovi na sve
@@ -555,6 +576,7 @@ public class Main extends Application {
         alert.setTitle(naslov);
         alert.setHeaderText(poruka);
         alert.setContentText("Ova radnja je trajna.");
+        alert.getDialogPane().setStyle("-fx-font-size: 16px;");
 
         ButtonType dugmeDa = new ButtonType("Da", ButtonBar.ButtonData.YES);
         ButtonType dugmeNe = new ButtonType("Ne", ButtonBar.ButtonData.NO);

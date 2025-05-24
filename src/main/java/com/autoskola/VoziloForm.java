@@ -52,7 +52,6 @@ public class VoziloForm {
         sacuvajBtn.setGraphicTextGap(8);
         sacuvajBtn.setContentDisplay(ContentDisplay.LEFT);
         sacuvajBtn.setStyle("-fx-font-size: 16px;");
-
         VBox.setMargin(sacuvajBtn, new Insets(10, 0, 10, 0));
 
         sacuvajBtn.setOnAction(e -> {
@@ -62,10 +61,18 @@ public class VoziloForm {
                     throw new IllegalArgumentException("Sva polja moraju biti popunjena.");
                 }
 
+                String uneseneTablice = tablicePolje.getText().trim();
+
+                // Ako se dodaje novo vozilo, proveri da li već postoji
+                if (postojece == null && Database.vratiVozila().stream()
+                        .anyMatch(v -> v.getTablice().equalsIgnoreCase(uneseneTablice))) {
+                    throw new IllegalArgumentException("Vozilo sa tim tablicama već postoji.");
+                }
+
                 Vozilo novo = new Vozilo(
                         postojece != null ? postojece.getId() : 0,
                         nazivPolje.getText(),
-                        tablicePolje.getText(),
+                        uneseneTablice,
                         registracijaPicker.getValue(),
                         tehnickiPicker.getValue()
                 );
@@ -74,8 +81,10 @@ public class VoziloForm {
             } catch (Exception ex) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Greška");
-                alert.setHeaderText("Unos nije uspešan");
-                alert.setContentText(ex.getMessage());
+                alert.setHeaderText(null);
+                alert.setContentText("Vozilo sa tim tablicama već postoji.");
+                alert.getDialogPane().setStyle("-fx-font-size: 16px;");
+                alert.getButtonTypes().setAll(new ButtonType("U redu", ButtonBar.ButtonData.OK_DONE));
                 alert.showAndWait();
             }
         });
