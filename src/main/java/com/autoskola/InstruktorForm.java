@@ -60,21 +60,30 @@ public class InstruktorForm {
         sacuvajBtn.setGraphicTextGap(8);
         sacuvajBtn.setContentDisplay(ContentDisplay.LEFT);
         sacuvajBtn.setStyle("-fx-font-size: 16px;");
-
         VBox.setMargin(sacuvajBtn, new Insets(10, 0, 10, 0));
 
         sacuvajBtn.setOnAction(e -> {
             sacuvajBtn.setDisable(true);
-
             try {
                 String ime = imePolje.getText().trim();
                 String prezime = prezimePolje.getText().trim();
-                LocalDate lekarski = lekarskiPicker.getValue();
-                LocalDate vozacka = vozackaPicker.getValue();
-                LocalDate licenca = licencaPicker.getValue();
 
-                if (ime.isEmpty() || prezime.isEmpty() || lekarski == null || vozacka == null || licenca == null) {
+                if (ime.isEmpty() || prezime.isEmpty()) {
                     throw new IllegalArgumentException("Sva polja moraju biti popunjena.");
+                }
+
+                LocalDate lekarski, vozacka, licenca;
+
+                try {
+                    lekarski = converter.fromString(lekarskiPicker.getEditor().getText().trim());
+                    vozacka = converter.fromString(vozackaPicker.getEditor().getText().trim());
+                    licenca = converter.fromString(licencaPicker.getEditor().getText().trim());
+
+                    lekarskiPicker.setValue(lekarski);
+                    vozackaPicker.setValue(vozacka);
+                    licencaPicker.setValue(licenca);
+                } catch (Exception ex) {
+                    throw new IllegalArgumentException("Datumi moraju biti u formatu: 01.01.2025.");
                 }
 
                 Instruktor novi = new Instruktor(
@@ -88,11 +97,13 @@ public class InstruktorForm {
                 onSacuvaj.accept(novi);
                 stage.close();
 
-            } catch (Exception ex) {
+            } catch (IllegalArgumentException ex) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Greška");
-                alert.setHeaderText("Neispravan unos");
-                alert.setContentText("Sva polja moraju biti ispravno popunjena. " + ex.getMessage());
+                alert.setHeaderText(null);
+                alert.setContentText(ex.getMessage());
+                alert.getDialogPane().setStyle("-fx-font-size: 16px;");
+                alert.getButtonTypes().setAll(new ButtonType("U redu", ButtonBar.ButtonData.OK_DONE));
                 alert.showAndWait();
                 sacuvajBtn.setDisable(false);
             }
@@ -105,15 +116,7 @@ public class InstruktorForm {
         VBox vozackaBox = new VBox(5, new Label("Vozačka dozvola ističe:"), vozackaPicker);
         VBox licencaBox = new VBox(5, new Label("Licenca ističe:"), licencaPicker);
 
-        VBox layout = new VBox(10,
-                imePrezimeBox,
-                lekarskiBox,
-                vozackaBox,
-                licencaBox,
-                spacer,
-                sacuvajBtn
-        );
-
+        VBox layout = new VBox(10, imePrezimeBox, lekarskiBox, vozackaBox, licencaBox, spacer, sacuvajBtn);
         layout.setPadding(new Insets(20));
         layout.setStyle("-fx-font-size: 16px;");
 

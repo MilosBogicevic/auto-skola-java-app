@@ -32,18 +32,24 @@ public class KandidatDetaljiForm {
         Label naslov = new Label("Detalji kandidata:");
         naslov.setStyle("-fx-size: 18px; -fx-font-weight: bold;");
 
-        VBox detaljiBox = new VBox(6);
-        detaljiBox.getChildren().addAll(
+        VBox kolona1 = new VBox(6);
+        VBox kolona2 = new VBox(6);
+
+        kolona1.getChildren().addAll(
                 new Label("ID broj kandidata: " + kandidat.getIdKandidata()),
-                new Label("Ime i prezime: " + kandidat.getIme() + " " + kandidat.getPrezime()),
-                new Label("Telefon: " + kandidat.getTelefon()),
                 new Label("Kategorija: " + kandidat.getKategorija()),
-                new Label("Datum upisa: " + kandidat.getDatumUpisa().format(format)),
                 new Label("Položena teorija: " + (kandidat.isPolozioTeoriju() ? "da" : "ne")),
+                new Label("Cena teorijske obuke: " + FormatUtil.format(kandidat.getCenaTeorija()) + " RSD")
+        );
+
+        kolona2.getChildren().addAll(
+                new Label("Ime i prezime: " + kandidat.getIme() + " " + kandidat.getPrezime()),
+                new Label("Datum upisa: " + kandidat.getDatumUpisa().format(format)),
                 new Label("Položena vožnja: " + (kandidat.isPolozioVoznju() ? "da" : "ne")),
-                new Label("Cena teorijske obuke: " + FormatUtil.format(kandidat.getCenaTeorija()) + " RSD"),
                 new Label("Cena praktične obuke: " + FormatUtil.format(kandidat.getCenaPraksa()) + " RSD")
         );
+
+        HBox detaljiBox = new HBox(40, kolona1, kolona2);
 
         Label uplateNaslov = new Label("Uplate kandidata:");
         uplateNaslov.setStyle("-fx-font-weight: bold; -fx-font-size: 18px;");
@@ -144,28 +150,29 @@ public class KandidatDetaljiForm {
         Region razmak = new Region();
         HBox.setHgrow(razmak, Priority.ALWAYS);
         HBox dugmici = new HBox(10, stampajBtn, ugovorBtn, razmak, obrisiUplatuBtn);
-        dugmici.setPadding(new Insets(10, 0, 0, 0));
-        dugmici.setStyle("-fx-font-size: 16px;");
+        Region spacer = new Region();
+        VBox.setVgrow(spacer, Priority.ALWAYS);
 
-        VBox sadrzaj = new VBox(12,
+        VBox content = new VBox(12,
                 naslov,
                 detaljiBox,
                 new Separator(),
                 uplateNaslov,
                 uplateList,
-                stanjeLabel,
-                dugmici
+                stanjeLabel
         );
-        sadrzaj.setPadding(new Insets(30));
-        sadrzaj.setStyle("-fx-font-size: 18px;");
+        content.setPadding(new Insets(30));
+        content.setStyle("-fx-font-size: 18px;");
 
-        ScrollPane scroll = new ScrollPane(sadrzaj);
+        ScrollPane scroll = new ScrollPane(content);
         scroll.setFitToWidth(true);
-        scroll.setPrefSize(700, 700);
+        scroll.setFitToHeight(true);
 
-        VBox koren = new VBox(scroll);
+        VBox koren = new VBox(10, scroll, dugmici);
+        VBox.setVgrow(scroll, Priority.ALWAYS);
         koren.setPadding(new Insets(10));
-        koren.setStyle("-fx-font-size: 18px;");
+        koren.setStyle("-fx-font-size: 16px;");
+
 
         osveziStanjeIKandidata(kandidat);
 

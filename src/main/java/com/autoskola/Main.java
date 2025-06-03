@@ -311,16 +311,26 @@ public class Main extends Application {
             b.setContentDisplay(ContentDisplay.LEFT);
         }
 
-        dodajVozilo.setOnAction(e -> new VoziloForm(null, v -> {
-            Database.sacuvajVozilo(v);
-            vozilaLista.setAll(Database.vratiVozila());
-            osveziObavestenja();
-        }));
+        for (Button b : new Button[]{
+                dodajKandidata, izmeniKandidata, dodajUplatu, detaljiBtn, dnevniIzvestajBtn
+        }) {
+            b.setMinWidth(Region.USE_PREF_SIZE);
+        }
+
+        dodajVozilo.setOnAction(e -> {
+            vozilaLista.setAll(Database.vratiVozila()); // OBAVEZNO osvežavanje liste
+            new VoziloForm(null, vozilaLista, v -> {
+                Database.sacuvajVozilo(v);
+                vozilaLista.setAll(Database.vratiVozila());
+                osveziObavestenja();
+            });
+        });
 
         izmeniVozilo.setOnAction(e -> {
             Vozilo v = vozilaTable.getSelectionModel().getSelectedItem();
             if (v != null) {
-                new VoziloForm(v, izmenjeno -> {
+                vozilaLista.setAll(Database.vratiVozila()); // obavezno osvežavanje liste i ovde
+                new VoziloForm(v, vozilaLista, izmenjeno -> {
                     Database.izmeniVozilo(izmenjeno);
                     vozilaLista.setAll(Database.vratiVozila());
                     osveziObavestenja();

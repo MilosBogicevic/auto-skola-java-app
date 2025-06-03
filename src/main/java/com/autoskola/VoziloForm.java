@@ -1,5 +1,6 @@
 package com.autoskola;
 
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -16,7 +17,7 @@ import java.util.function.Consumer;
 
 public class VoziloForm {
 
-    public VoziloForm(Vozilo postojece, Consumer<Vozilo> onSacuvaj) {
+    public VoziloForm(Vozilo postojece, ObservableList<Vozilo> postojecaLista, Consumer<Vozilo> onSacuvaj) {
         Stage stage = new Stage();
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.setTitle(postojece == null ? "Novo vozilo" : "Izmena vozila");
@@ -56,15 +57,23 @@ public class VoziloForm {
 
         sacuvajBtn.setOnAction(e -> {
             try {
-                if (nazivPolje.getText().isEmpty() || tablicePolje.getText().isEmpty()
-                        || registracijaPicker.getValue() == null || tehnickiPicker.getValue() == null) {
+                if (nazivPolje.getText().isEmpty() || tablicePolje.getText().isEmpty()) {
                     throw new IllegalArgumentException("Sva polja moraju biti popunjena.");
+                }
+
+                try {
+                    LocalDate datumRegistracije = converter.fromString(registracijaPicker.getEditor().getText().trim());
+                    LocalDate datumTehnickog = converter.fromString(tehnickiPicker.getEditor().getText().trim());
+                    registracijaPicker.setValue(datumRegistracije);
+                    tehnickiPicker.setValue(datumTehnickog);
+                } catch (Exception ex) {
+                    throw new IllegalArgumentException("Datum mora biti u formatu: 01.01.2025.");
                 }
 
                 String uneseneTablice = tablicePolje.getText().trim();
 
                 // Ako se dodaje novo vozilo, proveri da li već postoji
-                if (postojece == null && Database.vratiVozila().stream()
+                if (postojece == null && postojecaLista.stream()
                         .anyMatch(v -> v.getTablice().equalsIgnoreCase(uneseneTablice))) {
                     throw new IllegalArgumentException("Vozilo sa tim tablicama već postoji.");
                 }
@@ -78,11 +87,11 @@ public class VoziloForm {
                 );
                 onSacuvaj.accept(novo);
                 stage.close();
-            } catch (Exception ex) {
+            } catch (IllegalArgumentException ex) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Greška");
                 alert.setHeaderText(null);
-                alert.setContentText("Vozilo sa tim tablicama već postoji.");
+                alert.setContentText(ex.getMessage()); // ← prikazuje stvarnu poruku iz throw new IllegalArgumentException(...)
                 alert.getDialogPane().setStyle("-fx-font-size: 16px;");
                 alert.getButtonTypes().setAll(new ButtonType("U redu", ButtonBar.ButtonData.OK_DONE));
                 alert.showAndWait();

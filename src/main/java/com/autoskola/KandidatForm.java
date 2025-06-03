@@ -64,65 +64,42 @@ public class KandidatForm {
         TextField cenaTeorijaPolje = new TextField(postojeći != null ? FormatUtil.format(postojeći.getCenaTeorija()) : "");
         TextField cenaPraksaPolje = new TextField(postojeći != null ? FormatUtil.format(postojeći.getCenaPraksa()) : "");
 
-        // ID i IDB
         VBox idBox = new VBox(2, new Label("ID broj kandidata:"), idKandidatPolje);
         VBox idbBox = new VBox(2, new Label("IDB (eUprava):"), idbPolje);
         HBox idHBox = new HBox(10, idbBox, idBox);
-        HBox.setHgrow(idBox, Priority.ALWAYS);
-        HBox.setHgrow(idbBox, Priority.ALWAYS);
 
-        // Ime i prezime u jednom redu sa labelama iznad
         VBox imeBox = new VBox(2, new Label("Ime:"), imePolje);
         VBox prezimeBox = new VBox(2, new Label("Prezime:"), prezimePolje);
         HBox imePrezimeBox = new HBox(10, imeBox, prezimeBox);
-        HBox.setHgrow(imeBox, Priority.ALWAYS);
-        HBox.setHgrow(prezimeBox, Priority.ALWAYS);
 
-        // JMBG i lična karta
         VBox jmbgBox = new VBox(2, new Label("JMBG:"), jmbgPolje);
         VBox licnaBox = new VBox(2, new Label("Broj lične karte:"), licnaPolje);
         HBox jmbgLicnaBox = new HBox(10, jmbgBox, licnaBox);
-        HBox.setHgrow(jmbgBox, Priority.ALWAYS);
-        HBox.setHgrow(licnaBox, Priority.ALWAYS);
 
-        // Adresa i grad
         VBox adresaBox = new VBox(2, new Label("Adresa stanovanja:"), adresaPolje);
         VBox gradBox = new VBox(2, new Label("Grad:"), gradPolje);
         HBox adresaGradBox = new HBox(10, gradBox, adresaBox);
-        HBox.setHgrow(adresaBox, Priority.ALWAYS);
-        HBox.setHgrow(gradBox, Priority.ALWAYS);
 
-        // Telefon i email
         VBox telefonBox = new VBox(2, new Label("Telefon:"), telefonPolje);
         VBox emailBox = new VBox(2, new Label("Email (opciono):"), emailPolje);
         HBox telefonEmailBox = new HBox(10, telefonBox, emailBox);
-        HBox.setHgrow(telefonBox, Priority.ALWAYS);
-        HBox.setHgrow(emailBox, Priority.ALWAYS);
 
-        // Cena teorije i prakse u jednom redu sa labelama iznad
         VBox teorijskaBox = new VBox(2, new Label("Cena teorijske obuke (RSD):"), cenaTeorijaPolje);
         VBox prakticnaBox = new VBox(2, new Label("Cena praktične obuke (RSD):"), cenaPraksaPolje);
         HBox cenaBox = new HBox(10, teorijskaBox, prakticnaBox);
-        HBox.setHgrow(teorijskaBox, Priority.ALWAYS);
-        HBox.setHgrow(prakticnaBox, Priority.ALWAYS);
 
-        // Kategorija i dropdown u istom redu
         Label kategorijaLabel = new Label("Kategorija:");
         HBox kategorijaBoxHBox = new HBox(10, kategorijaLabel, kategorijaBox);
-        HBox.setHgrow(kategorijaBox, Priority.ALWAYS);
         kategorijaBoxHBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
-        // Datum upisa i picker u istom redu
         Label datumLabel = new Label("Datum upisa:");
         HBox datumBox = new HBox(10, datumLabel, datumUpisaPicker);
-        HBox.setHgrow(datumUpisaPicker, Priority.ALWAYS);
         datumBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
         Button sacuvajBtn = new Button("Sačuvaj", IkonicaUtil.napravi("save.png"));
         sacuvajBtn.setGraphicTextGap(8);
         sacuvajBtn.setContentDisplay(ContentDisplay.LEFT);
         sacuvajBtn.setStyle("-fx-font-size: 16px;");
-
         VBox.setMargin(sacuvajBtn, new Insets(10, 0, 10, 0));
 
         sacuvajBtn.setOnAction(e -> {
@@ -142,6 +119,14 @@ public class KandidatForm {
                 }
                 if (!cenaPraksaPolje.getText().matches(pattern)) {
                     throw new IllegalArgumentException("Iznos mora biti u formatu 1.000 ili 1000.");
+                }
+
+                LocalDate datumUpisa;
+                try {
+                    datumUpisa = converter.fromString(datumUpisaPicker.getEditor().getText().trim());
+                    datumUpisaPicker.setValue(datumUpisa);
+                } catch (Exception ex) {
+                    throw new IllegalArgumentException("Datum upisa mora biti u formatu: 01.01.2025.");
                 }
 
                 double cenaTeorija = FormatUtil.parse(cenaTeorijaPolje.getText());
@@ -170,7 +155,7 @@ public class KandidatForm {
                         kategorijaBox.getValue(),
                         polozioTeoriju.isSelected(),
                         polozioVoznju.isSelected(),
-                        datumUpisaPicker.getValue(),
+                        datumUpisa,
                         cenaTeorija,
                         cenaPraksa,
                         placeno,
