@@ -1,7 +1,6 @@
 package com.autoskola;
 
 import javafx.geometry.Insets;
-import javafx.print.PrinterJob;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
@@ -21,12 +20,7 @@ public class DnevniIzvestajForm {
         stage.setTitle("Dnevni izveštaj uplata");
 
         DateTimeFormatter srpskiFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy.");
-        Label naslov = new Label("Uplate na dan: –");
-        naslov.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
-
-        Label datumLabel = new Label("Izaberite datum:");
-        DatePicker datumPicker = new DatePicker(LocalDate.now());
-        datumPicker.setConverter(new StringConverter<>() {
+        StringConverter<LocalDate> converter = new StringConverter<>() {
             @Override
             public String toString(LocalDate date) {
                 return date != null ? date.format(srpskiFormat) : "";
@@ -36,7 +30,15 @@ public class DnevniIzvestajForm {
             public LocalDate fromString(String string) {
                 return (string != null && !string.isEmpty()) ? LocalDate.parse(string, srpskiFormat) : null;
             }
-        });
+        };
+
+        Label naslov = new Label("Uplate na dan: –");
+        naslov.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+
+        Label datumLabel = new Label("Izaberite datum:");
+        DatePicker datumPicker = new DatePicker(LocalDate.now());
+        datumPicker.setConverter(converter);
+        datumPicker.setPromptText("dd.MM.yyyy.");
 
         Button stampajBtn = new Button("Štampaj", IkonicaUtil.napravi("print.png"));
         Button prikaziBtn = new Button("Prikaži izveštaj", IkonicaUtil.napravi("report.png"));
@@ -52,8 +54,14 @@ public class DnevniIzvestajForm {
 
         prikaziBtn.setOnAction(e -> {
             lista.getItems().clear();
-            LocalDate datum = datumPicker.getValue();
-            if (datum == null) return;
+            LocalDate datum;
+            try {
+                datum = converter.fromString(datumPicker.getEditor().getText().trim());
+                datumPicker.setValue(datum);
+            } catch (Exception ex) {
+                prikaziGresku("Datum mora biti u formatu: 01.01.2025.");
+                return;
+            }
 
             naslov.setText("Uplate na dan: " + datum.format(srpskiFormat));
 
@@ -75,7 +83,7 @@ public class DnevniIzvestajForm {
                         + " – " + opis;
 
                 lista.getItems().add(stavka);
-                ukupno += u.getIznos(); // Sabira SVE, uključujući i ispite i dopunske
+                ukupno += u.getIznos();
             }
 
             if (uplate.isEmpty()) {
@@ -85,14 +93,13 @@ public class DnevniIzvestajForm {
             ukupnoLabel.setText("Ukupno: " + FormatUtil.format(ukupno) + " RSD");
         });
 
-        stampajBtn.setContentDisplay(ContentDisplay.LEFT);
-        stampajBtn.setGraphicTextGap(8);
-        stampajBtn.setStyle("-fx-font-size: 16px;");
-
         stampajBtn.setOnAction(e -> {
-            LocalDate datum = datumPicker.getValue();
-            if (datum != null) {
+            try {
+                LocalDate datum = converter.fromString(datumPicker.getEditor().getText().trim());
+                datumPicker.setValue(datum);
                 UgovorGenerator.generisiDnevniIzvestaj(datum);
+            } catch (Exception ex) {
+                prikaziGresku("Datum mora biti u formatu: 01.01.2025.");
             }
         });
 
@@ -110,5 +117,14 @@ public class DnevniIzvestajForm {
 
         stage.setScene(new Scene(box, 960, 700));
         stage.showAndWait();
+    }
+
+    private void prikaziGresku(String poruka) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Greška u unosu");
+        alert.setHeaderText(null);
+        alert.setContentText(poruka);
+        alert.getDialogPane().setStyle("-fx-font-size: 16px;");
+        alert.showAndWait();
     }
 }

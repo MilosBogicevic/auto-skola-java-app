@@ -36,7 +36,7 @@ public class UplataForm {
         };
 
         DatePicker datumPicker = new DatePicker(LocalDate.now());
-        datumPicker.setPromptText("Datum uplate");
+        datumPicker.setPromptText("dd.MM.yyyy.");
         datumPicker.setConverter(converter);
 
         TextField iznosField = new TextField();
@@ -73,7 +73,7 @@ public class UplataForm {
 
         sacuvajBtn.setOnAction(e -> {
             try {
-                if (datumPicker.getValue() == null || iznosField.getText().isEmpty()) {
+                if (datumPicker.getEditor().getText().trim().isEmpty() || iznosField.getText().isEmpty()) {
                     throw new IllegalArgumentException("Morate uneti datum i iznos.");
                 }
 
@@ -82,7 +82,14 @@ public class UplataForm {
                     throw new IllegalArgumentException("Iznos mora biti u formatu 1.000 ili 1000");
                 }
 
-                LocalDate datum = datumPicker.getValue();
+                LocalDate datum;
+                try {
+                    datum = converter.fromString(datumPicker.getEditor().getText().trim());
+                    datumPicker.setValue(datum); // osvežava DatePicker
+                } catch (Exception ex) {
+                    throw new IllegalArgumentException("Datum mora biti u formatu: 01.01.2025.");
+                }
+
                 double iznos = FormatUtil.parse(iznosField.getText());
                 String nacin = ((RadioButton) grupa.getSelectedToggle()).getText();
                 String svrha = svrhaBox.getValue();
