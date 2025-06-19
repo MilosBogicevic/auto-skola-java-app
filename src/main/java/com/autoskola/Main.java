@@ -229,12 +229,18 @@ public class Main extends Application {
             if (k != null) {
                 new KandidatDetaljiForm(k, () -> {
                     Kandidat osvezen = Database.vratiKandidataPoId(k.getId());
+
+                    // Ažuriraj kandidata u listi
                     for (int i = 0; i < kandidatiLista.size(); i++) {
                         if (kandidatiLista.get(i).getId() == k.getId()) {
                             kandidatiLista.set(i, osvezen);
                             break;
                         }
                     }
+
+                    // Dodato: osveži prikaz i obaveštenja
+                    kandidatiTable.refresh();
+                    osveziObavestenja();
                 });
             } else {
                 prikaziPoruku("Niste selektovali kandidata.");

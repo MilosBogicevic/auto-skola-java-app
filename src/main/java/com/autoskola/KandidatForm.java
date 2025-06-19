@@ -96,6 +96,14 @@ public class KandidatForm {
         HBox datumBox = new HBox(10, datumLabel, datumUpisaPicker);
         datumBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
+        for (HBox hbox : new HBox[]{idHBox, imePrezimeBox, jmbgLicnaBox, adresaGradBox, telefonEmailBox, cenaBox}) {
+            for (javafx.scene.Node node : hbox.getChildren()) {
+                if (node instanceof VBox) {
+                    HBox.setHgrow(node, Priority.ALWAYS);
+                }
+            }
+        }
+
         Button sacuvajBtn = new Button("Sačuvaj", IkonicaUtil.napravi("save.png"));
         sacuvajBtn.setGraphicTextGap(8);
         sacuvajBtn.setContentDisplay(ContentDisplay.LEFT);
@@ -106,10 +114,9 @@ public class KandidatForm {
             try {
                 if (idKandidatPolje.getText().isEmpty() || idbPolje.getText().isEmpty() ||
                         imePolje.getText().isEmpty() || prezimePolje.getText().isEmpty() ||
-                        jmbgPolje.getText().isEmpty() || licnaPolje.getText().isEmpty() ||
-                        adresaPolje.getText().isEmpty() || gradPolje.getText().isEmpty() ||
-                        telefonPolje.getText().isEmpty() || kategorijaBox.getValue() == null ||
-                        cenaTeorijaPolje.getText().isEmpty() || cenaPraksaPolje.getText().isEmpty()) {
+                        jmbgPolje.getText().isEmpty() || telefonPolje.getText().isEmpty() ||
+                        kategorijaBox.getValue() == null || cenaTeorijaPolje.getText().isEmpty() ||
+                        cenaPraksaPolje.getText().isEmpty()) {
                     throw new IllegalArgumentException("Sva obavezna polja moraju biti popunjena.");
                 }
 

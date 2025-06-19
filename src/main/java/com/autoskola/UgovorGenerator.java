@@ -161,27 +161,58 @@ public class UgovorGenerator {
             XWPFParagraph p = doc.createParagraph();
             XWPFRun run = p.createRun();
             run.setText("Dnevni izveštaj za: " + datum.format(dtf));
-            run.setFontSize(14);        // veći font
-            run.setBold(true);          // boldovan tekst
-            p.setSpacingAfter(300);     // više prostora ispod
+            run.setFontSize(14);
+            run.setBold(true);
+            p.setSpacingAfter(300);
 
-            List<Uplata> uplate = Database.vratiUplateZaDatum(datum);
             double ukupno = 0;
+            boolean imaUplata = false;
 
-            if (uplate.isEmpty()) {
+            // Uplate iz baze
+            List<Uplata> uplate = Database.vratiUplateZaDatum(datum);
+            for (Uplata u : uplate) {
+                Kandidat k = Database.vratiKandidataPoId(u.getKandidatId());
+                String opis = (u.getSvrha() != null ? u.getSvrha() : "Obuka") + " – "
+                        + FormatUtil.format(u.getIznos()) + " RSD"
+                        + (u.getNacinUplate().equals("Gotovina") ? "" : " – " + u.getNacinUplate());
+                String stavka = k.getIdKandidata() + " – " + k.getIme() + " " + k.getPrezime()
+                        + " – " + dtf.format(u.getDatum()) + " – " + opis;
+                dodajParagraf(doc, stavka);
+                ukupno += u.getIznos();
+                imaUplata = true;
+            }
+
+            // Uplate van evidencije iz CSV fajla
+            try (var reader = java.nio.file.Files.newBufferedReader(java.nio.file.Paths.get("van_evidencije.csv"))) {
+                String linija;
+                boolean prva = true;
+                while ((linija = reader.readLine()) != null) {
+                    if (prva) { prva = false; continue; }
+                    String[] podaci = linija.split(";", -1);
+                    if (podaci.length >= 4 && podaci[0].equals(datum.toString())) {
+                        String broj = podaci[1];
+                        int iznos = Integer.parseInt(podaci[2]);
+                        String svrha = podaci[3];
+                        String nacin = podaci.length >= 5 ? podaci[4] : "";
+
+                        String opis = (svrha != null ? svrha : "Obuka") + " – " + FormatUtil.format(iznos) + " RSD";
+                        if (!nacin.equals("Gotovina")) {
+                            opis += " – " + nacin;
+                        }
+
+                        String stavka = broj + " – " + datum.format(dtf) + " – " + opis;
+                        dodajParagraf(doc, stavka);
+                        ukupno += iznos;
+                        imaUplata = true;
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace(); // za debug
+            }
+
+            if (!imaUplata) {
                 dodajParagraf(doc, "- Nema uplata za izabrani datum.");
             } else {
-                for (Uplata u : uplate) {
-                    Kandidat k = Database.vratiKandidataPoId(u.getKandidatId());
-                    String opis = (u.getSvrha() != null ? u.getSvrha() : "Obuka") + " – "
-                            + FormatUtil.format(u.getIznos()) + " RSD"
-                            + (u.getNacinUplate().equals("Gotovina") ? "" : " – " + u.getNacinUplate());
-                    String stavka = k.getIdKandidata() + " – " + k.getIme() + " " + k.getPrezime()
-                            + " – " + dtf.format(u.getDatum()) + " – " + opis;
-                    dodajParagraf(doc, stavka);
-                    ukupno += u.getIznos();
-                }
-
                 doc.createParagraph().createRun().addBreak();
                 dodajParagraf(doc, "Ukupno: " + FormatUtil.format(ukupno) + " RSD");
             }
@@ -206,6 +237,7 @@ public class UgovorGenerator {
             alert.showAndWait();
         }
     }
+
 
     private static void dodajParagraf(XWPFDocument doc, String tekst) {
         XWPFParagraph p = doc.createParagraph();

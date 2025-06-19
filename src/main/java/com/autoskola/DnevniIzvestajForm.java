@@ -3,94 +3,99 @@ package com.autoskola;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class DnevniIzvestajForm {
+
+    private final DateTimeFormatter srpskiFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy.");
+    private final StringConverter<LocalDate> converter = new StringConverter<>() {
+        @Override
+        public String toString(LocalDate date) {
+            return date != null ? srpskiFormat.format(date) : "";
+        }
+
+        @Override
+        public LocalDate fromString(String string) {
+            return (string != null && !string.isEmpty()) ? LocalDate.parse(string, srpskiFormat) : null;
+        }
+    };
+
+    private final ListView<String> lista = new ListView<>();
+    private final Label ukupnoLabel = new Label("Ukupno: 0 RSD");
+    private final Label naslov = new Label("Uplate na dan: –");
+    private final DatePicker datumPicker = new DatePicker(LocalDate.now());
+
+    private final List<String> linijeCSV = new ArrayList<>();
+    private final Map<String, String> mapaLinija = new LinkedHashMap<>();
 
     public DnevniIzvestajForm() {
         Stage stage = new Stage();
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.setTitle("Dnevni izveštaj uplata");
 
-        DateTimeFormatter srpskiFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy.");
-        StringConverter<LocalDate> converter = new StringConverter<>() {
-            @Override
-            public String toString(LocalDate date) {
-                return date != null ? date.format(srpskiFormat) : "";
-            }
-
-            @Override
-            public LocalDate fromString(String string) {
-                return (string != null && !string.isEmpty()) ? LocalDate.parse(string, srpskiFormat) : null;
-            }
-        };
-
-        Label naslov = new Label("Uplate na dan: –");
         naslov.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
 
-        Label datumLabel = new Label("Izaberite datum:");
-        DatePicker datumPicker = new DatePicker(LocalDate.now());
         datumPicker.setConverter(converter);
         datumPicker.setPromptText("dd.MM.yyyy.");
 
         Button stampajBtn = new Button("Štampaj", IkonicaUtil.napravi("print.png"));
         Button prikaziBtn = new Button("Prikaži izveštaj", IkonicaUtil.napravi("report.png"));
+        Button dodajVanEvidencijuBtn = new Button("Dodaj uplatu van evidencije", IkonicaUtil.napravi("add.png"));
+        Button obrisiBtn = new Button("Obriši uplatu van evidencije", IkonicaUtil.napravi("trash.png"));
 
-        for (Button b : new Button[]{stampajBtn, prikaziBtn}) {
+        for (Button b : new Button[]{stampajBtn, prikaziBtn, dodajVanEvidencijuBtn, obrisiBtn}) {
             b.setGraphicTextGap(8);
             b.setContentDisplay(ContentDisplay.LEFT);
             b.setStyle("-fx-font-size: 16px;");
         }
 
-        ListView<String> lista = new ListView<>();
-        Label ukupnoLabel = new Label("Ukupno: 0 RSD");
+        prikaziBtn.setOnAction(e -> prikaziIzvestaj());
 
-        prikaziBtn.setOnAction(e -> {
-            lista.getItems().clear();
-            LocalDate datum;
-            try {
-                datum = converter.fromString(datumPicker.getEditor().getText().trim());
-                datumPicker.setValue(datum);
-            } catch (Exception ex) {
-                prikaziGresku("Datum mora biti u formatu: 01.01.2025.");
+        obrisiBtn.setOnAction(e -> {
+            String selektovana = lista.getSelectionModel().getSelectedItem();
+            if (selektovana == null || !selektovana.contains("(kandidat van evidencije)")) {
+                prikaziGresku("Morate selektovati uplatu van evidencije.");
                 return;
             }
+            String originalnaLinija = mapaLinija.get(selektovana);
+            String[] podaci = originalnaLinija.split(";", -1);
+            String datum = podaci[0];
+            String iznos = FormatUtil.format(Integer.parseInt(podaci[2]));
 
-            naslov.setText("Uplate na dan: " + datum.format(srpskiFormat));
+            Alert potvrda = new Alert(Alert.AlertType.CONFIRMATION);
+            potvrda.setTitle("Potvrda brisanja");
+            potvrda.setHeaderText("Obriši izabranu uplatu?");
+            potvrda.setContentText("Datum: " + srpskiFormat.format(LocalDate.parse(datum)) +
+                    "\nIznos: " + iznos + " RSD");
 
-            List<Uplata> uplate = Database.vratiUplateZaDatum(datum);
-            double ukupno = 0;
+            potvrda.getButtonTypes().setAll(
+                    new ButtonType("Da", ButtonBar.ButtonData.YES),
+                    new ButtonType("Ne", ButtonBar.ButtonData.NO)
+            );
+            potvrda.getDialogPane().setStyle("-fx-font-size: 16px;");
 
-            for (Uplata u : uplate) {
-                Kandidat k = Database.vratiKandidataPoId(u.getKandidatId());
-                StringBuilder opis = new StringBuilder();
-
-                opis.append(u.getSvrha() != null ? u.getSvrha() : "Obuka");
-                opis.append(" – ").append(FormatUtil.format(u.getIznos())).append(" RSD");
-                if (!u.getNacinUplate().equals("Gotovina")) {
-                    opis.append(" – ").append(u.getNacinUplate());
-                }
-
-                String stavka = k.getIdKandidata() + " – " + k.getIme() + " " + k.getPrezime()
-                        + " – " + srpskiFormat.format(u.getDatum())
-                        + " – " + opis;
-
-                lista.getItems().add(stavka);
-                ukupno += u.getIznos();
+            if (potvrda.showAndWait().orElse(ButtonType.NO).getButtonData() == ButtonBar.ButtonData.YES) {
+                linijeCSV.remove(originalnaLinija);
+                sacuvajCSV();
+                prikaziIzvestaj();
             }
 
-            if (uplate.isEmpty()) {
-                lista.getItems().add("Nema uplata za izabrani datum.");
-            }
-
-            ukupnoLabel.setText("Ukupno: " + FormatUtil.format(ukupno) + " RSD");
         });
 
         stampajBtn.setOnAction(e -> {
@@ -103,20 +108,130 @@ public class DnevniIzvestajForm {
             }
         });
 
-        VBox box = new VBox(10,
+        dodajVanEvidencijuBtn.setOnAction(e -> new UplataVanEvidencijeForm(this::prikaziIzvestaj).prikazi());
+
+        Region spacer = new Region();
+        VBox.setVgrow(spacer, Priority.ALWAYS);
+
+        HBox desnaDugmad = new HBox(10, dodajVanEvidencijuBtn, obrisiBtn);
+        Region razmak = new Region();
+        HBox.setHgrow(razmak, Priority.ALWAYS);
+        HBox rasporedDugmadi = new HBox(10, stampajBtn, razmak, desnaDugmad);
+
+        VBox box = new VBox(10); // samo razmak navodiš ovde
+
+        box.getChildren().addAll(
                 naslov,
-                datumLabel, datumPicker,
+                new Label("Izaberite datum:"), datumPicker,
                 prikaziBtn,
                 new Label("Uplate:"),
                 lista,
                 ukupnoLabel,
-                stampajBtn
+                spacer,
+                rasporedDugmadi
         );
         box.setPadding(new Insets(20));
         box.setStyle("-fx-font-size: 18px;");
 
+        prikaziIzvestaj();
+
         stage.setScene(new Scene(box, 960, 700));
         stage.showAndWait();
+    }
+
+    private void prikaziIzvestaj() {
+        lista.getItems().clear();
+        mapaLinija.clear();
+        linijeCSV.clear();
+        double ukupno = 0;
+
+        LocalDate datum;
+        String unetTekst = datumPicker.getEditor().getText().trim();
+
+        if (unetTekst.isEmpty()) {
+            datum = datumPicker.getValue();
+        } else {
+            try {
+                datum = converter.fromString(unetTekst);
+                datumPicker.setValue(datum);
+            } catch (Exception ex) {
+                prikaziGresku("Datum mora biti u formatu: 01.01.2025.");
+                return;
+            }
+        }
+
+        if (datum == null) {
+            prikaziGresku("Morate uneti ili izabrati datum.");
+            return;
+        }
+
+        naslov.setText("Uplate na dan: " + datum.format(srpskiFormat));
+
+        List<Uplata> uplate = Database.vratiUplateZaDatum(datum);
+        for (Uplata u : uplate) {
+            Kandidat k = Database.vratiKandidataPoId(u.getKandidatId());
+            StringBuilder opis = new StringBuilder();
+
+            opis.append(u.getSvrha() != null ? u.getSvrha() : "Obuka");
+            opis.append(" – ").append(FormatUtil.format(u.getIznos())).append(" RSD");
+            if (!u.getNacinUplate().equals("Gotovina")) {
+                opis.append(" – ").append(u.getNacinUplate());
+            }
+
+            String stavka = k.getIdKandidata() + " – " + k.getIme() + " " + k.getPrezime()
+                    + " – " + srpskiFormat.format(u.getDatum())
+                    + " – " + opis;
+
+            lista.getItems().add(stavka);
+            ukupno += u.getIznos();
+        }
+
+        try (BufferedReader reader = Files.newBufferedReader(Paths.get("van_evidencije.csv"))) {
+            String linija;
+            boolean prva = true;
+            while ((linija = reader.readLine()) != null) {
+                if (prva) { prva = false; continue; }
+                linijeCSV.add(linija);
+                String[] podaci = linija.split(";", -1);
+                if (podaci.length >= 4 && podaci[0].equals(datum.toString())) {
+                    String broj = podaci[1];
+                    int iznos = Integer.parseInt(podaci[2]);
+                    String svrha = podaci[3];
+                    String nacin = podaci.length >= 5 ? podaci[4] : "";
+
+                    StringBuilder opis = new StringBuilder();
+                    opis.append(svrha != null ? svrha : "Obuka");
+                    opis.append(" – ").append(FormatUtil.format(iznos)).append(" RSD");
+                    if (!nacin.equals("Gotovina")) {
+                        opis.append(" – ").append(nacin);
+                    }
+
+                    String stavka = broj + " – " + datum.format(srpskiFormat) + " – " + opis + " (kandidat van evidencije)";
+                    lista.getItems().add(stavka);
+                    mapaLinija.put(stavka, linija);
+                    ukupno += iznos;
+                }
+            }
+        } catch (Exception ignored) {}
+
+        if (lista.getItems().isEmpty()) {
+            lista.getItems().add("Nema uplata za izabrani datum.");
+        }
+
+        ukupnoLabel.setText("Ukupno: " + FormatUtil.format(ukupno) + " RSD");
+    }
+
+    private void sacuvajCSV() {
+        try (BufferedWriter writer = Files.newBufferedWriter(Paths.get("van_evidencije.csv"))) {
+            writer.write("datum;broj;iznos;svrha;nacin");
+            writer.newLine();
+            for (String linija : linijeCSV) {
+                writer.write(linija);
+                writer.newLine();
+            }
+        } catch (Exception e) {
+            prikaziGresku("Greška prilikom čuvanja fajla.");
+        }
     }
 
     private void prikaziGresku(String poruka) {
