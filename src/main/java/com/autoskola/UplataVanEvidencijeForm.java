@@ -112,7 +112,7 @@ public class UplataVanEvidencijeForm {
                 File fajl = new File("van_evidencije.csv");
                 boolean noviFajl = fajl.createNewFile();
 
-                try (PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(fajl, true)))) {
+                try (PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(fajl, true), java.nio.charset.StandardCharsets.UTF_8))) {
                     if (noviFajl) {
                         out.println("datum;brojKandidata;iznos;svrha;nacin");
                     }
