@@ -9,7 +9,6 @@ import java.io.FileOutputStream;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-
 import java.awt.Desktop;
 
 public class UgovorGenerator {
@@ -170,7 +169,6 @@ public class UgovorGenerator {
                 double ukupno = 0;
                 boolean imaUplata = false;
 
-                // === Uplate iz baze ===
                 List<Uplata> uplate = Database.vratiUplateZaDatum(datum);
                 for (Uplata u : uplate) {
                     Kandidat k = Database.vratiKandidataPoId(u.getKandidatId());
@@ -184,34 +182,6 @@ public class UgovorGenerator {
                     imaUplata = true;
                 }
 
-                // === Uplate van evidencije iz CSV ===
-                try (var reader = java.nio.file.Files.newBufferedReader(java.nio.file.Paths.get("van_evidencije.csv"))) {
-                    String linija;
-                    boolean prva = true;
-                    while ((linija = reader.readLine()) != null) {
-                        if (prva) { prva = false; continue; }
-                        String[] podaci = linija.split(";", -1);
-                        if (podaci.length >= 4 && podaci[0].equals(datum.toString())) {
-                            String broj = podaci[1];
-                            int iznos = Integer.parseInt(podaci[2]);
-                            String svrha = podaci[3];
-                            String nacin = podaci.length >= 5 ? podaci[4] : "";
-
-                            String opis = (svrha != null ? svrha : "Obuka") + " – " + FormatUtil.format(iznos) + " RSD";
-                            if (!nacin.equals("Gotovina")) {
-                                opis += " – " + nacin;
-                            }
-
-                            String stavka = broj + " – " + datum.format(dtf) + " – " + opis + " (kandidat van evidencije)";
-                            dodajParagraf(doc, stavka);
-                            ukupno += iznos;
-                            imaUplata = true;
-                        }
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace(); // za debug
-                }
-
                 if (!imaUplata) {
                     dodajParagraf(doc, "- Nema uplata za ovaj dan.");
                 } else {
@@ -219,7 +189,6 @@ public class UgovorGenerator {
                     dodajParagraf(doc, "Ukupno: " + FormatUtil.format(ukupno) + " RSD");
                 }
 
-                // Vizuelni razmak između dana
                 doc.createParagraph().createRun().addBreak();
             }
 
@@ -244,8 +213,6 @@ public class UgovorGenerator {
             alert.showAndWait();
         }
     }
-
-
 
     private static void dodajParagraf(XWPFDocument doc, String tekst) {
         XWPFParagraph p = doc.createParagraph();
