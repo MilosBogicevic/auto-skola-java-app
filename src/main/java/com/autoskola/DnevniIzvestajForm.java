@@ -15,11 +15,9 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class DnevniIzvestajForm {
 
@@ -38,8 +36,9 @@ public class DnevniIzvestajForm {
 
     private final ListView<String> lista = new ListView<>();
     private final Label ukupnoLabel = new Label("Ukupno: 0 RSD");
-    private final Label naslov = new Label("Uplate na dan: –");
-    private final DatePicker datumPicker = new DatePicker(LocalDate.now());
+    private final Label naslov = new Label("Uplate u periodu: –");
+    private final DatePicker datumOdPicker = new DatePicker(LocalDate.now());
+    private final DatePicker datumDoPicker = new DatePicker(LocalDate.now());
 
     private final List<String> linijeCSV = new ArrayList<>();
     private final Map<String, String> mapaLinija = new LinkedHashMap<>();
@@ -51,8 +50,10 @@ public class DnevniIzvestajForm {
 
         naslov.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
 
-        datumPicker.setConverter(converter);
-        datumPicker.setPromptText("dd.MM.yyyy.");
+        datumOdPicker.setConverter(converter);
+        datumOdPicker.setPromptText("dd.MM.yyyy.");
+        datumDoPicker.setConverter(converter);
+        datumDoPicker.setPromptText("dd.MM.yyyy.");
 
         Button stampajBtn = new Button("Štampaj", IkonicaUtil.napravi("print.png"));
         Button prikaziBtn = new Button("Prikaži izveštaj", IkonicaUtil.napravi("report.png"));
@@ -66,6 +67,22 @@ public class DnevniIzvestajForm {
         }
 
         prikaziBtn.setOnAction(e -> prikaziIzvestaj());
+
+        stampajBtn.setOnAction(e -> {
+            try {
+                LocalDate od = datumOdPicker.getValue();
+                LocalDate doD = datumDoPicker.getValue();
+                if (od != null && doD != null && !doD.isBefore(od)) {
+                    UgovorGenerator.generisiDnevniIzvestaj(od, doD);
+                } else {
+                    prikaziGresku("Proverite datume – 'DO' ne može biti pre 'OD'.");
+                }
+            } catch (Exception ex) {
+                prikaziGresku("Greška prilikom štampe izveštaja.");
+            }
+        });
+
+        dodajVanEvidencijuBtn.setOnAction(e -> new UplataVanEvidencijeForm(this::prikaziIzvestaj).prikazi());
 
         obrisiBtn.setOnAction(e -> {
             String selektovana = lista.getSelectionModel().getSelectedItem();
@@ -95,35 +112,22 @@ public class DnevniIzvestajForm {
                 sacuvajCSV();
                 prikaziIzvestaj();
             }
-
         });
-
-        stampajBtn.setOnAction(e -> {
-            try {
-                LocalDate datum = converter.fromString(datumPicker.getEditor().getText().trim());
-                datumPicker.setValue(datum);
-                UgovorGenerator.generisiDnevniIzvestaj(datum);
-            } catch (Exception ex) {
-                prikaziGresku("Datum mora biti u formatu: 01.01.2025.");
-            }
-        });
-
-        dodajVanEvidencijuBtn.setOnAction(e -> new UplataVanEvidencijeForm(this::prikaziIzvestaj).prikazi());
 
         Region spacer = new Region();
         VBox.setVgrow(spacer, Priority.ALWAYS);
+
+        HBox datumiBox = new HBox(10, new Label("Od:"), datumOdPicker, new Label("Do:"), datumDoPicker, prikaziBtn);
 
         HBox desnaDugmad = new HBox(10, dodajVanEvidencijuBtn, obrisiBtn);
         Region razmak = new Region();
         HBox.setHgrow(razmak, Priority.ALWAYS);
         HBox rasporedDugmadi = new HBox(10, stampajBtn, razmak, desnaDugmad);
 
-        VBox box = new VBox(10); // samo razmak navodiš ovde
-
+        VBox box = new VBox(10);
         box.getChildren().addAll(
                 naslov,
-                new Label("Izaberite datum:"), datumPicker,
-                prikaziBtn,
+                datumiBox,
                 new Label("Uplate:"),
                 lista,
                 ukupnoLabel,
@@ -145,29 +149,17 @@ public class DnevniIzvestajForm {
         linijeCSV.clear();
         double ukupno = 0;
 
-        LocalDate datum;
-        String unetTekst = datumPicker.getEditor().getText().trim();
+        LocalDate od = datumOdPicker.getValue();
+        LocalDate doD = datumDoPicker.getValue();
 
-        if (unetTekst.isEmpty()) {
-            datum = datumPicker.getValue();
-        } else {
-            try {
-                datum = converter.fromString(unetTekst);
-                datumPicker.setValue(datum);
-            } catch (Exception ex) {
-                prikaziGresku("Datum mora biti u formatu: 01.01.2025.");
-                return;
-            }
-        }
-
-        if (datum == null) {
-            prikaziGresku("Morate uneti ili izabrati datum.");
+        if (od == null || doD == null || doD.isBefore(od)) {
+            prikaziGresku("Neispravan opseg datuma.");
             return;
         }
 
-        naslov.setText("Uplate na dan: " + datum.format(srpskiFormat));
+        naslov.setText("Uplate u periodu: " + od.format(srpskiFormat) + " – " + doD.format(srpskiFormat));
 
-        List<Uplata> uplate = Database.vratiUplateZaDatum(datum);
+        List<Uplata> uplate = Database.vratiUplateZaPeriod(od, doD);
         for (Uplata u : uplate) {
             Kandidat k = Database.vratiKandidataPoId(u.getKandidatId());
             StringBuilder opis = new StringBuilder();
@@ -193,29 +185,32 @@ public class DnevniIzvestajForm {
                 if (prva) { prva = false; continue; }
                 linijeCSV.add(linija);
                 String[] podaci = linija.split(";", -1);
-                if (podaci.length >= 4 && podaci[0].equals(datum.toString())) {
-                    String broj = podaci[1];
-                    int iznos = Integer.parseInt(podaci[2]);
-                    String svrha = podaci[3];
-                    String nacin = podaci.length >= 5 ? podaci[4] : "";
+                if (podaci.length >= 4) {
+                    LocalDate datum = LocalDate.parse(podaci[0]);
+                    if ((datum.isEqual(od) || datum.isAfter(od)) && (datum.isEqual(doD) || datum.isBefore(doD))) {
+                        String broj = podaci[1];
+                        int iznos = Integer.parseInt(podaci[2]);
+                        String svrha = podaci[3];
+                        String nacin = podaci.length >= 5 ? podaci[4] : "";
 
-                    StringBuilder opis = new StringBuilder();
-                    opis.append(svrha != null ? svrha : "Obuka");
-                    opis.append(" – ").append(FormatUtil.format(iznos)).append(" RSD");
-                    if (!nacin.equals("Gotovina")) {
-                        opis.append(" – ").append(nacin);
+                        StringBuilder opis = new StringBuilder();
+                        opis.append(svrha != null ? svrha : "Obuka");
+                        opis.append(" – ").append(FormatUtil.format(iznos)).append(" RSD");
+                        if (!nacin.equals("Gotovina")) {
+                            opis.append(" – ").append(nacin);
+                        }
+
+                        String stavka = broj + " – " + datum.format(srpskiFormat) + " – " + opis + " (kandidat van evidencije)";
+                        lista.getItems().add(stavka);
+                        mapaLinija.put(stavka, linija);
+                        ukupno += iznos;
                     }
-
-                    String stavka = broj + " – " + datum.format(srpskiFormat) + " – " + opis + " (kandidat van evidencije)";
-                    lista.getItems().add(stavka);
-                    mapaLinija.put(stavka, linija);
-                    ukupno += iznos;
                 }
             }
         } catch (Exception ignored) {}
 
         if (lista.getItems().isEmpty()) {
-            lista.getItems().add("Nema uplata za izabrani datum.");
+            lista.getItems().add("Nema uplata za izabrani period.");
         }
 
         ukupnoLabel.setText("Ukupno: " + FormatUtil.format(ukupno) + " RSD");
@@ -236,7 +231,7 @@ public class DnevniIzvestajForm {
 
     private void prikaziGresku(String poruka) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Greška u unosu");
+        alert.setTitle("Greška");
         alert.setHeaderText(null);
         alert.setContentText(poruka);
         alert.getDialogPane().setStyle("-fx-font-size: 16px;");

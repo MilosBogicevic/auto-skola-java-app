@@ -475,4 +475,34 @@ public class Database {
         }
     }
 
+    public static List<Uplata> vratiUplateZaPeriod(LocalDate od, LocalDate doD) {
+        List<Uplata> lista = new ArrayList<>();
+        String sql = "SELECT * FROM uplate WHERE datum BETWEEN ? AND ? ORDER BY datum ASC";
+
+        try (Connection conn = connect(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, od.toString());
+            stmt.setString(2, doD.toString());
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                String nacin = rs.getString("nacin_uplate");
+                if (nacin == null || nacin.isEmpty()) nacin = "Gotovina";
+                String svrha = rs.getString("svrha");
+                if (svrha == null || svrha.isEmpty()) svrha = "Obuka";
+
+                lista.add(new Uplata(
+                        rs.getInt("id"),
+                        rs.getInt("kandidat_id"),
+                        LocalDate.parse(rs.getString("datum")),
+                        rs.getDouble("iznos"),
+                        nacin,
+                        svrha
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return lista;
+    }
 }

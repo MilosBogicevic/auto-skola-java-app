@@ -114,9 +114,8 @@ public class KandidatForm {
             try {
                 if (idKandidatPolje.getText().isEmpty() || idbPolje.getText().isEmpty() ||
                         imePolje.getText().isEmpty() || prezimePolje.getText().isEmpty() ||
-                        jmbgPolje.getText().isEmpty() || telefonPolje.getText().isEmpty() ||
-                        kategorijaBox.getValue() == null || cenaTeorijaPolje.getText().isEmpty() ||
-                        cenaPraksaPolje.getText().isEmpty()) {
+                        telefonPolje.getText().isEmpty() || kategorijaBox.getValue() == null ||
+                        cenaTeorijaPolje.getText().isEmpty() || cenaPraksaPolje.getText().isEmpty()) {
                     throw new IllegalArgumentException("Sva obavezna polja moraju biti popunjena.");
                 }
 

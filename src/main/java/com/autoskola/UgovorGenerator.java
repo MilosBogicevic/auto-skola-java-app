@@ -155,69 +155,76 @@ public class UgovorGenerator {
         }
     }
 
-    public static void generisiDnevniIzvestaj(LocalDate datum) {
+    public static void generisiDnevniIzvestaj(LocalDate datumOd, LocalDate datumDo) {
         try (XWPFDocument doc = new XWPFDocument(new FileInputStream("sabloni/dnevni_izvestaj.docx"))) {
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy.");
-            XWPFParagraph p = doc.createParagraph();
-            XWPFRun run = p.createRun();
-            run.setText("Dnevni izveštaj za: " + datum.format(dtf));
-            run.setFontSize(14);
-            run.setBold(true);
-            p.setSpacingAfter(300);
 
-            double ukupno = 0;
-            boolean imaUplata = false;
+            for (LocalDate datum = datumOd; !datum.isAfter(datumDo); datum = datum.plusDays(1)) {
+                XWPFParagraph naslov = doc.createParagraph();
+                XWPFRun run = naslov.createRun();
+                run.setText("Dnevni izveštaj za: " + datum.format(dtf));
+                run.setFontSize(14);
+                run.setBold(true);
+                naslov.setSpacingAfter(300);
 
-            // Uplate iz baze
-            List<Uplata> uplate = Database.vratiUplateZaDatum(datum);
-            for (Uplata u : uplate) {
-                Kandidat k = Database.vratiKandidataPoId(u.getKandidatId());
-                String opis = (u.getSvrha() != null ? u.getSvrha() : "Obuka") + " – "
-                        + FormatUtil.format(u.getIznos()) + " RSD"
-                        + (u.getNacinUplate().equals("Gotovina") ? "" : " – " + u.getNacinUplate());
-                String stavka = k.getIdKandidata() + " – " + k.getIme() + " " + k.getPrezime()
-                        + " – " + dtf.format(u.getDatum()) + " – " + opis;
-                dodajParagraf(doc, stavka);
-                ukupno += u.getIznos();
-                imaUplata = true;
-            }
+                double ukupno = 0;
+                boolean imaUplata = false;
 
-            // Uplate van evidencije iz CSV fajla
-            try (var reader = java.nio.file.Files.newBufferedReader(java.nio.file.Paths.get("van_evidencije.csv"))) {
-                String linija;
-                boolean prva = true;
-                while ((linija = reader.readLine()) != null) {
-                    if (prva) { prva = false; continue; }
-                    String[] podaci = linija.split(";", -1);
-                    if (podaci.length >= 4 && podaci[0].equals(datum.toString())) {
-                        String broj = podaci[1];
-                        int iznos = Integer.parseInt(podaci[2]);
-                        String svrha = podaci[3];
-                        String nacin = podaci.length >= 5 ? podaci[4] : "";
-
-                        String opis = (svrha != null ? svrha : "Obuka") + " – " + FormatUtil.format(iznos) + " RSD";
-                        if (!nacin.equals("Gotovina")) {
-                            opis += " – " + nacin;
-                        }
-
-                        String stavka = broj + " – " + datum.format(dtf) + " – " + opis;
-                        dodajParagraf(doc, stavka);
-                        ukupno += iznos;
-                        imaUplata = true;
-                    }
+                // === Uplate iz baze ===
+                List<Uplata> uplate = Database.vratiUplateZaDatum(datum);
+                for (Uplata u : uplate) {
+                    Kandidat k = Database.vratiKandidataPoId(u.getKandidatId());
+                    String opis = (u.getSvrha() != null ? u.getSvrha() : "Obuka") + " – "
+                            + FormatUtil.format(u.getIznos()) + " RSD"
+                            + (u.getNacinUplate().equals("Gotovina") ? "" : " – " + u.getNacinUplate());
+                    String stavka = k.getIdKandidata() + " – " + k.getIme() + " " + k.getPrezime()
+                            + " – " + dtf.format(u.getDatum()) + " – " + opis;
+                    dodajParagraf(doc, stavka);
+                    ukupno += u.getIznos();
+                    imaUplata = true;
                 }
-            } catch (Exception e) {
-                e.printStackTrace(); // za debug
-            }
 
-            if (!imaUplata) {
-                dodajParagraf(doc, "- Nema uplata za izabrani datum.");
-            } else {
+                // === Uplate van evidencije iz CSV ===
+                try (var reader = java.nio.file.Files.newBufferedReader(java.nio.file.Paths.get("van_evidencije.csv"))) {
+                    String linija;
+                    boolean prva = true;
+                    while ((linija = reader.readLine()) != null) {
+                        if (prva) { prva = false; continue; }
+                        String[] podaci = linija.split(";", -1);
+                        if (podaci.length >= 4 && podaci[0].equals(datum.toString())) {
+                            String broj = podaci[1];
+                            int iznos = Integer.parseInt(podaci[2]);
+                            String svrha = podaci[3];
+                            String nacin = podaci.length >= 5 ? podaci[4] : "";
+
+                            String opis = (svrha != null ? svrha : "Obuka") + " – " + FormatUtil.format(iznos) + " RSD";
+                            if (!nacin.equals("Gotovina")) {
+                                opis += " – " + nacin;
+                            }
+
+                            String stavka = broj + " – " + datum.format(dtf) + " – " + opis + " (kandidat van evidencije)";
+                            dodajParagraf(doc, stavka);
+                            ukupno += iznos;
+                            imaUplata = true;
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace(); // za debug
+                }
+
+                if (!imaUplata) {
+                    dodajParagraf(doc, "- Nema uplata za ovaj dan.");
+                } else {
+                    doc.createParagraph().createRun().addBreak();
+                    dodajParagraf(doc, "Ukupno: " + FormatUtil.format(ukupno) + " RSD");
+                }
+
+                // Vizuelni razmak između dana
                 doc.createParagraph().createRun().addBreak();
-                dodajParagraf(doc, "Ukupno: " + FormatUtil.format(ukupno) + " RSD");
             }
 
-            String naziv = "izvestaji/dnevni-izvestaj-" + datum.format(DateTimeFormatter.ofPattern("dd-MM-yyyy")) + ".docx";
+            String naziv = "izvestaji/dnevni-izvestaj-" + datumOd.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))
+                    + "_do_" + datumDo.format(DateTimeFormatter.ofPattern("dd-MM-yyyy")) + ".docx";
             File fajl = new File(naziv);
             File parent = fajl.getParentFile();
             if (parent != null && !parent.exists()) {
@@ -237,6 +244,7 @@ public class UgovorGenerator {
             alert.showAndWait();
         }
     }
+
 
 
     private static void dodajParagraf(XWPFDocument doc, String tekst) {
