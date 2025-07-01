@@ -86,7 +86,7 @@ public class Database {
                     broj_uplate TEXT
                 );
             """);
-
+            izvrsiMigracije(conn);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -509,5 +509,21 @@ public class Database {
         }
 
         return lista;
+    }
+
+    private static void izvrsiMigracije(Connection conn) {
+        try (ResultSet rs = conn.getMetaData().getColumns(null, null, "uplate", "broj_uplate")) {
+            if (!rs.next()) {
+                System.out.println("Dodaje se kolona 'broj_uplate' u tabelu 'uplate'...");
+                try (Statement st = conn.createStatement()) {
+                    st.execute("ALTER TABLE uplate ADD COLUMN broj_uplate TEXT;");
+                }
+            } else {
+                System.out.println("Kolona 'broj_uplate' već postoji – migracija nije potrebna.");
+            }
+        } catch (SQLException e) {
+            System.err.println("Greška prilikom migracije baze:");
+            e.printStackTrace();
+        }
     }
 }
