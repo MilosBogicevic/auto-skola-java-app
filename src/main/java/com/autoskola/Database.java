@@ -82,7 +82,8 @@ public class Database {
                     datum TEXT,
                     iznos REAL,
                     nacin_uplate TEXT,
-                    svrha TEXT
+                    svrha TEXT,
+                    broj_uplate TEXT
                 );
             """);
 
@@ -391,13 +392,14 @@ public class Database {
     // === UPLATE ===
 
     public static void sacuvajUplatu(Uplata u) {
-        String sql = "INSERT INTO uplate (kandidat_id, datum, iznos, nacin_uplate, svrha) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO uplate (kandidat_id, datum, iznos, nacin_uplate, svrha, broj_uplate) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = connect(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, u.getKandidatId());
             stmt.setString(2, u.getDatum().toString());
             stmt.setDouble(3, u.getIznos());
             stmt.setString(4, u.getNacinUplate());
             stmt.setString(5, u.getSvrha());
+            stmt.setString(6, u.getBrojUplate());
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -424,7 +426,8 @@ public class Database {
                         LocalDate.parse(rs.getString("datum")),
                         rs.getDouble("iznos"),
                         nacin,
-                        svrha
+                        svrha,
+                        rs.getString("broj_uplate")
                 ));
             }
         } catch (SQLException e) {
@@ -454,7 +457,8 @@ public class Database {
                         LocalDate.parse(rs.getString("datum")),
                         rs.getDouble("iznos"),
                         nacin,
-                        svrha
+                        svrha,
+                        rs.getString("broj_uplate")
                 ));
             }
         } catch (SQLException e) {
@@ -496,7 +500,8 @@ public class Database {
                         LocalDate.parse(rs.getString("datum")),
                         rs.getDouble("iznos"),
                         nacin,
-                        svrha
+                        svrha,
+                        rs.getString("broj_uplate")
                 ));
             }
         } catch (SQLException e) {

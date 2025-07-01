@@ -62,9 +62,13 @@ public class KandidatDetaljiForm {
                 if (empty || u == null) {
                     setText(null);
                 } else {
-                    String opis = u.getDatum().format(format) + " – " +
+                    String opis = (u.getBrojUplate() != null && !u.getBrojUplate().isEmpty()
+                            ? "Broj uplatnice: " + u.getBrojUplate() + " – "
+                            : "") +
+                            u.getDatum().format(format) + " – " +
                             FormatUtil.format(u.getIznos()) + " RSD – " +
                             (u.getSvrha() != null ? u.getSvrha() : "Obuka");
+
 
                     if (u.getNacinUplate() != null && !u.getNacinUplate().equalsIgnoreCase("Gotovina")) {
                         opis += " – " + u.getNacinUplate();
@@ -176,7 +180,7 @@ public class KandidatDetaljiForm {
 
         osveziStanjeIKandidata(kandidat);
 
-        stage.setScene(new Scene(koren));
+        stage.setScene(new Scene(koren, 840, 600));
         stage.showAndWait();
     }
 

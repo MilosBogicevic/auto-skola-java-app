@@ -124,10 +124,18 @@ public class DnevniIzvestajForm {
             Kandidat k = Database.vratiKandidataPoId(u.getKandidatId());
             StringBuilder opis = new StringBuilder();
 
+            // Svrha + iznos
             opis.append(u.getSvrha() != null ? u.getSvrha() : "Obuka");
             opis.append(" – ").append(FormatUtil.format(u.getIznos())).append(" RSD");
-            if (!u.getNacinUplate().equals("Gotovina")) {
+
+            // Npr. Uplata karticom
+            if (u.getNacinUplate() != null && !u.getNacinUplate().equalsIgnoreCase("Gotovina")) {
                 opis.append(" – ").append(u.getNacinUplate());
+            }
+
+            // Npr. Uplata 00234
+            if (u.getBrojUplate() != null && !u.getBrojUplate().isBlank()) {
+                opis.append(" – Broj uplatnice: ").append(u.getBrojUplate());
             }
 
             String stavka = k.getIdKandidata() + " – " + k.getIme() + " " + k.getPrezime()

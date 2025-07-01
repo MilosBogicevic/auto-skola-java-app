@@ -35,6 +35,9 @@ public class UplataForm {
             }
         };
 
+        TextField brojUplateField = new TextField();
+        brojUplateField.setPromptText("Broj uplatnice");
+
         DatePicker datumPicker = new DatePicker(LocalDate.now());
         datumPicker.setPromptText("dd.MM.yyyy.");
         datumPicker.setConverter(converter);
@@ -85,7 +88,7 @@ public class UplataForm {
                 LocalDate datum;
                 try {
                     datum = converter.fromString(datumPicker.getEditor().getText().trim());
-                    datumPicker.setValue(datum); // osvežava DatePicker
+                    datumPicker.setValue(datum);
                 } catch (Exception ex) {
                     throw new IllegalArgumentException("Datum mora biti u formatu: 01.01.2025.");
                 }
@@ -93,8 +96,9 @@ public class UplataForm {
                 double iznos = FormatUtil.parse(iznosField.getText());
                 String nacin = ((RadioButton) grupa.getSelectedToggle()).getText();
                 String svrha = svrhaBox.getValue();
+                String brojUplate = brojUplateField.getText().trim();
 
-                Uplata uplata = new Uplata(0, kandidatId, datum, iznos, nacin, svrha);
+                Uplata uplata = new Uplata(0, kandidatId, datum, iznos, nacin, svrha, brojUplate.isEmpty() ? null : brojUplate);
                 onSacuvaj.accept(uplata);
                 stage.close();
             } catch (ParseException ex) {
@@ -108,6 +112,7 @@ public class UplataForm {
         VBox.setVgrow(spacer, Priority.ALWAYS);
 
         VBox layout = new VBox(10,
+                brojUplateField,
                 datumPicker,
                 iznosField,
                 nacinLabel,
@@ -120,8 +125,8 @@ public class UplataForm {
         layout.setPadding(new Insets(20));
         layout.setStyle("-fx-font-size: 16px;");
 
-        stage.setScene(new Scene(layout, 320, 460));
-        stage.setOnShown(ev -> iznosField.requestFocus());
+        stage.setScene(new Scene(layout, 350, Region.USE_COMPUTED_SIZE));
+        stage.setOnShown(ev -> gotovina.requestFocus());
         stage.showAndWait();
     }
 

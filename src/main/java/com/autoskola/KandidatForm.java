@@ -64,12 +64,12 @@ public class KandidatForm {
         TextField cenaTeorijaPolje = new TextField(postojeći != null ? FormatUtil.format(postojeći.getCenaTeorija()) : "");
         TextField cenaPraksaPolje = new TextField(postojeći != null ? FormatUtil.format(postojeći.getCenaPraksa()) : "");
 
-        VBox idBox = new VBox(2, new Label("ID broj kandidata:"), idKandidatPolje);
-        VBox idbBox = new VBox(2, new Label("IDB (eUprava):"), idbPolje);
+        VBox idBox = new VBox(2, new Label("ID broj kandidata: *"), idKandidatPolje);
+        VBox idbBox = new VBox(2, new Label("IDB (eUprava): *"), idbPolje);
         HBox idHBox = new HBox(10, idbBox, idBox);
 
-        VBox imeBox = new VBox(2, new Label("Ime:"), imePolje);
-        VBox prezimeBox = new VBox(2, new Label("Prezime:"), prezimePolje);
+        VBox imeBox = new VBox(2, new Label("Ime: *"), imePolje);
+        VBox prezimeBox = new VBox(2, new Label("Prezime: *"), prezimePolje);
         HBox imePrezimeBox = new HBox(10, imeBox, prezimeBox);
 
         VBox jmbgBox = new VBox(2, new Label("JMBG:"), jmbgPolje);
@@ -80,15 +80,15 @@ public class KandidatForm {
         VBox gradBox = new VBox(2, new Label("Grad:"), gradPolje);
         HBox adresaGradBox = new HBox(10, gradBox, adresaBox);
 
-        VBox telefonBox = new VBox(2, new Label("Telefon:"), telefonPolje);
-        VBox emailBox = new VBox(2, new Label("Email (opciono):"), emailPolje);
+        VBox telefonBox = new VBox(2, new Label("Telefon: *"), telefonPolje);
+        VBox emailBox = new VBox(2, new Label("Email:"), emailPolje);
         HBox telefonEmailBox = new HBox(10, telefonBox, emailBox);
 
-        VBox teorijskaBox = new VBox(2, new Label("Cena teorijske obuke (RSD):"), cenaTeorijaPolje);
-        VBox prakticnaBox = new VBox(2, new Label("Cena praktične obuke (RSD):"), cenaPraksaPolje);
+        VBox teorijskaBox = new VBox(2, new Label("Cena teorijske obuke (RSD): *"), cenaTeorijaPolje);
+        VBox prakticnaBox = new VBox(2, new Label("Cena praktične obuke (RSD): *"), cenaPraksaPolje);
         HBox cenaBox = new HBox(10, teorijskaBox, prakticnaBox);
 
-        Label kategorijaLabel = new Label("Kategorija:");
+        Label kategorijaLabel = new Label("Kategorija: *");
         HBox kategorijaBoxHBox = new HBox(10, kategorijaLabel, kategorijaBox);
         kategorijaBoxHBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 

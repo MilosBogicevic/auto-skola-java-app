@@ -128,7 +128,8 @@ public class UgovorGenerator {
                     String tekst = u.getDatum().format(dtf) + " – "
                             + (u.getSvrha() != null ? u.getSvrha() : "Obuka") + " – "
                             + FormatUtil.format(u.getIznos()) + " RSD"
-                            + (u.getNacinUplate().equals("Gotovina") ? "" : " – " + u.getNacinUplate());
+                            + (u.getNacinUplate().equals("Gotovina") ? "" : " – " + u.getNacinUplate())
+                            + (u.getBrojUplate() != null && !u.getBrojUplate().isEmpty() ? " – Broj uplatnice: " + u.getBrojUplate() : "");
                     dodajParagraf(doc, "• " + tekst);
                 }
             }
@@ -157,6 +158,7 @@ public class UgovorGenerator {
     public static void generisiDnevniIzvestaj(LocalDate datumOd, LocalDate datumDo) {
         try (XWPFDocument doc = new XWPFDocument(new FileInputStream("sabloni/dnevni_izvestaj.docx"))) {
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd.MM.yyyy.");
+            double ukupnoZaPeriod = 0;
 
             for (LocalDate datum = datumOd; !datum.isAfter(datumDo); datum = datum.plusDays(1)) {
                 XWPFParagraph naslov = doc.createParagraph();
@@ -174,11 +176,13 @@ public class UgovorGenerator {
                     Kandidat k = Database.vratiKandidataPoId(u.getKandidatId());
                     String opis = (u.getSvrha() != null ? u.getSvrha() : "Obuka") + " – "
                             + FormatUtil.format(u.getIznos()) + " RSD"
-                            + (u.getNacinUplate().equals("Gotovina") ? "" : " – " + u.getNacinUplate());
+                            + (u.getNacinUplate().equals("Gotovina") ? "" : " – " + u.getNacinUplate())
+                            + (u.getBrojUplate() != null && !u.getBrojUplate().isEmpty() ? " – Broj uplatnice: " + u.getBrojUplate() : "");
                     String stavka = k.getIdKandidata() + " – " + k.getIme() + " " + k.getPrezime()
                             + " – " + dtf.format(u.getDatum()) + " – " + opis;
                     dodajParagraf(doc, stavka);
                     ukupno += u.getIznos();
+                    ukupnoZaPeriod += u.getIznos();
                     imaUplata = true;
                 }
 
@@ -191,6 +195,15 @@ public class UgovorGenerator {
 
                 doc.createParagraph().createRun().addBreak();
             }
+
+            XWPFParagraph ukupnoParagraf = doc.createParagraph();
+            ukupnoParagraf.setSpacingBefore(300);
+            XWPFRun ukupnoRun = ukupnoParagraf.createRun();
+
+            ukupnoRun.setText("UKUPNO za period od " + datumOd.format(dtf) + " do " + datumDo.format(dtf)
+                    + ": " + FormatUtil.format(ukupnoZaPeriod) + " RSD");
+            ukupnoRun.setFontSize(14);
+            ukupnoRun.setBold(true);
 
             String naziv = "izvestaji/dnevni-izvestaj-" + datumOd.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))
                     + "_do_" + datumDo.format(DateTimeFormatter.ofPattern("dd-MM-yyyy")) + ".docx";
